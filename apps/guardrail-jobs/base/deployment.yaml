@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-jobs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guardrail-jobs
+  template:
+    metadata:
+      labels:
+        app: guardrail-jobs
+    spec:
+      containers:
+        - name: guardrail-jobs
+          image: ghcr.io/rcaelers/guardrail-jobs:latest
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/guardrail/config.yaml
+              subPath: production.yaml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: guardrail-jobs-config

@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-web
+spec:
+  template:
+    spec:
+      containers:
+        - name: guardrail-web
+          image: ghcr.io/rcaelers/guardrail-web:dev

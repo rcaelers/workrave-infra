@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guardrail-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: rust:1.76
+          command: ["sh", "-c"]
+          args:
+            - |
+              apt-get update && \
+              apt-get install -y libpq-dev pkg-config && \
+              cargo install sqlx-cli --no-default-features --features native-tls,postgres && \
+              cd /workspace && \
+              cargo sqlx migrate run
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: workrave-db-secret
+                  key: url
+          volumeMounts:
+            - name: migrations
+              mountPath: /workspace/migrations
+      volumes:
+        - name: migrations
+          configMap:
+            name: guardrail-migrations

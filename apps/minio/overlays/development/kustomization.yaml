@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: minio-dev
+bases:
+  - ../../base
+resources:
+  - minio-secrets.yaml
+helmCharts:
+  - name: minio
+    repo: https://charts.min.io/
+    version: 5.4.0
+    releaseName: minio
+    valuesFile: ../../values/guardrail-minio.dev.yaml

@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-jobs
+spec:
+  template:
+    spec:
+      containers:
+        - name: guardrail-jobs
+          image: ghcr.io/rcaelers/guardrail-jobs:dev

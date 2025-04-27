@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: guardrail-api
+spec:
+  rules:
+    - host: crashes.workrave.org
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: guardrail-api
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - crashes.workrave.org
+      secretName: guardrail-api-tls

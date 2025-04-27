@@ -1,0 +1,3 @@
+resources:
+  - longhorn-postgres-storageclass.yaml
+  - cluster.yaml

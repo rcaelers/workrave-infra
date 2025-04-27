@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrail-initdb-sql
+  namespace: postgres-prd
+data:
+  guardrail.sql: |
+    CREATE USER guardrail WITH PASSWORD '{{GUARDRAIL_PASSWORD}}';
+    CREATE DATABASE guardrail;
+    GRANT ALL PRIVILEGES ON DATABASE guardrail TO guardrail;
+
+    \c guardrail;
+    GRANT ALL ON schema public TO guardrail;
+
+    CREATE ROLE authenticator LOGIN PASSWORD '{{AUTHENTICATOR_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+    CREATE ROLE guardrail_webuser LOGIN PASSWORD '{{WEBUSER_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+    CREATE ROLE guardrail_anonymous NOLOGIN;
+    CREATE ROLE guardrail_apiuser NOLOGIN;
+
+    GRANT guardrail_anonymous TO authenticator;
+    GRANT guardrail_apiuser TO authenticator;
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guardrail-db-init
+  namespace: postgres-prd
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-init
+        image: postgres:17
+        env:
+        - name: GUARDRAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: guardrail-db-password
+              key: GUARDRAIL_PASSWORD
+        - name: AUTHENTICATOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: guardrail-db-password
+              key: AUTHENTICATOR_PASSWORD
+        - name: WEBUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: guardrail-db-password
+              key: WEBUSER_PASSWORD
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-superuser-secret
+              key: password
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            timeout=60
+            while ! pg_isready -h guardrail-db-rw -U postgres; do
+              echo "Waiting for database..."; sleep 5;
+              timeout=$((timeout-5))
+              if [ $timeout -le 0 ]; then
+                echo "Timed out waiting for database"; exit 1
+              fi
+            done
+            # If psql fails, exit with error so Job fails and can be retried
+            if ! envsubst < /initdb/guardrail.sql | psql -h guardrail-db-rw -U postgres; then
+              echo "Database initialization failed"; exit 1
+            fi
+        volumeMounts:
+        - name: initdb
+          mountPath: /initdb
+      restartPolicy: OnFailure
+      volumes:
+      - name: initdb
+        configMap:
+          name: guardrail-initdb-sql

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: postgresql-dev
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/workrave-infra.git
+    targetRevision: HEAD
+    path: apps/postgresql/overlays/development
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: postgresql-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

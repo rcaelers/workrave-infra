@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guardrail-web
+  template:
+    metadata:
+      labels:
+        app: guardrail-web
+    spec:
+      containers:
+        - name: guardrail-web
+          image: ghcr.io/rcaelers/guardrail-web:latest
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/guardrail/config.yaml
+              subPath: production.yaml
+      volumes:
+        - name: config-volume
+          configMap:
+            name: guardrail-web-config

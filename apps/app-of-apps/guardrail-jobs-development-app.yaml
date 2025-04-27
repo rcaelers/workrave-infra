@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guardrail-jobs-development
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/workrave-infra.git
+    targetRevision: HEAD
+    path: apps/guardrail-jobs/overlays/development
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guardrail-jobs-development
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

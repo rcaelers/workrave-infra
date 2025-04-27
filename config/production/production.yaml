@@ -1,0 +1,5 @@
+# Dummy production config for all guardrail apps
+api_url: https://api.example.com
+web_url: https://web.example.com
+db_host: prod-db.example.com
+log_level: info
