@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-helm-development
+  name: minio-guardrail-dev
   namespace: argocd
 spec:
   project: default
