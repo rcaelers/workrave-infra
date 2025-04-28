@@ -4,6 +4,4 @@ namespace: postgres-prd
 resources:
   - ../../base
   - cluster-patch.yaml
-  - postgresql-superuser-secret.yaml
-  - guardrail-db-password.yaml
-  - guardrail-db-init.yaml
+  - postgresql-secrets.yaml

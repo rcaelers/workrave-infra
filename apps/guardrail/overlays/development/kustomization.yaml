@@ -1,0 +1,6 @@
+namespace: guardrail-dev
+resources:
+  - postgresql-secrets.yaml
+  - guardrail-db-password.yaml
+  - guardrail-db-init.yaml
+  - ../../base
