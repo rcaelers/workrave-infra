@@ -5,17 +5,40 @@ metadata:
   namespace: guardrail-prd
 data:
   guardrail.sql: |
-    CREATE USER guardrail WITH PASSWORD '{{GUARDRAIL_PASSWORD}}';
-    CREATE DATABASE guardrail;
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'guardrail') THEN
+            CREATE USER guardrail WITH PASSWORD '{{GUARDRAIL_PASSWORD}}';
+        END IF;
+    END$$;
+
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail') THEN
+            CREATE DATABASE guardrail;
+        END IF;
+    END$$;
+
     GRANT ALL PRIVILEGES ON DATABASE guardrail TO guardrail;
 
     \c guardrail;
-    GRANT ALL ON schema public TO guardrail;
+    GRANT ALL ON SCHEMA public TO guardrail;
 
-    CREATE ROLE authenticator LOGIN PASSWORD '{{AUTHENTICATOR_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
-    CREATE ROLE guardrail_webuser LOGIN PASSWORD '{{WEBUSER_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
-    CREATE ROLE guardrail_anonymous NOLOGIN;
-    CREATE ROLE guardrail_apiuser NOLOGIN;
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'authenticator') THEN
+            CREATE ROLE authenticator LOGIN PASSWORD '{{AUTHENTICATOR_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'guardrail_webuser') THEN
+            CREATE ROLE guardrail_webuser LOGIN PASSWORD '{{WEBUSER_PASSWORD}}' NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'guardrail_anonymous') THEN
+            CREATE ROLE guardrail_anonymous NOLOGIN;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'guardrail_apiuser') THEN
+            CREATE ROLE guardrail_apiuser NOLOGIN;
+        END IF;
+    END$$;
 
     GRANT guardrail_anonymous TO authenticator;
     GRANT guardrail_apiuser TO authenticator;
