@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/workrave-infra.git
+    repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: apps/guardrail-web/overlays/development
   destination:

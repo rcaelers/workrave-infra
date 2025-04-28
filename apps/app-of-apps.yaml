@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/workrave-infra.git
+    repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: app-of-apps
   destination:
@@ -27,7 +27,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/workrave-infra.git
+    repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: apps/app-of-apps/postgresql-development-app.yaml
   destination:

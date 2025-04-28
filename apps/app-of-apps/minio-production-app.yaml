@@ -6,12 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/workrave-infra.git
+    repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: apps/minio/overlays/production
-    helm:
-      valueFiles:
-        - ../../values/guardrail-minio.prd.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: minio-prd
