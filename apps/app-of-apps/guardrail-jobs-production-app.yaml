@@ -11,7 +11,7 @@ spec:
     path: apps/guardrail-jobs/overlays/production
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-jobs-production
+    namespace: guardrail-prd
   syncPolicy:
     automated:
       prune: true

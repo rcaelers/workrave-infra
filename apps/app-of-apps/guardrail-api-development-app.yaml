@@ -11,7 +11,7 @@ spec:
     path: apps/guardrail-api/overlays/development
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-api-development
+    namespace: guardrail-dev
   syncPolicy:
     automated:
       prune: true
