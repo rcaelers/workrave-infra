@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-prd
+resources:
+  - postgresql-secrets.yaml
+  - guardrail-db-password.yaml
+  - guardrail-db-init.yaml
+  - ../../base
+patches:
+  - path: cluster-patch.yaml

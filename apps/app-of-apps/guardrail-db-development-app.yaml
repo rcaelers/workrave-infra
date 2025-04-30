@@ -1,17 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: postgresql-dev
+  name: guardrail-development
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   project: default
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
-    path: apps/postgresql/overlays/development
+    path: apps/guardrail/overlays/development
   destination:
     server: https://kubernetes.default.svc
-    namespace: postgresql-dev
+    namespace: guardrail-dev
   syncPolicy:
     automated:
       prune: true

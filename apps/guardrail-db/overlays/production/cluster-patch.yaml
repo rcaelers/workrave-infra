@@ -4,7 +4,5 @@ metadata:
   name: guardrail-db-prd
   namespace: postgres-prd
 spec:
-  storage:
-    storageClass: longhorn
   superuserSecret:
     name: postgresql-superuser-secret
