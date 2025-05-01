@@ -20,8 +20,17 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/guardrail/config.yaml
-              subPath: production.yaml
+              subPath: 01-config.yaml
+            - name: secret-volume
+              mountPath: /etc/guardrail/secret.yaml
+              subPath: 02-secret.yaml
       volumes:
         - name: config-volume
           configMap:
-            name: guardrail-jobs-config
+            name: guardrail-config
+        - name: secret-volume
+          secret:
+            secretName: guardrail-secrets
+        - name: secret-volume
+          secret:
+            secretName: guardrail-secrets

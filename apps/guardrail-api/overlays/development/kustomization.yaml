@@ -2,6 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
-  - image-patch.yaml
-patchesStrategicMerge:
-  - ingress-host-patch.yaml
+patches:
+  - path: image-patch.yaml
+  - path: ingress-host-patch.yaml

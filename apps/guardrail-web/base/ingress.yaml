@@ -7,7 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: CHANGEME
+    - host: crashes.workrave.org
       http:
         paths:
           - path: /
@@ -19,5 +19,5 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - CHANGEME
+        - crashes.workrave.org
       secretName: guardrail-web-tls

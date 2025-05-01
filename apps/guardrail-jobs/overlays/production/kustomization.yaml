@@ -3,4 +3,5 @@ kind: Kustomization
 resources:
   - ../../../overlays/production
   - ../../base
-  - image-patch.yaml
+patches:
+  - path: image-patch.yaml
