@@ -1,0 +1,19 @@
+server:
+  port: 4433
+  api_port: 4434
+  base_path: _data
+  site: https://guardrail.workrave.org:4433
+  store: TODO
+logger:
+  directory: _data/logs
+  level: debug
+auth:
+  id: guardrail.workrave.org
+  origin: https://guardrail.workrave.org:4433
+  name: Guardrail
+  jwk:
+    token_validity_in_minutes: 30
+    public_key:  |
+      -----BEGIN PUBLIC KEY-----
+      MCowBQYDK2VwAyEA+kw52Fhenb9GDfSq/LaV7RgxPv6f2M5RBB5vuoR6I4k=
+      -----END PUBLIC KEY-----

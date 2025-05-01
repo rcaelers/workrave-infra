@@ -3,4 +3,6 @@ kind: Kustomization
 configMapGenerator:
   - name: guardrail-config
     files:
-      - ../../config/development/development.yaml
+      - 01-config.yaml
+resources:
+  - 02-secrets.yaml

@@ -1,5 +1,0 @@
-# Dummy dev config for all guardrail apps
-api_url: https://api-dev.example.com
-web_url: https://web-dev.example.com
-db_host: db-dev.example.com
-log_level: debug
