@@ -30,10 +30,10 @@ spec:
                   key: secretKey
           volumeMounts:
             - name: config-volume
-              mountPath: /etc/guardrail/config.yaml
+              mountPath: /etc/guardrail/01-config.yaml
               subPath: 01-config.yaml
             - name: secret-volume
-              mountPath: /etc/guardrail/secret.yaml
+              mountPath: /etc/guardrail/02-secret.yaml
               subPath: 02-secret.yaml
       volumes:
         - name: config-volume
