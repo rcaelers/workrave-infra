@@ -1,8 +1,8 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: quardrail-db-dev
-  namespace: postgres-dev
+  name: guardrail-db-dev
+  namespace: guardrail-dev
 spec:
   superuserSecret:
     name: postgresql-superuser-secrets

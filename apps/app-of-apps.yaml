@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
-    path: app-of-apps
+    path: apps/app-of-apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

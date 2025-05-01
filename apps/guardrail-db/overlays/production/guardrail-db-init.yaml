@@ -83,7 +83,7 @@ spec:
         args:
           - |
             timeout=60
-            while ! pg_isready -h guardrail-db-rw -U postgres; do
+            while ! pg_isready -h guardrail-db-prd-rw -U postgres; do
               echo "Waiting for database..."; sleep 5;
               timeout=$((timeout-5))
               if [ $timeout -le 0 ]; then
@@ -91,7 +91,7 @@ spec:
               fi
             done
             # If psql fails, exit with error so Job fails and can be retried
-            if ! envsubst < /initdb/guardrail.sql | psql -h guardrail-db-rw -U postgres; then
+            if ! envsubst < /initdb/guardrail.sql | psql -h guardrail-db-prd-rw -U postgres; then
               echo "Database initialization failed"; exit 1
             fi
         volumeMounts:
