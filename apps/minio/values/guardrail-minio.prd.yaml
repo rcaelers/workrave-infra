@@ -4,7 +4,7 @@ mode: standalone
 image:
   tag: RELEASE.2025-04-22T22-12-26Z
 
-existingSecret: minio-secrets-prd
+existingSecret: minio-secrets
 
 persistence:
   size: 20Gi
@@ -29,11 +29,11 @@ policies:
 
 users:
   - accessKey: admin
-    existingSecret: minio-secrets-prd
+    existingSecret: minio-secrets
     existingSecretKey: adminSecretKey
     policy: consoleAdmin
   - accessKey: guardrail
-    existingSecret: minio-secrets-prd
+    existingSecret: minio-secrets
     existingSecretKey: guardrailSecretKey
     policy: guardrail-readwrite
 
