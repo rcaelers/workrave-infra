@@ -18,6 +18,6 @@ spec:
       cpu: 250m
       memory: 512Mi
   superuserSecret:
-    name: postgresql-superuser-secret
+    name: postgresql-superuser-secrets
   monitoring:
     enablePodMonitor: false

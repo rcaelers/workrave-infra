@@ -4,6 +4,6 @@ namespace: guardrail-dev
 resources:
   - postgresql-secrets.yaml
   - cluster-patch.yaml
-  - guardrail-db-password.yaml
+  - guardrail-db-secrets.yaml
   - guardrail-db-init.yaml
   - ../../base

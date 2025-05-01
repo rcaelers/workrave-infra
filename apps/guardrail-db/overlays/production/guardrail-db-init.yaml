@@ -62,22 +62,22 @@ spec:
         - name: GUARDRAIL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: guardrail-db-password
+              name: guardrail-db-secrets
               key: GUARDRAIL_PASSWORD
         - name: AUTHENTICATOR_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: guardrail-db-password
+              name: guardrail-db-secrets
               key: AUTHENTICATOR_PASSWORD
         - name: WEBUSER_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: guardrail-db-password
+              name: guardrail-db-secrets
               key: WEBUSER_PASSWORD
         - name: PGPASSWORD
           valueFrom:
             secretKeyRef:
-              name: postgresql-superuser-secret
+              name: postgresql-superuser-secrets
               key: password
         command: ["/bin/sh", "-c"]
         args:

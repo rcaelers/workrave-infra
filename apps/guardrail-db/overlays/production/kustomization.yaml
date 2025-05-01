@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: guardrail-prd
 resources:
   - postgresql-secrets.yaml
-  - guardrail-db-password.yaml
+  - guardrail-db-secrets.yaml
   - guardrail-db-init.yaml
   - ../../base
 patches:

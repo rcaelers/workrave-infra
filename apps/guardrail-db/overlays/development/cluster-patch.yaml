@@ -5,4 +5,4 @@ metadata:
   namespace: postgres-dev
 spec:
   superuserSecret:
-    name: postgresql-superuser-secret
+    name: postgresql-superuser-secrets
