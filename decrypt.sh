@@ -6,3 +6,4 @@
  sops -d -i apps/guardrail-db/overlays/development/guardrail-db-secrets.yaml 
  sops -d -i apps/minio/overlays/development/minio-secrets.yaml 
  sops -d -i apps/minio/overlays/production/minio-secrets.yaml
+ 
