@@ -6,5 +6,3 @@ resources:
   - guardrail-db-secrets.yaml
   - guardrail-db-init.yaml
   - ../../base
-patches:
-  - path: cluster-patch.yaml
