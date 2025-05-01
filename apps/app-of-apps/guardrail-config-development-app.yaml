@@ -1,17 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guardrail-production
+  name: guardrail-api-development
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "11"
 spec:
   project: default
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
-    path: apps/guardrail/overlays/production
+    path: apps/guardrail-config/overlays/development
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-prd
+    namespace: guardrail-dev
   syncPolicy:
     automated:
       prune: true
