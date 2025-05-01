@@ -17,6 +17,17 @@ spec:
           image: ghcr.io/rcaelers/guardrail-jobs:latest
           ports:
             - containerPort: 8081
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: accessKey
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: secretKey
           volumeMounts:
             - name: config-volume
               mountPath: /etc/guardrail/config.yaml

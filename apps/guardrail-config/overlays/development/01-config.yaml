@@ -3,10 +3,7 @@ server:
   api_port: 4434
   base_path: _data
   site: https://guardrail-dev.workrave.org:4433
-  store: TODO
-logger:
-  directory: _data/logs
-  level: debug
+  store: s3://guardrail-dev/guardrail
 auth:
   id: guardrail-dev.workrave.org
   origin: https://guardrail-dev.workrave.org:4433
