@@ -28,5 +28,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=false  # Changed to false to force reapplication
-      - Replace=true  # Force replacement of resources
+      - ApplyOutOfSyncOnly=true
