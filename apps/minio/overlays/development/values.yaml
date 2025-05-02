@@ -28,10 +28,6 @@ policies:
         effect: Allow
 
 users:
-  - accessKey: admin
-    existingSecret: minio-secrets
-    existingSecretKey: adminSecretKey
-    policy: consoleAdmin
   - accessKey: guardrail
     existingSecret: minio-secrets
     existingSecretKey: guardrailSecretKey
