@@ -13,6 +13,8 @@ spec:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: apps/minio/overlays/development
+    kustomize:
+      buildOptions: "--enable-helm"
   destination:
     server: https://kubernetes.default.svc
     namespace: minio-dev
