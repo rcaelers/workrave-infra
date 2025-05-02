@@ -8,6 +8,7 @@ existingSecret: minio-secrets
 
 persistence:
   size: 5Gi
+  existingClaim: ""  # Clear any existing claim to force a new PVC creation
 
 resources:
   requests:
