@@ -40,7 +40,7 @@ buckets:
     versioning: false
 
 consoleIngress:
-  enabled: true
+  enabled: false
   ingressClassName: nginx
   path: /
   hosts:
