@@ -46,11 +46,9 @@ buckets:
 consoleIngress:
   enabled: true
   ingressClassName: nginx
+  path: /
   hosts:
-    - host: minio.workrave.org
-      paths:
-        - path: /
-          pathType: Prefix
+    - minio.workrave.org
   tls:
     - hosts:
         - minio.workrave.org

@@ -7,6 +7,10 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  info:
+    - name: errors
+      value: "{{ range .status.conditions }}{{ .message }}{{ end }}"
 spec:
   project: default
   source:
@@ -24,3 +28,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
