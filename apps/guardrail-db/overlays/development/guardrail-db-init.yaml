@@ -12,12 +12,10 @@ data:
         END IF;
     END$$;
 
-    DO $$
-    BEGIN
-        IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail') THEN
-            CREATE DATABASE guardrail;
-        END IF;
-    END$$;
+    -- Create database without using DO block
+    SELECT 'CREATE DATABASE guardrail'
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail')
+    \gexec
 
     GRANT ALL PRIVILEGES ON DATABASE guardrail TO guardrail;
 

@@ -12,12 +12,10 @@ data:
         END IF;
     END$$;
 
-    DO $$
-    BEGIN
-        IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail') THEN
-            CREATE DATABASE guardrail;
-        END IF;
-    END$$;
+    -- Create database without using DO block
+    SELECT 'CREATE DATABASE guardrail'
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail')
+    \gexec
 
     GRANT ALL PRIVILEGES ON DATABASE guardrail TO guardrail;
 
@@ -98,7 +96,7 @@ spec:
               sed "s/{{WEBUSER_PASSWORD}}/$WEBUSER_PASSWORD/g" > /tmp/init-with-vars.sql
             
             # If psql fails, exit with error so Job fails and can be retried
-            if ! psql -h guardrail-db-rw -U postgres -f /tmp/init-with-vars.sql; then
+            if ! psql -h guardrail-db-prd-rw -U postgres -f /tmp/init-with-vars.sql; then
               echo "Database initialization failed"; exit 1
             fi
             
