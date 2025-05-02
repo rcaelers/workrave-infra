@@ -7,6 +7,9 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "1"
+  info:
+    - name: errors
+      value: "{{ range .status.conditions }}{{ .message }}{{ end }}"
 spec:
   project: default
   source:
