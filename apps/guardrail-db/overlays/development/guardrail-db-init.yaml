@@ -92,10 +92,20 @@ spec:
                   echo "Timed out waiting for database"; exit 1
                 fi
               done
+              # Replace variables and execute SQL
+              # Create a temp file with substituted variables
+              cat /initdb/guardrail.sql | \
+                sed "s/{{GUARDRAIL_PASSWORD}}/$GUARDRAIL_PASSWORD/g" | \
+                sed "s/{{AUTHENTICATOR_PASSWORD}}/$AUTHENTICATOR_PASSWORD/g" | \
+                sed "s/{{WEBUSER_PASSWORD}}/$WEBUSER_PASSWORD/g" > /tmp/init-with-vars.sql
+              
               # If psql fails, exit with error so Job fails and can be retried
-              if ! envsubst < /initdb/guardrail.sql | psql -h guardrail-db-rw -U postgres; then
+              if ! psql -h guardrail-db-rw -U postgres -f /tmp/init-with-vars.sql; then
                 echo "Database initialization failed"; exit 1
               fi
+              
+              # Clean up temp file with credentials
+              rm -f /tmp/init-with-vars.sql
           volumeMounts:
             - name: initdb
               mountPath: /initdb

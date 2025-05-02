@@ -52,7 +52,7 @@ consoleIngress:
   tls:
     - hosts:
         - minio.workrave.org
-      secretName: minio-tls
+      secretName: minio-prd-tls
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
