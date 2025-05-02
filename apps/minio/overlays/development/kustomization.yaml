@@ -9,4 +9,4 @@ helmCharts:
     repo: https://charts.min.io/
     version: 5.4.0
     releaseName: minio
-    valuesFile: ../../values/guardrail-minio.dev.yaml
+    valuesFile: values.yaml
