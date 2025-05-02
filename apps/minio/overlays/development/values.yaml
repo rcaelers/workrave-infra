@@ -46,10 +46,13 @@ consoleIngress:
   hosts:
     - minio-dev.workrave.org
   tls:
-    - hosts:
+    - secretName: minio-dev-tls
+      hosts:
         - minio-dev.workrave.org
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
 
