@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: argocd
 resources:
   - cloudnativepg-operator-app.yaml
-  #- minio-development-app.yaml
+  - minio-development-app.yaml
   #- minio-production-app.yaml
   - guardrail-config-development-app.yaml
   #- guardrail-config-production-app.yaml
