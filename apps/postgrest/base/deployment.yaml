@@ -43,11 +43,13 @@ spec:
           volumeMounts:
             - mountPath: "/mnt/secret"
               name: secret-volume
-              subPath: jwk.json
       volumes:
         - name: secret-volume
           secret:
             secretName: postgrest-secrets
+            items:
+            - key: jwk
+              path: jwk.json
       resources:
         limits:
           cpu: "200m"
