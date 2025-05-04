@@ -43,6 +43,10 @@ spec:
           volumeMounts:
             - mountPath: "/mnt/secret"
               name: secret-volume
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "500Mi"
       volumes:
         - name: secret-volume
           secret:
@@ -50,7 +54,3 @@ spec:
             items:
             - key: jwk
               path: jwk.json
-      resources:
-        limits:
-          cpu: "200m"
-          memory: "500Mi"
