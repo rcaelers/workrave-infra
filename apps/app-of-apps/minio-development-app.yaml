@@ -7,18 +7,14 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "1"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-  info:
-    - name: errors
-      value: "{{ range .status.conditions }}{{ .message }}{{ end }}"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true,ServerSideApply=true
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   project: default
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
     path: apps/minio/overlays/development
-    kustomize:
-      buildOptions: "--enable-helm"
   destination:
     server: https://kubernetes.default.svc
     namespace: guardrail-dev
