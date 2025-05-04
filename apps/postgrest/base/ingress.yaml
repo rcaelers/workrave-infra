@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: postgrest
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - aristo.krandor.org
+      secretName: guardrail-tls
+  rules:
+    - host: aristo.krandor.org
+      http:
+        paths:
+          - path: /db
+            pathType: Prefix
+            backend:
+              service:
+                name: postgrest
+                port:
+                  number: 80

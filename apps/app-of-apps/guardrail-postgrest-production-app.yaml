@@ -1,0 +1,24 @@
+postgrestVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guardrail-postgrest-production
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rcaelers/workrave-infra.git
+    targetRevision: HEAD
+    path: apps/postgrest/overlays/production
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guardrail-prd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

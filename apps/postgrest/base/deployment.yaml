@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgrest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgrest
+  template:
+    metadata:
+      labels:
+        app: postgrest
+    spec:
+      serviceAccountName: x
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest
+          env:
+            - name: PGRST_DB_URI
+              value: "postgres://authenticator@guardrail-db-rw:5432/guardrail"
+            - name: PGRST_DB_SCHEMAS
+              value: "guardrail"
+            - name: PGRST_DB_ANON_ROLE
+              value: "guardrail_anonymous"
+            - name: PGRST_OPENAPI_SERVER_PROXY_URI
+              value: "http://127.0.0.1:3000"
+            - name: PGRST_JWT_SECRET
+              value: "@/mnt/secret/jwt.json"
+            - name: PGRST_ADMIN_SERVER_PORT
+              value: 3001
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: guardrail-db-secrets
+                  key: AUTHENTICATOR_PASSWORD
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: http-admin
+              containerPort: 3001
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/mnt/secret"
+              name: secret-volume
+              subPath: jwk.json
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: postgrest-secrets
+      resources:
+        limits:
+          cpu: "200m"
+          memory: "500Mi"
