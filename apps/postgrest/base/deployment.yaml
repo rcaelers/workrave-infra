@@ -23,7 +23,7 @@ spec:
             - name: PGRST_DB_ANON_ROLE
               value: "guardrail_anonymous"
             - name: PGRST_OPENAPI_SERVER_PROXY_URI
-              value: "http://127.0.0.1:3000"
+              value: "https://aristo.krandor.org/db"
             - name: PGRST_JWT_SECRET
               value: "@/mnt/secret/jwk.json"
             - name: PGRST_ADMIN_SERVER_PORT

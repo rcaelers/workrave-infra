@@ -4,6 +4,8 @@ metadata:
   name: postgrest
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   tls:
@@ -14,8 +16,8 @@ spec:
     - host: aristo.krandor.org
       http:
         paths:
-          - path: /db
-            pathType: Prefix
+          - path: /db(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: postgrest
