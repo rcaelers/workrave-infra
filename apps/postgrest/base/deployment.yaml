@@ -12,7 +12,6 @@ spec:
       labels:
         app: postgrest
     spec:
-      serviceAccountName: x
       containers:
         - name: postgrest
           image: postgrest/postgrest
@@ -28,7 +27,7 @@ spec:
             - name: PGRST_JWT_SECRET
               value: "@/mnt/secret/jwt.json"
             - name: PGRST_ADMIN_SERVER_PORT
-              value: 3001
+              value: "3001"
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
