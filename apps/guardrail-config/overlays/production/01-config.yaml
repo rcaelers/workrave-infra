@@ -1,12 +1,15 @@
-server:
-  port: 4433
-  api_port: 4434
-  base_path: _data
-  site: https://guardrail.workrave.org:4433
-  store: s3://guardrail-prd/guardrail
+web_server:
+  port: 3000
+api_server:
+  port: 3001
+object_storage:
+  region: us-east-1
+  bucket: guardrail
+  endpoint: http://minio:9000
+  allow_http: true
 auth:
   id: guardrail.workrave.org
-  origin: https://guardrail.workrave.org:4433
+  origin: https://guardrail.workrave.org/
   name: Guardrail
   jwk:
     token_validity_in_minutes: 30

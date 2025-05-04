@@ -42,6 +42,3 @@ spec:
         - name: secret-volume
           secret:
             secretName: guardrail-secrets
-        - name: secret-volume
-          secret:
-            secretName: guardrail-secrets
