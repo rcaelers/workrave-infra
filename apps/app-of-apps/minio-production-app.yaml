@@ -21,7 +21,7 @@ spec:
       buildOptions: "--enable-helm"
   destination:
     server: https://kubernetes.default.svc
-    namespace: minio-prd
+    namespace: guardrail-prd
   syncPolicy:
     automated:
       prune: true
