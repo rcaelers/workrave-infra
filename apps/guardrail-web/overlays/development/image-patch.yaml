@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
         - name: guardrail-web
-          image: ghcr.io/rcaelers/guardrail-web:dev
+          image: ghcr.io/rcaelers/guardrail-web:latest

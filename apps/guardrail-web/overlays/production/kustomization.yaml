@@ -4,5 +4,9 @@ resources:
   - ../../base
 patches:
   - path: image-patch.yaml
-  - path: ingress-host-patch.yaml
-  
+  - path: ingress-host-patch.json
+    target:
+      group: networking.k8s.io
+      kind: Ingress
+      name: guardrail-web
+      version: v1

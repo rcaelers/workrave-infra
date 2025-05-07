@@ -16,7 +16,9 @@ spec:
         - name: guardrail-web
           image: ghcr.io/rcaelers/guardrail-web:latest
           ports:
-            - containerPort: 3000
+            - name: http
+              containerPort: 3000
+              protocol: TCP
           volumeMounts:
             - name: config-volume
               mountPath: /etc/guardrail/01-config.yaml
