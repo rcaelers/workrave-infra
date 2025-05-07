@@ -16,7 +16,9 @@ spec:
         - name: guardrail-api
           image: ghcr.io/rcaelers/guardrail-api:latest
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 3001
+              protocol: TCP
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -35,6 +37,18 @@ spec:
             - name: secret-volume
               mountPath: /etc/guardrail/02-secret.yaml
               subPath: 02-secret.yaml
+          livenessProbe:
+            httpGet:
+              path: /api/live
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
       volumes:
         - name: config-volume
           configMap:

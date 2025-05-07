@@ -1,0 +1,12 @@
+[
+  {
+    "op": "add", 
+    "path": "/spec/rules/0/host", 
+    "value": "crashes.workrave.org"
+  },
+  {
+    "op": "add", 
+    "path": "/spec/tls/0/hosts", 
+    "value": ["crashes.workrave.org"]
+  }
+]

@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
         - name: guardrail-api
-          image: ghcr.io/rcaelers/guardrail-api:development
+          image: ghcr.io/rcaelers/guardrail-api:latest

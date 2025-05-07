@@ -7,8 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: CHANGEME
-      http:
+    - http:
         paths:
           - path: /api
             pathType: Prefix
@@ -18,6 +17,4 @@ spec:
                 port:
                   number: 80
   tls:
-    - hosts:
-        - CHANGEME
-      secretName: guardrail-api-tls
+    - secretName: guardrail-api-tls
