@@ -1,7 +1,7 @@
 web_server:
-  port: 3000
+  port: 80
 api_server:
-  port: 3001
+  port: 80
 object_storage:
   region: us-east-1
   bucket: guardrail
