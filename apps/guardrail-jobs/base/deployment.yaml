@@ -16,7 +16,9 @@ spec:
         - name: guardrail-jobs
           image: ghcr.io/rcaelers/guardrail-jobs:latest
           ports:
-            - containerPort: 8081
+            - name: http
+              containerPort: 3001
+              protocol: TCP
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -39,9 +41,6 @@ spec:
         - name: config-volume
           configMap:
             name: guardrail-config
-        - name: secret-volume
-          secret:
-            secretName: guardrail-secrets
         - name: secret-volume
           secret:
             secretName: guardrail-secrets
