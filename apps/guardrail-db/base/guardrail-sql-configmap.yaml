@@ -11,8 +11,8 @@ data:
         END IF;
     END$$;
 
-    DROP DATABASE guardrail;
-    DROP DATABASE apalis;
+    DROP DATABASE guardrail WITH (FORCE);
+    DROP DATABASE apalis WITH (FORCE);
 
     SELECT 'CREATE DATABASE guardrail'
     WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail')
