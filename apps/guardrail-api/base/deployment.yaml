@@ -15,6 +15,8 @@ spec:
       containers:
         - name: guardrail-api
           image: ghcr.io/rcaelers/guardrail-api:latest
+          command: ["/app/api"]
+          args: ["-C", "/config"]
           ports:
             - name: http
               containerPort: 3001
@@ -32,10 +34,10 @@ spec:
                   key: secretKey
           volumeMounts:
             - name: config-volume
-              mountPath: /etc/guardrail/01-config.yaml
+              mountPath: /config/01-config.yaml
               subPath: 01-config.yaml
             - name: secret-volume
-              mountPath: /etc/guardrail/02-secret.yaml
+              mountPath: /config/02-secret.yaml
               subPath: 02-secret.yaml
           livenessProbe:
             httpGet:
