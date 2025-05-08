@@ -38,7 +38,7 @@ spec:
               subPath: 01-config.yaml
             - name: secret-volume
               mountPath: /config/02-secret.yaml
-              subPath: 02-secret.yaml
+              subPath: secrets
           livenessProbe:
             httpGet:
               path: /api/live
