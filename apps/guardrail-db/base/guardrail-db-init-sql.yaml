@@ -12,6 +12,9 @@ data:
         END IF;
     END$$;
 
+    DROP DATABASE guardrail;
+    DROP DATABASE apalis;
+
     SELECT 'CREATE DATABASE guardrail'
     WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'guardrail')
     \gexec
