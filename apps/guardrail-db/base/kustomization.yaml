@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - longhorn-postgres-storageclass.yaml
   - cluster.yaml
-  - guardrail-db-init-sql.yaml
+  - guardrail-sql-configmap.yaml
