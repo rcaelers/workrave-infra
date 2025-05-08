@@ -1,8 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: guardrail-dev
 configMapGenerator:
   - name: guardrail-config
     files:
       - 01-config.yaml
+    options:
+      disableNameSuffixHash: true
 resources:
   - 02-secrets.yaml
