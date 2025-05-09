@@ -9,7 +9,7 @@ resources:
   - longhorn-app.yaml
   - cloudnativepg-operator-app.yaml
   - minio-development-app.yaml
-  - minio-production-app.yaml
+  # - minio-production-app.yaml
   # - guardrail-config-development-app.yaml
   #- guardrail-config-production-app.yaml
   # - guardrail-db-development-app.yaml
