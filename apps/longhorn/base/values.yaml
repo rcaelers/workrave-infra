@@ -1,0 +1,13 @@
+csi:
+  attacherReplicaCount: 2
+  provisionerReplicaCount: 2
+  resizerReplicaCount: 2
+  snapshotterReplicaCount: 2
+defaultSettings:
+  defaultReplicaCount: 2
+longhornConversionWebhook:
+  replicas: 1
+longhornUI:
+  replicas: 1
+persistence:
+  defaultClassReplicaCount: 1
