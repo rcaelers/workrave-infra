@@ -14,7 +14,7 @@ resources:
   #- guardrail-config-production-app.yaml
   - guardrail-db-development-app.yaml
   #- guardrail-db-production-app.yaml
-  # - guardrail-postgrest-development-app.yaml
+  - guardrail-postgrest-development-app.yaml
   #- guardrail-postgrest-production-app.yaml
   #- guardrail-jobs-development-app.yaml
   #- guardrail-jobs-production-app.yaml
