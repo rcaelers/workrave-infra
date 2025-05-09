@@ -6,15 +6,15 @@ resources:
   - sops-secrets-operator-app.yaml
   - ingress-nginx-app.yaml
   - cert-manager-app.yaml
-  #- longhorn-app.yaml
-  - cloudnativepg-operator-app.yaml
-  - minio-development-app.yaml
+  - longhorn-app.yaml
+  #- cloudnativepg-operator-app.yaml
+  #- minio-development-app.yaml
   #- minio-production-app.yaml
-  - guardrail-config-development-app.yaml
+  # - guardrail-config-development-app.yaml
   #- guardrail-config-production-app.yaml
-  - guardrail-db-development-app.yaml
+  # - guardrail-db-development-app.yaml
   #- guardrail-db-production-app.yaml
-  - guardrail-postgrest-development-app.yaml
+  # - guardrail-postgrest-development-app.yaml
   #- guardrail-postgrest-production-app.yaml
   #- guardrail-jobs-development-app.yaml
   #- guardrail-jobs-production-app.yaml
