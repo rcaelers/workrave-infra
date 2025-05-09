@@ -4,6 +4,7 @@ csi:
   resizerReplicaCount: 2
   snapshotterReplicaCount: 2
 defaultSettings:
+  orphanAutoDeletion: true
   defaultReplicaCount: 2
 longhornConversionWebhook:
   replicas: 1
@@ -11,3 +12,5 @@ longhornUI:
   replicas: 1
 persistence:
   defaultClassReplicaCount: 1
+preUpgradeChecker:
+  jobEnabled: false
