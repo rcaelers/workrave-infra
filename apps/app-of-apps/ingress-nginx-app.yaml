@@ -1,25 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudnativepg-operator
+  name: ingress-nginx
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
-    repoURL: https://cloudnative-pg.github.io/charts
-    chart: cloudnative-pg
-    targetRevision: 0.23.2
-    helm:
-      releaseName: cnpg
-      valuesObject: 
-        replicaCount: 1
+    repoURL: https://github.com/rcaelers/workrave-infra.git
+    targetRevision: HEAD
+    path: apps/nginx-ingress/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: cnpg-system
+    namespace: ingress-nginx
   syncPolicy:
     automated:
       prune: true
