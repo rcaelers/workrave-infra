@@ -4,3 +4,5 @@ resources:
   - ../../base
 patches:
   - path: image-patch.yaml
+  - path: rolebinding-patch.yaml
+namespace: guardrail-dev

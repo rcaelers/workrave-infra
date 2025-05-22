@@ -1,0 +1,31 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: guardrail-jobs-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["guardrail-config"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["guardrail-secrets", "minio-secrets"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+  resourceNames: ["guardrail-jobs-*"]  # Allow access only to guardrail-jobs pods
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: guardrail-jobs-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: guardrail-jobs-sa
+  # The namespace will be set in each overlay
+  namespace: default
+roleRef:
+  kind: Role
+  name: guardrail-jobs-role
+  apiGroup: rbac.authorization.k8s.io

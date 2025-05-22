@@ -12,15 +12,46 @@ spec:
       labels:
         app: guardrail-jobs
     spec:
+      serviceAccountName: guardrail-jobs-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: guardrail-jobs
           image: ghcr.io/rcaelers/guardrail-jobs:latest
           command: ["/app/jobs"]
           args: ["-C", "/config"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           ports:
             - name: http
-              containerPort: 3001
+              containerPort: 80
               protocol: TCP
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -39,6 +70,8 @@ spec:
             - name: secret-volume
               mountPath: /config/02-secret.yaml
               subPath: 02-secret.yaml
+            - name: tmp-volume
+              mountPath: /tmp
       volumes:
         - name: config-volume
           configMap:
@@ -46,3 +79,5 @@ spec:
         - name: secret-volume
           secret:
             secretName: guardrail-secrets
+        - name: tmp-volume
+          emptyDir: {}
