@@ -2,6 +2,8 @@ web_server:
   port: 80
 api_server:
   port: 80
+job_server:
+  port: 80
 object_storage:
   region: us-east-1
   bucket: guardrail
