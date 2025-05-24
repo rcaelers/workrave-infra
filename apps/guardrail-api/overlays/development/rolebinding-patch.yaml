@@ -1,0 +1,8 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: guardrail-api-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: guardrail-api-sa
+  namespace: guardrail-dev

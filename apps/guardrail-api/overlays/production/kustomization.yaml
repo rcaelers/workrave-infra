@@ -4,6 +4,7 @@ namespace: guardrail-prd
 resources:
 - ../../base
 patches:
+- path: rolebinding-patch.yaml
 - path: image-patch.yaml
 - path: ingress-host-patch.json
   target:
