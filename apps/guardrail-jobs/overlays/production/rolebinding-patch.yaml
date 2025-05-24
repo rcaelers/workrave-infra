@@ -5,4 +5,4 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: guardrail-jobs-sa
-  namespace: production
+  namespace: guardrail-prd
