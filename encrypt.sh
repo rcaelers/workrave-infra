@@ -6,4 +6,6 @@
  sops -e -i apps/guardrail-db/overlays/development/guardrail-db-secrets.yaml 
  sops -e -i apps/minio/overlays/development/minio-secrets.yaml 
  sops -e -i apps/minio/overlays/production/minio-secrets.yaml
+ sops -e -i apps/postgrest/overlays/development/postgrest-secrets.yaml 
+ sops -e -i apps/postgrest/overlays/production/postgrest-secrets.yaml
  
