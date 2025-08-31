@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: postgrest
-          image: postgrest/postgrest
+          image: postgrest/postgrest:v13.0.6
           env:
             - name: PGRST_DB_URI
               value: "postgres://authenticator@guardrail-db-rw:5432/guardrail"
@@ -52,5 +52,5 @@ spec:
           secret:
             secretName: postgrest-secrets
             items:
-            - key: jwk
-              path: jwk.json
+              - key: jwk
+                path: jwk.json
