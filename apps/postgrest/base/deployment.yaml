@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: postgrest
-          image: postgrest/postgrest:v13.0.6
+          image: postgrest/postgrest
           env:
             - name: PGRST_DB_URI
               value: "postgres://authenticator@guardrail-db-rw:5432/guardrail"

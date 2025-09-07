@@ -4,3 +4,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+
+images:
+  - name: postgrest/postgrest
+    newTag: v13.0.6
