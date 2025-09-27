@@ -8,4 +8,4 @@ helmCharts:
     repo: https://longhorn.github.io/charts
     version: 1.10.0
     releaseName: longhorn
-    valuesFile: values.yaml
+    #valuesFile: values.yaml
