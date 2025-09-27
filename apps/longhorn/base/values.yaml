@@ -5,7 +5,7 @@ csi:
   snapshotterReplicaCount: 2
 defaultSettings:
   orphanAutoDeletion: true
-  defaultReplicaCount: 2
+  defaultReplicaCount: "2"
 longhornConversionWebhook:
   replicas: 1
 longhornUI:
