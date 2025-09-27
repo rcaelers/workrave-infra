@@ -6,8 +6,6 @@ csi:
 defaultSettings:
   orphanAutoDeletion: true
   defaultReplicaCount: "2"
-longhornConversionWebhook:
-  replicas: 1
 longhornUI:
   replicas: 1
 persistence:
