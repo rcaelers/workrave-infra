@@ -10,13 +10,15 @@ volumeBindingMode: WaitForFirstConsumer
 reclaimPolicy: Delete
 parameters:
   numberOfReplicas: "1"
-  staleReplicaTimeout: "1440" # 1 day
+  staleReplicaTimeout: "30" # 30 seconds
+  fromBackup: ""
+  baseImage: ""
   fsType: "ext4"
   # diskSelector: "nvme"
   dataLocality: "strict-local"
   recurringJobSelector: '[
-      {
-        "name":"postgres-replica-storage",
-        "isGroup":true
-      }
+    {
+    "name":"postgres-replica-storage",
+    "isGroup":true
+    }
     ]'
