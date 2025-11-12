@@ -6,6 +6,6 @@ namespace: longhorn-system
 helmCharts:
   - name: longhorn
     repo: https://longhorn.github.io/charts
-    version: 1.10.0
+    version: 1.10.1
     releaseName: longhorn
     valuesFile: values.yaml
