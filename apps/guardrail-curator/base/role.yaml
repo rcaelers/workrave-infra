@@ -22,6 +22,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: guardrail-curator-sa
+  # The namespace will be set in each overlay
   namespace: default
 roleRef:
   kind: Role

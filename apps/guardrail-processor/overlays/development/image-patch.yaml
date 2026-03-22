@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
         - name: guardrail-processor
-          image: ghcr.io/rcaelers/guardrail-processor:dev
+          image: ghcr.io/rcaelers/guardrail-processor:latest

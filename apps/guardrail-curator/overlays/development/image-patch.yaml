@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
         - name: guardrail-curator
-          image: ghcr.io/rcaelers/guardrail-curator:dev
+          image: ghcr.io/rcaelers/guardrail-curator:latest
