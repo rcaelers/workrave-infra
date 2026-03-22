@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guardrail-jobs-development
+  name: guardrail-curator-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -12,10 +12,10 @@ spec:
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
-    path: apps/guardrail-jobs/overlays/development
+    path: apps/guardrail-curator/overlays/production
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-dev
+    namespace: guardrail-prd
   syncPolicy:
     automated:
       prune: true
