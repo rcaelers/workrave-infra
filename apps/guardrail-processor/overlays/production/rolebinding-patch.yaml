@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: guardrail-jobs-rolebinding
+  name: guardrail-processor-rolebinding
 subjects:
 - kind: ServiceAccount
-  name: guardrail-jobs-sa
+  name: guardrail-processor-sa
   namespace: guardrail-prd

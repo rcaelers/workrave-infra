@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: guardrail-jobs
+  name: guardrail-processor
 spec:
   selector:
-    app: guardrail-jobs
+    app: guardrail-processor
   ports:
     - protocol: TCP
       port: 80

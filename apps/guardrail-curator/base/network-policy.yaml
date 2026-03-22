@@ -1,11 +1,11 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: guardrail-api-network-policy
+  name: guardrail-curator-network-policy
 spec:
   podSelector:
     matchLabels:
-      app: guardrail-api
+      app: guardrail-curator
   policyTypes:
   - Ingress
   - Egress
