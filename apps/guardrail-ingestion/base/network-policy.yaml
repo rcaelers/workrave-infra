@@ -1,33 +1,31 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: valkey-network-policy
+  name: guardrail-ingestion-network-policy
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: valkey
-      app.kubernetes.io/instance: valkey
+      app: guardrail-ingestion
   policyTypes:
   - Ingress
   - Egress
   ingress:
-  - from:
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: guardrail-api
-    - podSelector:
-        matchLabels:
-          app: guardrail-processor
-    - podSelector:
-        matchLabels:
-          app: guardrail-curator
-    - podSelector:
-        matchLabels:
-          app: guardrail-ingestion
+          app.kubernetes.io/name: valkey
+          app.kubernetes.io/instance: valkey
     ports:
     - protocol: TCP
       port: 6379
-  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: minio
+    ports:
+    - protocol: TCP
+      port: 9000
   - to:
     - namespaceSelector:
         matchLabels:

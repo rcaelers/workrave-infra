@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: guardrail-ingestion-role
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["guardrail-config"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["guardrail-secrets", "minio-secrets"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: guardrail-ingestion-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: guardrail-ingestion-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: guardrail-ingestion-role
+  apiGroup: rbac.authorization.k8s.io
