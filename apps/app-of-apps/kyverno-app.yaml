@@ -20,8 +20,9 @@ spec:
   ignoreDifferences:
     - group: apiextensions.k8s.io
       kind: CustomResourceDefinition
-      jsonPointers:
-        - /spec
+      jqPathExpressions:
+        - .metadata.labels
+        - .metadata.annotations
   syncPolicy:
     automated:
       prune: true
