@@ -21,6 +21,9 @@ spec:
     - podSelector:
         matchLabels:
           app: guardrail-curator
+    - podSelector:
+        matchLabels:
+          app: guardrail-ingestion
     ports:
     - protocol: TCP
       port: 6379

@@ -24,5 +24,7 @@ resources:
   #- guardrail-curator-production-app.yaml
   #- guardrail-api-development-app.yaml
   #- guardrail-api-production-app.yaml
+  #- guardrail-ingestion-development-app.yaml
+  #- guardrail-ingestion-production-app.yaml
   #- guardrail-web-development-app.yaml
   #- guardrail-web-production-app.yaml

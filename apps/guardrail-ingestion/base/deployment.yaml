@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-ingestion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guardrail-ingestion
+  template:
+    metadata:
+      labels:
+        app: guardrail-ingestion
+    spec:
+      serviceAccountName: guardrail-ingestion-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: guardrail-ingestion
+          image: ghcr.io/rcaelers/guardrail-ingestion:latest
+          command: ["/app/ingestion"]
+          args: ["-C", "/config"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/live
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: accessKey
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secrets
+                  key: secretKey
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config/01-config.yaml
+              subPath: 01-config.yaml
+            - name: secret-volume
+              mountPath: /config/02-secret.yaml
+              subPath: secrets
+            - name: tmp-volume
+              mountPath: /tmp
+      volumes:
+        - name: config-volume
+          configMap:
+            name: guardrail-config
+        - name: secret-volume
+          secret:
+            secretName: guardrail-secrets
+        - name: tmp-volume
+          emptyDir: {}
