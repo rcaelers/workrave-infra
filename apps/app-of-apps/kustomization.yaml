@@ -6,6 +6,8 @@ resources:
   - sops-secrets-operator-app.yaml
   - ingress-nginx-app.yaml
   - cert-manager-app.yaml
+  - kyverno-app.yaml
+  - guardrail-security-app.yaml
   - longhorn-app.yaml
   - cloudnativepg-operator-app.yaml
   - minio-development-app.yaml
