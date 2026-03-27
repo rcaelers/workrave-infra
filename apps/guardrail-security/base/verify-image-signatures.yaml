@@ -11,9 +11,12 @@ metadata:
 spec:
   validationFailureAction: Enforce
   webhookTimeoutSeconds: 30
+  admission: true
   background: false
+  emitWarning: false
   rules:
     - name: verify-cosign-signature
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
@@ -25,6 +28,10 @@ spec:
       verifyImages:
         - imageReferences:
             - "ghcr.io/rcaelers/guardrail-*"
+          mutateDigest: true
+          required: true
+          useCache: true
+          verifyDigest: true
           attestors:
             - entries:
                 - keyless:
@@ -32,3 +39,4 @@ spec:
                     subjectRegExp: "https://github.com/rcaelers/guardrail/\\.github/workflows/containers\\.yml@refs/.*"
                     rekor:
                       url: "https://rekor.sigstore.dev"
+                  signatureAlgorithm: sha256
