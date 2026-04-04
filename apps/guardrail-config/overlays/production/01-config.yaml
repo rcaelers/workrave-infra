@@ -7,7 +7,7 @@ ingestion_server:
 processor:
   maximum_frame_count: 10
   delimiter: "|"
-  skip_patterns:
+  skip_patterns: []
   end_patterns:
     - "WinMainCRTStartup"
     - "mainCRTStartup"
