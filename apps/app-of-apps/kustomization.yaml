@@ -20,13 +20,13 @@ resources:
   #- guardrail-postgrest-production-app.yaml
   - valkey-development-app.yaml
   #- valkey-production-app.yaml
-  #- guardrail-processor-development-app.yaml
+  - guardrail-processor-development-app.yaml
   #- guardrail-processor-production-app.yaml
-  #- guardrail-curator-development-app.yaml
+  - guardrail-curator-development-app.yaml
   #- guardrail-curator-production-app.yaml
   #- guardrail-api-development-app.yaml
   #- guardrail-api-production-app.yaml
-  #- guardrail-ingestion-development-app.yaml
+  - guardrail-ingestion-development-app.yaml
   #- guardrail-ingestion-production-app.yaml
   #- guardrail-web-development-app.yaml
   #- guardrail-web-production-app.yaml
