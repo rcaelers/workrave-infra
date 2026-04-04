@@ -2,8 +2,20 @@ web_server:
   port: 80
 api_server:
   port: 80
-job_server:
+ingestion_server:
   port: 80
+processor:
+  maximum_frame_count: 10
+  delimiter: "|"
+  skip_patterns:
+  end_patterns:
+    - "WinMainCRTStartup"
+    - "mainCRTStartup"
+    - "main()"
+minidumps:
+  mandatory_annotations:
+    - "product"
+    - "version"
 object_storage:
   region: us-east-1
   bucket: guardrail
