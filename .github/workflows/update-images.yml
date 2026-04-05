@@ -17,7 +17,7 @@ jobs:
       - name: Update image tags
         run: |
           SHA="${{ github.event.client_payload.sha }}"
-          TAG="sha-${SHA:0:7}"
+          TAG="${SHA:0:7}"
           SERVICES="${{ github.event.client_payload.services }}"
 
           for SERVICE in ${SERVICES}; do
@@ -33,7 +33,7 @@ jobs:
       - name: Commit and push
         run: |
           SHA="${{ github.event.client_payload.sha }}"
-          TAG="sha-${SHA:0:7}"
+          TAG="${SHA:0:7}"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
