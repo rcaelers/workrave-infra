@@ -4,6 +4,7 @@ metadata:
   name: guardrail-web
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: guardrail-web
