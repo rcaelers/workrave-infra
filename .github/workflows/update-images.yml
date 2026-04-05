@@ -1,0 +1,43 @@
+name: Update Development Images
+
+on:
+  repository_dispatch:
+    types: [update-dev-images]
+
+jobs:
+  update-images:
+    name: Update development image tags
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update image tags
+        run: |
+          SHA="${{ github.event.client_payload.sha }}"
+          TAG="sha-${SHA:0:7}"
+          SERVICES="${{ github.event.client_payload.services }}"
+
+          for SERVICE in ${SERVICES}; do
+            KUSTOMIZATION="apps/guardrail-${SERVICE}/overlays/development/kustomization.yaml"
+            if [[ -f "${KUSTOMIZATION}" ]]; then
+              sed -i "s|newTag: .*|newTag: ${TAG}|" "${KUSTOMIZATION}"
+              echo "Updated ${SERVICE} to ${TAG}"
+            else
+              echo "Warning: ${KUSTOMIZATION} not found, skipping"
+            fi
+          done
+
+      - name: Commit and push
+        run: |
+          SHA="${{ github.event.client_payload.sha }}"
+          TAG="sha-${SHA:0:7}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: update dev images to ${TAG}"
+          git push
