@@ -46,7 +46,7 @@ spec:
           resources:
             limits:
               cpu: "200m"
-              memory: "500Mi"
+              memory: "256Mi"
       volumes:
         - name: secret-volume
           secret:
