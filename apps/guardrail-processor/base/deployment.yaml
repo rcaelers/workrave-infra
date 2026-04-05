@@ -32,10 +32,10 @@ spec:
           resources:
             limits:
               cpu: "1"
-              memory: "1Gi"
+              memory: "512Mi"
             requests:
-              cpu: "200m"
-              memory: "256Mi"
+              cpu: "100m"
+              memory: "128Mi"
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
