@@ -12,10 +12,6 @@ rules:
   resourceNames: ["guardrail-secrets", "minio-secrets"]
   verbs: ["get"]
 - apiGroups: [""]
-  resources: ["secrets"]
-  resourceNames: ["guardrail-initial-admin-token"]
-  verbs: ["get", "create"]
-- apiGroups: [""]
   resources: ["pods"]
   verbs: ["get"]
 ---
