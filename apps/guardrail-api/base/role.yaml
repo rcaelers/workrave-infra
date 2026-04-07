@@ -14,7 +14,7 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   resourceNames: ["guardrail-initial-admin-token"]
-  verbs: ["create"]
+  verbs: ["update", "patch"]
 - apiGroups: [""]
   resources: ["secrets"]
   resourceNames: ["guardrail-secrets", "minio-secrets"]
