@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: valkey-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: valkey
+      app.kubernetes.io/instance: valkey
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: guardrail-api
+    - podSelector:
+        matchLabels:
+          app: guardrail-processor
+    - podSelector:
+        matchLabels:
+          app: guardrail-curator
+    - podSelector:
+        matchLabels:
+          app: guardrail-ingestion
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

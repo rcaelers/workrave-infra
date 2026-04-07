@@ -1,0 +1,18 @@
+fullnameOverride: valkey
+auth:
+  enabled: true
+  usersExistingSecret: valkey-secrets
+  aclUsers:
+    default:
+      permissions: "~* &* +@all"
+      passwordKey: VALKEY_PASSWORD
+dataStorage:
+  enabled: true
+  size: 5Gi
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "100m"
+    memory: "128Mi"

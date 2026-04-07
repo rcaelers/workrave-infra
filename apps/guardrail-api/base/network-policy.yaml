@@ -21,6 +21,14 @@ spec:
   - to:
     - podSelector:
         matchLabels:
+          app.kubernetes.io/name: valkey
+          app.kubernetes.io/instance: valkey
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to:
+    - podSelector:
+        matchLabels:
           app: minio
     ports:
     - protocol: TCP

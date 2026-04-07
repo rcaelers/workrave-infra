@@ -9,16 +9,19 @@ rules:
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["guardrail-secrets", "minio-secrets"]
+  resourceNames: ["guardrail-secrets", "minio-secrets", "guardrail-initial-admin-token"]
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["secrets"]
   resourceNames: ["guardrail-initial-admin-token"]
-  verbs: ["get", "create"]
+  verbs: ["update", "patch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["guardrail-secrets", "minio-secrets"]
+  verbs: ["get"]
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["get"]
-  resourceNames: ["guardrail-api-*"]  # Allow access only to guardrail-api pods
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

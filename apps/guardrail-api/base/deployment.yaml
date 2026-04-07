@@ -4,6 +4,7 @@ metadata:
   name: guardrail-api
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: guardrail-api
@@ -12,6 +13,7 @@ spec:
       labels:
         app: guardrail-api
     spec:
+      serviceAccountName: guardrail-api-sa
       containers:
         - name: guardrail-api
           image: ghcr.io/rcaelers/guardrail-api:latest
