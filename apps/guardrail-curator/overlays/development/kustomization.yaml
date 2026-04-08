@@ -7,4 +7,4 @@ patches:
 namespace: guardrail-dev
 images:
 - name: ghcr.io/rcaelers/guardrail-curator
-  newTag: d05cb61
+  newTag: 3c84738
