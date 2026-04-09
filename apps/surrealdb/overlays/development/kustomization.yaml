@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-dev
+resources:
+  - ../../base
+  - surrealdb-secrets.yaml
+helmCharts:
+  - name: surrealdb
+    repo: https://helm.surrealdb.com
+    version: 0.4.0
+    releaseName: surrealdb
+    valuesFile: values.yaml

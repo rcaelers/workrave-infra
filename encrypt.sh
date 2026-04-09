@@ -10,4 +10,5 @@
  sops -e -i apps/minio/overlays/production/minio-secrets.yaml
  sops -e -i apps/postgrest/overlays/development/postgrest-secrets.yaml 
  sops -e -i apps/postgrest/overlays/production/postgrest-secrets.yaml
- 
+ sops -e -i apps/surrealdb/overlays/production/surrealdb-secrets.yaml
+ sops -e -i apps/surrealdb/overlays/development/surrealdb-secrets.yaml

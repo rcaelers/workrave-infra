@@ -21,6 +21,13 @@ spec:
   - to:
     - podSelector:
         matchLabels:
+          app.kubernetes.io/name: surrealdb
+    ports:
+    - protocol: TCP
+      port: 8000
+  - to:
+    - podSelector:
+        matchLabels:
           app.kubernetes.io/name: valkey
           app.kubernetes.io/instance: valkey
     ports:
