@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-ingestion
+spec:
+  template:
+    spec:
+      containers:
+        - name: guardrail-ingestion
+          env:
+            - name: GUARDRAIL_DATABASE_ENDPOINT
+              value: ws://surrealdb:8000
+            - name: GUARDRAIL_DATABASE_NAMESPACE
+              value: guardrail
+            - name: GUARDRAIL_DATABASE_DATABASE
+              value: guardrail
+            - name: GUARDRAIL_DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootUser
+            - name: GUARDRAIL_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootPassword

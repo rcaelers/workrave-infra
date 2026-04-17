@@ -5,10 +5,14 @@ resources:
 - ../../base
 patches:
 - path: rolebinding-patch.yaml
-- path: image-patch.yaml
 - path: ingress-host-patch.json
   target:
     group: networking.k8s.io
     kind: Ingress
     name: guardrail-api
     version: v1
+images:
+- name: ghcr.io/rcaelers/guardrail-api
+  newTag: production
+- name: ghcr.io/rcaelers/guardrail-schema-sync
+  newTag: production

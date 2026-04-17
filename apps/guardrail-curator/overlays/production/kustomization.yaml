@@ -3,6 +3,8 @@ kind: Kustomization
 resources:
   - ../../base
 patches:
-  - path: image-patch.yaml
   - path: rolebinding-patch.yaml
 namespace: guardrail-prd
+images:
+- name: ghcr.io/rcaelers/guardrail-curator
+  newTag: production

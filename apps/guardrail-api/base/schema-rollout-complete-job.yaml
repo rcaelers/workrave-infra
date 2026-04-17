@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guardrail-schema-rollout-complete
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded,HookFailed
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: guardrail-schema-rollout
+    spec:
+      serviceAccountName: guardrail-api-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: schema-rollout-complete
+          image: ghcr.io/rcaelers/guardrail-schema-sync:latest
+          command: ["sh", "/app/bin/surrealkit-rollout-complete.sh"]
+          env:
+            - name: DATABASE_HOST
+              value: ws://surrealdb:8000
+            - name: DATABASE_NAMESPACE
+              value: guardrail
+            - name: DATABASE_NAME
+              value: guardrail
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootUser
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootPassword

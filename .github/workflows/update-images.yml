@@ -1,12 +1,12 @@
-name: Update Development Images
+name: Update Guardrail Images
 
 on:
   repository_dispatch:
-    types: [update-dev-images]
+    types: [update-dev-images, update-prod-images]
 
 jobs:
   update-images:
-    name: Update development image tags
+    name: Update image tags
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -17,13 +17,38 @@ jobs:
       - name: Update image tags
         run: |
           SHA="${{ github.event.client_payload.sha }}"
-          TAG="${SHA:0:7}"
           SERVICES="${{ github.event.client_payload.services }}"
+          if [[ "${{ github.event.action }}" == "update-prod-images" ]]; then
+            OVERLAY="production"
+            ENV_NAME="prod"
+            TAG="${{ github.event.client_payload.tag }}"
+          else
+            OVERLAY="development"
+            ENV_NAME="dev"
+            TAG="${SHA:0:7}"
+          fi
 
           for SERVICE in ${SERVICES}; do
-            KUSTOMIZATION="apps/guardrail-${SERVICE}/overlays/development/kustomization.yaml"
+            IMAGE="ghcr.io/rcaelers/guardrail-${SERVICE}"
+
+            if [[ "${SERVICE}" == "schema-sync" ]]; then
+              KUSTOMIZATION="apps/guardrail-api/overlays/${OVERLAY}/kustomization.yaml"
+            else
+              KUSTOMIZATION="apps/guardrail-${SERVICE}/overlays/${OVERLAY}/kustomization.yaml"
+            fi
+
             if [[ -f "${KUSTOMIZATION}" ]]; then
-              sed -i "s|newTag: .*|newTag: ${TAG}|" "${KUSTOMIZATION}"
+              awk -v image="${IMAGE}" -v tag="${TAG}" '
+                $1 == "-" && $2 == "name:" && $3 == image {
+                  print
+                  getline
+                  sub(/newTag: .*/, "newTag: " tag)
+                  print
+                  next
+                }
+                { print }
+              ' "${KUSTOMIZATION}" > "${KUSTOMIZATION}.tmp"
+              mv "${KUSTOMIZATION}.tmp" "${KUSTOMIZATION}"
               echo "Updated ${SERVICE} to ${TAG}"
             else
               echo "Warning: ${KUSTOMIZATION} not found, skipping"
@@ -33,11 +58,17 @@ jobs:
       - name: Commit and push
         run: |
           SHA="${{ github.event.client_payload.sha }}"
-          TAG="${SHA:0:7}"
+          if [[ "${{ github.event.action }}" == "update-prod-images" ]]; then
+            ENV_NAME="prod"
+            TAG="${{ github.event.client_payload.tag }}"
+          else
+            ENV_NAME="dev"
+            TAG="${SHA:0:7}"
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "chore: update dev images to ${TAG}"
+          git commit -m "chore: update ${ENV_NAME} images to ${TAG}"
           git push

@@ -4,8 +4,12 @@ metadata:
   name: guardrail-api-network-policy
 spec:
   podSelector:
-    matchLabels:
-      app: guardrail-api
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - guardrail-api
+      - guardrail-schema-rollout
   policyTypes:
   - Ingress
   - Egress
