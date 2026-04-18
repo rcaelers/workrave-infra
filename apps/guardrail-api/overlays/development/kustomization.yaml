@@ -5,6 +5,7 @@ resources:
 - ../../base
 patches:
 - path: rolebinding-patch.yaml
+- path: database-env-patch.yaml
 - path: ingress-host-patch.json
   target:
     group: networking.k8s.io
