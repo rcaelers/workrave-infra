@@ -14,6 +14,6 @@ patches:
     version: v1
 images:
 - name: ghcr.io/rcaelers/guardrail-api
-  newTag: 1f7b5c6
+  newTag: b262aa9
 - name: ghcr.io/rcaelers/guardrail-schema-sync
-  newTag: 1f7b5c6
+  newTag: b262aa9
