@@ -18,6 +18,9 @@ podExtraEnv:
         name: surrealdb-secrets
         key: rootPassword
 
+podSecurityContext:
+  fsGroup: 65532
+
 resources:
   requests:
     cpu: 100m
