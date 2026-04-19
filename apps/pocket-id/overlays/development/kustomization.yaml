@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-dev
+resources:
+  - ../../base
+  - pocket-id-secrets.yaml
+configMapGenerator:
+  - name: pocket-id-config
+    options:
+      disableNameSuffixHash: true
+    envs:
+      - config.env
+patches:
+  - path: ingress-host-patch.json
+    target:
+      group: networking.k8s.io
+      kind: Ingress
+      name: pocket-id
+      version: v1
+images:
+  - name: ghcr.io/pocket-id/pocket-id
+    newTag: v2

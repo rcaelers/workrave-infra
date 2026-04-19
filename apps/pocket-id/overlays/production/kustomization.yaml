@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-prd
+resources:
+  - ../../base
+  - pocket-id-secrets.yaml
+configMapGenerator:
+  - name: pocket-id-config
+    options:
+      disableNameSuffixHash: true
+    envs:
+      - config.env
+images:
+  - name: ghcr.io/pocket-id/pocket-id
+    newTag: v2

@@ -12,3 +12,5 @@
  sops -e -i apps/postgrest/overlays/production/postgrest-secrets.yaml
  sops -e -i apps/surrealdb/overlays/production/surrealdb-secrets.yaml
  sops -e -i apps/surrealdb/overlays/development/surrealdb-secrets.yaml
+ sops -e -i apps/pocket-id/overlays/development/pocket-id-secrets.yaml
+ sops -e -i apps/pocket-id/overlays/production/pocket-id-secrets.yaml

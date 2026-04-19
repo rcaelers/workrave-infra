@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pocket-id-setup
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: setup
+          image: alpine:3
+          command: ["/bin/sh", "-c"]
+          args:
+            - apk add --no-cache curl >/dev/null 2>&1 && /bin/sh /scripts/setup.sh
+          env:
+            - name: POCKET_ID_URL
+              value: "http://pocket-id"
+            - name: POCKET_ID_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-secrets
+                  key: STATIC_API_KEY
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: pocket-id-setup-script
+            defaultMode: 0755

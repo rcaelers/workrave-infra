@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pocket-id-setup-script
+data:
+  setup.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '%s\n' "$*"
+    }
+
+    request_json() {
+      method=$1
+      url=$2
+      response_file=$(mktemp)
+
+      status=$(curl -sS \
+        -o "$response_file" \
+        -w '%{http_code}' \
+        -X "$method" \
+        -H "X-API-KEY: $POCKET_ID_API_KEY" \
+        "$url")
+
+      case "$status" in
+        2*)
+          cat "$response_file"
+          rm -f "$response_file"
+          ;;
+        *)
+          log "Pocket ID request failed: $method $url -> HTTP $status"
+          cat "$response_file" >&2
+          rm -f "$response_file"
+          return 1
+          ;;
+      esac
+    }
+
+    : "${POCKET_ID_URL:?POCKET_ID_URL is required}"
+    : "${POCKET_ID_API_KEY:?POCKET_ID_API_KEY is required}"
+
+    POCKET_ID_URL=${POCKET_ID_URL%/}
+
+    log "Waiting for Pocket ID API..."
+    attempt=0
+    until request_json GET "$POCKET_ID_URL/api/users" >/dev/null 2>&1; do
+      attempt=$((attempt + 1))
+      if [ "$attempt" -ge 90 ]; then
+        log "Pocket ID API did not become ready in time"
+        exit 1
+      fi
+      sleep 2
+    done
+
+    log "Pocket ID is ready"
+    log "Pocket ID setup complete"

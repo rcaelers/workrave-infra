@@ -1,0 +1,344 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrail-auth-setup-script
+data:
+  setup.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '%s\n' "$*"
+    }
+
+    request_json() {
+      method=$1
+      url=$2
+      body=${3-}
+      response_file=$(mktemp)
+
+      if [ -n "$body" ]; then
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H 'Content-Type: application/json' \
+          -H "X-API-KEY: $POCKET_ID_API_KEY" \
+          "$url" \
+          -d "$body")
+      else
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H "X-API-KEY: $POCKET_ID_API_KEY" \
+          "$url")
+      fi
+
+      case "$status" in
+        2*)
+          cat "$response_file"
+          rm -f "$response_file"
+          ;;
+        *)
+          log "Pocket ID request failed: $method $url -> HTTP $status"
+          cat "$response_file" >&2
+          rm -f "$response_file"
+          return 1
+          ;;
+      esac
+    }
+
+    request_status() {
+      method=$1
+      url=$2
+      output_file=$3
+      body=${4-}
+
+      if [ -n "$body" ]; then
+        curl -sS \
+          -o "$output_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H 'Content-Type: application/json' \
+          -H "X-API-KEY: $POCKET_ID_API_KEY" \
+          "$url" \
+          -d "$body"
+        return
+      fi
+
+      curl -sS \
+        -o "$output_file" \
+        -w '%{http_code}' \
+        -X "$method" \
+        -H "X-API-KEY: $POCKET_ID_API_KEY" \
+        "$url"
+    }
+
+    request_noauth_json() {
+      method=$1
+      url=$2
+      body=${3-}
+      response_file=$(mktemp)
+
+      if [ -n "$body" ]; then
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H 'Content-Type: application/json' \
+          "$url" \
+          -d "$body")
+      else
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          "$url")
+      fi
+
+      case "$status" in
+        2*)
+          cat "$response_file"
+          rm -f "$response_file"
+          ;;
+        *)
+          log "Pocket ID request failed: $method $url -> HTTP $status"
+          cat "$response_file" >&2
+          rm -f "$response_file"
+          return 1
+          ;;
+      esac
+    }
+
+    read_k8s_secret_field() {
+      field=$1
+      K8S_API="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+      K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+      K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      K8S_NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+      response=$(curl -sk \
+        --cacert "$K8S_CA" \
+        -H "Authorization: Bearer $K8S_TOKEN" \
+        "$K8S_API/api/v1/namespaces/$K8S_NS/secrets/$GUARDRAIL_OIDC_SECRET_NAME" 2>/dev/null || true)
+
+      printf '%s' "$response" | jq -r --arg f "$field" '.data[$f] // empty' 2>/dev/null \
+        | base64 -d 2>/dev/null || true
+    }
+
+    write_k8s_secret() {
+      K8S_API="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+      K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+      K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      K8S_NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+      b64() { printf '%s' "$1" | base64 | tr -d '\n'; }
+
+      launch_entry=""
+      if [ -n "$GUARDRAIL_AUTH_OIDC_LAUNCH_URL" ]; then
+        launch_entry=",\"GUARDRAIL_AUTH_OIDC_LAUNCH_URL\": \"$(b64 "$GUARDRAIL_AUTH_OIDC_LAUNCH_URL")\""
+      fi
+
+      manifest=$(printf '{
+      "apiVersion": "v1",
+      "kind": "Secret",
+      "metadata": {"name": "%s", "namespace": "%s"},
+      "type": "Opaque",
+      "data": {
+        "GUARDRAIL_AUTH_OIDC_ISSUER_URL": "%s",
+        "GUARDRAIL_AUTH_OIDC_CLIENT_ID": "%s",
+        "GUARDRAIL_AUTH_OIDC_CLIENT_SECRET": "%s",
+        "GUARDRAIL_AUTH_OIDC_CALLBACK_URL": "%s",
+        "GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL": "%s"%s
+      }
+    }' \
+        "$GUARDRAIL_OIDC_SECRET_NAME" "$K8S_NS" \
+        "$(b64 "$POCKET_ID_PUBLIC_URL")" \
+        "$(b64 "$GUARDRAIL_AUTH_OIDC_CLIENT_ID")" \
+        "$(b64 "$client_secret")" \
+        "$(b64 "$GUARDRAIL_AUTH_OIDC_CALLBACK_URL")" \
+        "$(b64 "$GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL")" \
+        "$launch_entry")
+
+      http_status=$(curl -sk --cacert "$K8S_CA" \
+        -H "Authorization: Bearer $K8S_TOKEN" \
+        -o /dev/null -w '%{http_code}' \
+        "$K8S_API/api/v1/namespaces/$K8S_NS/secrets/$GUARDRAIL_OIDC_SECRET_NAME")
+
+      if [ "$http_status" = "200" ]; then
+        curl -sk --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/json" \
+          -X PUT \
+          "$K8S_API/api/v1/namespaces/$K8S_NS/secrets/$GUARDRAIL_OIDC_SECRET_NAME" \
+          -d "$manifest" >/dev/null
+        log "Updated Kubernetes Secret: $GUARDRAIL_OIDC_SECRET_NAME"
+      else
+        curl -sk --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/json" \
+          -X POST \
+          "$K8S_API/api/v1/namespaces/$K8S_NS/secrets" \
+          -d "$manifest" >/dev/null
+        log "Created Kubernetes Secret: $GUARDRAIL_OIDC_SECRET_NAME"
+      fi
+    }
+
+    : "${POCKET_ID_URL:?POCKET_ID_URL is required}"
+    : "${POCKET_ID_PUBLIC_URL:?POCKET_ID_PUBLIC_URL is required}"
+    : "${POCKET_ID_API_KEY:?POCKET_ID_API_KEY is required}"
+    : "${POCKET_ID_ADMIN_USERNAME:?POCKET_ID_ADMIN_USERNAME is required}"
+    : "${POCKET_ID_ADMIN_EMAIL:?POCKET_ID_ADMIN_EMAIL is required}"
+    : "${POCKET_ID_ADMIN_FIRST_NAME:?POCKET_ID_ADMIN_FIRST_NAME is required}"
+    : "${POCKET_ID_ADMIN_LAST_NAME:?POCKET_ID_ADMIN_LAST_NAME is required}"
+    : "${GUARDRAIL_AUTH_OIDC_CLIENT_ID:?GUARDRAIL_AUTH_OIDC_CLIENT_ID is required}"
+    : "${GUARDRAIL_AUTH_OIDC_CLIENT_NAME:?GUARDRAIL_AUTH_OIDC_CLIENT_NAME is required}"
+    : "${GUARDRAIL_AUTH_OIDC_CALLBACK_URL:?GUARDRAIL_AUTH_OIDC_CALLBACK_URL is required}"
+    : "${GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL:?GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL is required}"
+
+    POCKET_ID_URL=${POCKET_ID_URL%/}
+    POCKET_ID_PUBLIC_URL=${POCKET_ID_PUBLIC_URL%/}
+    GUARDRAIL_AUTH_OIDC_CALLBACK_URL=${GUARDRAIL_AUTH_OIDC_CALLBACK_URL%/}
+    GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL=${GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL%/}
+    GUARDRAIL_AUTH_OIDC_LAUNCH_URL=${GUARDRAIL_AUTH_OIDC_LAUNCH_URL:-}
+    GUARDRAIL_AUTH_OIDC_LAUNCH_URL=${GUARDRAIL_AUTH_OIDC_LAUNCH_URL%/}
+    GUARDRAIL_OIDC_SECRET_NAME=${GUARDRAIL_OIDC_SECRET_NAME:-guardrail-oidc}
+
+    log "Waiting for Pocket ID API..."
+    attempt=0
+    until request_json GET "$POCKET_ID_URL/api/users" >/dev/null 2>&1; do
+      attempt=$((attempt + 1))
+      if [ "$attempt" -ge 90 ]; then
+        log "Pocket ID API did not become ready in time"
+        exit 1
+      fi
+      sleep 2
+    done
+
+    log "Ensuring initial admin user exists..."
+    users_json=$(request_json GET "$POCKET_ID_URL/api/users")
+    admin_id=$(printf '%s' "$users_json" | jq -r --arg username "$POCKET_ID_ADMIN_USERNAME" '
+      .data[]
+      | select(.username == $username or (.isAdmin == true and .username != "Static API User"))
+      | .id
+    ' | head -n 1)
+    admin_username=$(printf '%s' "$users_json" | jq -r --arg username "$POCKET_ID_ADMIN_USERNAME" '
+      .data[]
+      | select(.username == $username or (.isAdmin == true and .username != "Static API User"))
+      | .username
+    ' | head -n 1)
+
+    if [ -z "$admin_id" ]; then
+      setup_payload=$(jq -nc \
+        --arg username "$POCKET_ID_ADMIN_USERNAME" \
+        --arg email "$POCKET_ID_ADMIN_EMAIL" \
+        --arg first_name "$POCKET_ID_ADMIN_FIRST_NAME" \
+        --arg last_name "$POCKET_ID_ADMIN_LAST_NAME" \
+        '{
+          username: $username,
+          email: $email,
+          firstName: $first_name,
+          lastName: $last_name
+        }')
+      request_noauth_json POST "$POCKET_ID_URL/api/signup/setup" "$setup_payload" >/dev/null
+
+      users_json=$(request_json GET "$POCKET_ID_URL/api/users")
+      admin_id=$(printf '%s' "$users_json" | jq -r --arg username "$POCKET_ID_ADMIN_USERNAME" '
+        .data[]
+        | select(.username == $username or (.isAdmin == true and .username != "Static API User"))
+        | .id
+      ' | head -n 1)
+      admin_username=$(printf '%s' "$users_json" | jq -r --arg username "$POCKET_ID_ADMIN_USERNAME" '
+        .data[]
+        | select(.username == $username or (.isAdmin == true and .username != "Static API User"))
+        | .username
+      ' | head -n 1)
+    fi
+
+    if [ -z "$admin_id" ]; then
+      log "Pocket ID admin user was not found after setup"
+      exit 1
+    fi
+
+    if [ -z "$admin_username" ]; then
+      admin_username=$POCKET_ID_ADMIN_USERNAME
+    fi
+
+    log "Generating Pocket ID admin login code..."
+    login_token_json=$(request_json POST "$POCKET_ID_URL/api/users/$admin_id/one-time-access-token" '{"ttl":"168h"}')
+    admin_login_token=$(printf '%s' "$login_token_json" | jq -r '.token // empty')
+
+    if [ -z "$admin_login_token" ]; then
+      log "Pocket ID did not return an admin login token"
+      exit 1
+    fi
+
+    log "Admin login URL: $POCKET_ID_PUBLIC_URL/lc/$admin_login_token"
+
+    log "Ensuring Guardrail OIDC client exists..."
+    client_tmp=$(mktemp)
+    client_status=$(request_status GET "$POCKET_ID_URL/api/oidc/clients/$GUARDRAIL_AUTH_OIDC_CLIENT_ID" "$client_tmp")
+
+    client_payload=$(jq -nc \
+      --arg id "$GUARDRAIL_AUTH_OIDC_CLIENT_ID" \
+      --arg name "$GUARDRAIL_AUTH_OIDC_CLIENT_NAME" \
+      --arg callback "$GUARDRAIL_AUTH_OIDC_CALLBACK_URL" \
+      --arg logout "$GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL" \
+      --arg launch "$GUARDRAIL_AUTH_OIDC_LAUNCH_URL" \
+      '{
+        id: $id,
+        name: $name,
+        callbackURLs: [$callback],
+        logoutCallbackURLs: [$logout],
+        isPublic: false,
+        pkceEnabled: true,
+        requiresReauthentication: false,
+        credentials: {
+          federatedIdentities: []
+        },
+        launchURL: (if $launch != "" then $launch else null end),
+        isGroupRestricted: false
+      }')
+
+    case "$client_status" in
+      200)
+        request_json PUT "$POCKET_ID_URL/api/oidc/clients/$GUARDRAIL_AUTH_OIDC_CLIENT_ID" "$client_payload" >/dev/null
+        log "Updated Guardrail OIDC client: $GUARDRAIL_AUTH_OIDC_CLIENT_ID"
+        ;;
+      404)
+        request_json POST "$POCKET_ID_URL/api/oidc/clients" "$client_payload" >/dev/null
+        log "Created Guardrail OIDC client: $GUARDRAIL_AUTH_OIDC_CLIENT_ID"
+        ;;
+      *)
+        log "Unexpected response while checking OIDC client: HTTP $client_status"
+        cat "$client_tmp"
+        rm -f "$client_tmp"
+        exit 1
+        ;;
+    esac
+    rm -f "$client_tmp"
+
+    existing_secret=""
+    if [ "$client_status" = "200" ]; then
+      existing_secret=$(read_k8s_secret_field "GUARDRAIL_AUTH_OIDC_CLIENT_SECRET" || true)
+    fi
+
+    if [ -n "$existing_secret" ] && [ "$client_status" = "200" ]; then
+      log "Reusing existing OIDC client secret from Kubernetes Secret"
+      client_secret="$existing_secret"
+    else
+      log "Generating Guardrail OIDC client secret..."
+      secret_json=$(request_json POST "$POCKET_ID_URL/api/oidc/clients/$GUARDRAIL_AUTH_OIDC_CLIENT_ID/secret")
+      client_secret=$(printf '%s' "$secret_json" | jq -r '.secret // empty')
+
+      if [ -z "$client_secret" ]; then
+        log "Pocket ID did not return a client secret for $GUARDRAIL_AUTH_OIDC_CLIENT_ID"
+        exit 1
+      fi
+    fi
+
+    write_k8s_secret
+
+    log "Guardrail auth bootstrap completed"
+    log "OIDC credentials stored in Kubernetes Secret: $GUARDRAIL_OIDC_SECRET_NAME"
