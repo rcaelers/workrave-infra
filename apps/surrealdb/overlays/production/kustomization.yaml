@@ -10,3 +10,11 @@ helmCharts:
     version: 0.4.0
     releaseName: surrealdb
     valuesFile: values.yaml
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: surrealdb
+    patch: |-
+      - op: add
+        path: /spec/storageClassName
+        value: longhorn-surrealdb-storage

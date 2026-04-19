@@ -28,7 +28,6 @@ resources:
 
 persistence:
   enabled: true
-  storageClassName: longhorn-surrealdb-storage
   size: 5Gi
   mountPath: /data
   accessModes:
