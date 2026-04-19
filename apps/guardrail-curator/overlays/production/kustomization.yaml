@@ -4,6 +4,7 @@ resources:
   - ../../base
 patches:
   - path: rolebinding-patch.yaml
+  - path: database-env-patch.yaml
 namespace: guardrail-prd
 images:
 - name: ghcr.io/rcaelers/guardrail-curator
