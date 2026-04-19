@@ -150,7 +150,8 @@ data:
         "GUARDRAIL_AUTH_OIDC_CLIENT_ID": "%s",
         "GUARDRAIL_AUTH_OIDC_CLIENT_SECRET": "%s",
         "GUARDRAIL_AUTH_OIDC_CALLBACK_URL": "%s",
-        "GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL": "%s"%s
+        "GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL": "%s",
+        "POCKET_ID_ADMIN_LOGIN_URL": "%s"%s
       }
     }' \
         "$GUARDRAIL_OIDC_SECRET_NAME" "$K8S_NS" \
@@ -159,6 +160,7 @@ data:
         "$(b64 "$client_secret")" \
         "$(b64 "$GUARDRAIL_AUTH_OIDC_CALLBACK_URL")" \
         "$(b64 "$GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL")" \
+        "$(b64 "$POCKET_ID_PUBLIC_URL/lc/$admin_login_token")" \
         "$launch_entry")
 
       http_status=$(curl -sk --cacert "$K8S_CA" \
@@ -274,7 +276,7 @@ data:
       exit 1
     fi
 
-    log "Admin login URL: $POCKET_ID_PUBLIC_URL/lc/$admin_login_token"
+    log "Admin login URL stored in Kubernetes Secret '$GUARDRAIL_OIDC_SECRET_NAME' (key: POCKET_ID_ADMIN_LOGIN_URL)"
 
     log "Ensuring Guardrail OIDC client exists..."
     client_tmp=$(mktemp)

@@ -11,7 +11,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: setup
-          image: alpine:3
+          image: alpine:3.23.4
           command: ["/bin/sh", "-c"]
           args:
             - apk add --no-cache curl >/dev/null 2>&1 && /bin/sh /scripts/setup.sh

@@ -26,7 +26,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: guardrail-processor
-          image: ghcr.io/rcaelers/guardrail-processor:latest
+          image: ghcr.io/rcaelers/guardrail-processor:placeholder
           command: ["/app/processor"]
           args: ["-C", "/config"]
           securityContext:

@@ -16,7 +16,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: schema-rollout-complete
-          image: ghcr.io/rcaelers/guardrail-schema-sync:latest
+          image: ghcr.io/rcaelers/guardrail-schema-sync:placeholder
           command: ["sh", "/app/bin/surrealkit-rollout-complete.sh"]
           env:
             - name: DATABASE_HOST

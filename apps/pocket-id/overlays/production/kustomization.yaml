@@ -12,4 +12,4 @@ configMapGenerator:
       - config.env
 images:
   - name: ghcr.io/pocket-id/pocket-id
-    newTag: v2
+    newTag: v2.5.0

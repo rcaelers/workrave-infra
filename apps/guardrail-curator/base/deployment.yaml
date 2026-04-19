@@ -26,7 +26,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: guardrail-curator
-          image: ghcr.io/rcaelers/guardrail-curator:latest
+          image: ghcr.io/rcaelers/guardrail-curator:placeholder
           command: ["/app/curator"]
           args: ["-C", "/config"]
           securityContext:
