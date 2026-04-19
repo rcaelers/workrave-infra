@@ -7,4 +7,4 @@ patches:
 namespace: guardrail-dev
 images:
 - name: ghcr.io/rcaelers/guardrail-processor
-  newTag: 1f7b5c6
+  newTag: 042a5a5
