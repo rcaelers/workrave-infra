@@ -8,12 +8,6 @@ spec:
       containers:
         - name: guardrail-api
           env:
-            - name: GUARDRAIL_DATABASE_ENDPOINT
-              value: ws://surrealdb:8000
-            - name: GUARDRAIL_DATABASE_NAMESPACE
-              value: guardrail
-            - name: GUARDRAIL_DATABASE_DATABASE
-              value: guardrail
             - name: GUARDRAIL_DATABASE_USERNAME
               valueFrom:
                 secretKeyRef:

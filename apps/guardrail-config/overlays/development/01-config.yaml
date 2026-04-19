@@ -17,6 +17,10 @@ minidumps:
   mandatory_annotations:
     - "product"
     - "version"
+database:
+  endpoint: ws://surrealdb:8000
+  namespace: guardrail
+  database: guardrail
 object_storage:
   region: us-east-1
   bucket: guardrail
