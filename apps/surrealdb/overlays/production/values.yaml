@@ -1,11 +1,38 @@
 ---
-persistence:
-  storageClassName: longhorn-surrealdb-storage
+image:
+  tag: v3.0.5
+
+surrealdb:
+  path: rocksdb:///data
+  port: 8000
+
+podExtraEnv:
+  - name: SURREAL_USER
+    valueFrom:
+      secretKeyRef:
+        name: surrealdb-secrets
+        key: rootUser
+  - name: SURREAL_PASS
+    valueFrom:
+      secretKeyRef:
+        name: surrealdb-secrets
+        key: rootPassword
 
 resources:
   requests:
     cpu: 100m
     memory: 256Mi
   limits:
-    cpu: 250m
-    memory: 512Mi
+    cpu: 500m
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  storageClassName: longhorn-surrealdb-storage
+  size: 5Gi
+  mountPath: /data
+  accessModes:
+    - ReadWriteOnce
+
+strategy:
+  type: Recreate
