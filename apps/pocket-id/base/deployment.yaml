@@ -7,6 +7,7 @@ spec:
   revisionHistoryLimit: 3
   strategy:
     type: Recreate
+    rollingUpdate: null
   selector:
     matchLabels:
       app: pocket-id
