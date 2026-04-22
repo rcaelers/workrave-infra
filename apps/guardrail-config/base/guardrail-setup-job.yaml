@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guardrail-setup
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: guardrail-setup
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: setup
+          image: alpine:3.23.4
+          command: ["/bin/sh", "-c"]
+          args:
+            - apk add --no-cache curl jq >/dev/null 2>&1 && /bin/sh /scripts/setup.sh
+          env:
+            - name: SURREAL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootUser
+            - name: SURREAL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: surrealdb-secrets
+                  key: rootPassword
+            - name: DATABASE_NAMESPACE
+              value: guardrail
+            - name: DATABASE_NAME
+              value: guardrail
+          envFrom:
+            - secretRef:
+                name: guardrail-setup-secrets
+            - configMapRef:
+                name: guardrail-setup-config
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: guardrail-setup-script
+            defaultMode: 0755

@@ -1,5 +1,7 @@
  sops -d -i apps/guardrail-config/overlays/development/02-secrets.yaml 
  sops -d -i apps/guardrail-config/overlays/production/02-secrets.yaml 
+ sops -d -i apps/guardrail-config/overlays/development/guardrail-setup-secrets.yaml
+ sops -d -i apps/guardrail-config/overlays/production/guardrail-setup-secrets.yaml
  sops -d -i apps/guardrail-db/overlays/production/guardrail-db-secrets.yaml 
  sops -d -i apps/guardrail-db/overlays/production/postgresql-secrets.yaml 
  sops -d -i apps/guardrail-db/overlays/development/postgresql-secrets.yaml 
@@ -14,3 +16,4 @@
  sops -d -i apps/surrealdb/overlays/development/surrealdb-secrets.yaml
  sops -d -i apps/pocket-id/overlays/development/pocket-id-secrets.yaml
  sops -d -i apps/pocket-id/overlays/production/pocket-id-secrets.yaml
+ 

@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrail-setup-script
+data:
+  setup.sh: |
+    #!/bin/sh
+    set -eu
+
+    SURREAL_URL="http://surrealdb:8000"
+    SURREAL_NS="${DATABASE_NAMESPACE:-guardrail}"
+    SURREAL_DB="${DATABASE_NAME:-guardrail}"
+
+    log() { printf '%s\n' "$*"; }
+
+    # Execute SurrealQL - reads SQL text from stdin, returns JSON
+    surql() {
+      curl -sf \
+        -X POST "${SURREAL_URL}/sql" \
+        -H "Accept: application/json" \
+        -H "Content-Type: text/plain" \
+        -H "Surreal-NS: ${SURREAL_NS}" \
+        -H "Surreal-DB: ${SURREAL_DB}" \
+        -u "${SURREAL_USER}:${SURREAL_PASS}" \
+        --data-binary @-
+    }
+
+    # Wait for guardrail API to be ready (which also implies SurrealDB is up)
+    log "Waiting for Guardrail API..."
+    attempt=0
+    until curl -sf http://guardrail-api/api/ready >/dev/null 2>&1; do
+      attempt=$((attempt + 1))
+      if [ "$attempt" -ge 60 ]; then
+        log "Guardrail API did not become ready in time"
+        exit 1
+      fi
+      sleep 5
+    done
+    log "Guardrail API is ready"
+
+    # Create Workrave product if it doesn't exist; retrieve existing id otherwise
+    EXISTING_ID=$(printf "SELECT meta::id(id) as id FROM products WHERE name = 'Workrave' LIMIT 1;" \
+      | surql | jq -r '.[0].result[0].id // empty')
+
+    if [ -z "$EXISTING_ID" ]; then
+      printf "CREATE type::record('products', u'%s') CONTENT {
+        name: 'Workrave',
+        description: 'Workrave',
+        accepting_crashes: true,
+        metadata: {},
+        created_at: time::now(),
+        updated_at: time::now()
+      };" "$WORKRAVE_PRODUCT_ID" | surql >/dev/null
+      log "Created Workrave product (id: ${WORKRAVE_PRODUCT_ID})"
+    else
+      log "Workrave product already exists (id: ${EXISTING_ID})"
+    fi
+
+    # Insert a token record if none exists yet for the given entitlement+product.
+    # token_id is used as the SurrealDB record key (it is already unique).
+    # token, token_id, token_hash come from SOPS secrets; product_id from plain ConfigMap.
+    create_token_if_needed() {
+      entitlement="$1"
+      description="$2"
+      token="$3"
+      token_id="$4"
+      token_hash="$5"
+
+      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = u'%s' AND '%s' INSIDE entitlements GROUP ALL;" \
+        "$WORKRAVE_PRODUCT_ID" "$entitlement" \
+        | surql | jq -r '.[0].result[0].count // 0')
+
+      if [ "$count" != "0" ]; then
+        log "${description} token already exists, skipping"
+        return
+      fi
+
+      printf "CREATE type::record('api_tokens', u'%s') CONTENT {
+        description: '%s',
+        token_id: u'%s',
+        token_hash: '%s',
+        product_id: u'%s',
+        entitlements: ['%s'],
+        is_active: true,
+        created_at: time::now(),
+        updated_at: time::now()
+      };" \
+        "$token_id" "$description" "$token_id" "$token_hash" "$WORKRAVE_PRODUCT_ID" "$entitlement" \
+        | surql >/dev/null
+
+      log "${description} token created (id: ${token_id})"
+      log "${description} bearer token: ${token}"
+    }
+
+    create_token_if_needed "minidump-upload" "Minidump upload" \
+      "$WORKRAVE_MINIDUMP_TOKEN" "$WORKRAVE_MINIDUMP_TOKEN_ID" "$WORKRAVE_MINIDUMP_TOKEN_HASH"
+    create_token_if_needed "symbol-upload" "Symbol upload" \
+      "$WORKRAVE_SYMBOLS_TOKEN" "$WORKRAVE_SYMBOLS_TOKEN_ID" "$WORKRAVE_SYMBOLS_TOKEN_HASH"
+
+    log "Guardrail setup complete"

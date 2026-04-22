@@ -1,5 +1,7 @@
  sops -e -i apps/guardrail-config/overlays/development/02-secrets.yaml 
  sops -e -i apps/guardrail-config/overlays/production/02-secrets.yaml 
+ sops -e -i apps/guardrail-config/overlays/development/guardrail-setup-secrets.yaml
+ sops -e -i apps/guardrail-config/overlays/production/guardrail-setup-secrets.yaml
  sops -e -i apps/guardrail-db/overlays/production/guardrail-db-secrets.yaml 
  sops -e -i apps/guardrail-db/overlays/production/postgresql-secrets.yaml 
  sops -e -i apps/guardrail-db/overlays/development/postgresql-secrets.yaml 
