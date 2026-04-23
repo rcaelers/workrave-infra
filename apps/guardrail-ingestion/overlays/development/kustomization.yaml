@@ -14,4 +14,4 @@ patches:
     version: v1
 images:
 - name: ghcr.io/rcaelers/guardrail-ingestion
-  newTag: 43fffd0
+  newTag: 95b5761
