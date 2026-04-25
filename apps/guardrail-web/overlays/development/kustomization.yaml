@@ -11,4 +11,4 @@ patches:
       version: v1
 images:
 - name: ghcr.io/rcaelers/guardrail-web
-  newTag: 43fffd0
+  newTag: 709ce50
