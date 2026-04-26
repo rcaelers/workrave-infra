@@ -147,19 +147,25 @@ data:
       "type": "Opaque",
       "data": {
         "GUARDRAIL_AUTH_OIDC_ISSUER_URL": "%s",
+        "GUARDRAIL_AUTH_OIDC_INTERNAL_ISSUER_URL": "%s",
+        "GUARDRAIL_AUTH_OIDC_SELF_SERVICE_URL": "%s",
         "GUARDRAIL_AUTH_OIDC_CLIENT_ID": "%s",
         "GUARDRAIL_AUTH_OIDC_CLIENT_SECRET": "%s",
         "GUARDRAIL_AUTH_OIDC_CALLBACK_URL": "%s",
         "GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL": "%s",
+        "GUARDRAIL_AUTH_OIDC_PKCE": "%s",
         "POCKET_ID_ADMIN_LOGIN_URL": "%s"%s
       }
     }' \
         "$GUARDRAIL_OIDC_SECRET_NAME" "$K8S_NS" \
         "$(b64 "$POCKET_ID_PUBLIC_URL")" \
+        "$(b64 "$POCKET_ID_URL")" \
+        "$(b64 "$POCKET_ID_PUBLIC_URL")" \
         "$(b64 "$GUARDRAIL_AUTH_OIDC_CLIENT_ID")" \
         "$(b64 "$client_secret")" \
         "$(b64 "$GUARDRAIL_AUTH_OIDC_CALLBACK_URL")" \
         "$(b64 "$GUARDRAIL_AUTH_OIDC_LOGOUT_CALLBACK_URL")" \
+        "$(b64 "true")" \
         "$(b64 "$POCKET_ID_PUBLIC_URL/lc/$admin_login_token")" \
         "$launch_entry")
 
