@@ -18,7 +18,7 @@ resources:
   #- guardrail-surrealdb-production-app.yaml
   - guardrail-db-development-app.yaml
   #- guardrail-db-production-app.yaml
-  - guardrail-postgrest-development-app.yaml
+  #- guardrail-postgrest-development-app.yaml
   #- guardrail-postgrest-production-app.yaml
   - valkey-development-app.yaml
   #- valkey-production-app.yaml
