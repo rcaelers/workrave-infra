@@ -10,6 +10,7 @@ patches:
       kind: Ingress
       name: guardrail-web
       version: v1
+  - path: database-env-patch.yaml
 images:
 - name: ghcr.io/rcaelers/guardrail-web
   newTag: production
