@@ -3,10 +3,3 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - ../../base
-patches:
-  - path: ingress-host-patch.json
-    target:
-      group: networking.k8s.io
-      kind: Ingress
-      name: victorialogs
-      version: v1
