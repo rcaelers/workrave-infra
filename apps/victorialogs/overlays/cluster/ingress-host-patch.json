@@ -1,0 +1,17 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/rules/0/host",
+    "value": "logs.workrave.org"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/tls/0/hosts/0",
+    "value": "logs.workrave.org"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/tls/0/secretName",
+    "value": "victorialogs-tls"
+  }
+]
