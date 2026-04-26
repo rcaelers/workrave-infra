@@ -58,6 +58,18 @@ data:
     else
       log "Workrave product already exists (id: ${EXISTING_ID})"
     fi
+  
+    # Ensure the anonymous user record exists so anonymous JWT authentication succeeds.
+    printf "UPSERT type::record('users', 'anonymous') CONTENT {
+      username: 'anonymous',
+      email: 'anonymous@localhost',
+      name: 'Anonymous',
+      avatar: 'A',
+      is_admin: false,
+      created_at: time::now(),
+      updated_at: time::now()
+    };" | surql >/dev/null
+    log "Anonymous user record ensured"
 
     # Insert a token record if none exists yet for the given entitlement+product.
     # token_id is used as the SurrealDB record key (it is already unique).
