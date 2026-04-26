@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-dev
+resources:
+  - ../../base
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: "https://crashes-dev.workrave.org"
+    target:
+      kind: Deployment
+      name: guardrail-ui
+images:
+  - name: ghcr.io/rcaelers/guardrail-ui
+    newTag: 43fffd0

@@ -16,24 +16,46 @@ spec:
       containers:
         - name: guardrail-web
           image: ghcr.io/rcaelers/guardrail-web:placeholder
+          command: ["/app/web"]
+          args: ["-C", "/config"]
           ports:
             - name: http
-              containerPort: 3000
+              containerPort: 80
               protocol: TCP
           volumeMounts:
             - name: config-volume
-              mountPath: /etc/guardrail/01-config.yaml
+              mountPath: /config/01-config.yaml
               subPath: 01-config.yaml
             - name: secret-volume
-              mountPath: /etc/guardrail/02-secret.yaml
-              subPath: 02-secret.yaml
+              mountPath: /config/02-secret.yaml
+              subPath: secrets
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
       volumes:
         - name: config-volume
           configMap:
             name: guardrail-config
-        - name: secret-volume
-          secret:
-            secretName: guardrail-secrets
         - name: secret-volume
           secret:
             secretName: guardrail-secrets
