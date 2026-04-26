@@ -45,7 +45,10 @@ data:
     if [ -z "$EXISTING_ID" ]; then
       printf "CREATE type::record('products', u'%s') CONTENT {
         name: 'Workrave',
-        description: 'Workrave',
+        slug: 'workrave',
+        description: 'Workrave is a free program that assists in the recovery and prevention of Repetitive Strain Injury (RSI)',
+        color: '#9333ea',
+        public: true,
         accepting_crashes: true,
         metadata: {},
         created_at: time::now(),
