@@ -23,6 +23,9 @@ spec:
     - podSelector:
         matchLabels:
           app: guardrail-setup
+    - podSelector:
+        matchLabels:
+          app: guardrail-web
     ports:
     - protocol: TCP
       port: 8000
