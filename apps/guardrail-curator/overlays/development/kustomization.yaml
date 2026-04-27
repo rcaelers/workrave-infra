@@ -8,4 +8,4 @@ patches:
 namespace: guardrail-dev
 images:
 - name: ghcr.io/rcaelers/guardrail-curator
-  newTag: "e8848e3"
+  newTag: "62c8e93"
