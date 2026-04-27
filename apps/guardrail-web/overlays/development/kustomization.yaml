@@ -13,4 +13,4 @@ patches:
   - path: database-env-patch.yaml
 images:
 - name: ghcr.io/rcaelers/guardrail-web
-  newTag: "232b1da"
+  newTag: "368f993"
