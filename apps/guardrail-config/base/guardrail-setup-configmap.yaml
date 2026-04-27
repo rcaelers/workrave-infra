@@ -112,4 +112,50 @@ data:
     create_token_if_needed "symbol-upload" "Symbol upload" \
       "$WORKRAVE_SYMBOLS_TOKEN" "$WORKRAVE_SYMBOLS_TOKEN_ID" "$WORKRAVE_SYMBOLS_TOKEN_HASH"
 
+    # Create Workrave Demo product if it doesn't exist, then seed crash groups
+    EXISTING_DEMO_ID=$(printf "SELECT meta::id(id) as id FROM products WHERE name = 'Workrave Demo' LIMIT 1;" \
+      | surql | jq -r '.[0].result[0].id // empty')
+
+    if [ -z "$EXISTING_DEMO_ID" ]; then
+      printf "CREATE type::record('products', u'%s') CONTENT {
+        name: 'Workrave Demo',
+        slug: 'workrave-demo',
+        description: 'Demo Workrave data set',
+        color: '#9333ea',
+        public: true,
+        accepting_crashes: true,
+        metadata: {},
+        created_at: time::now(),
+        updated_at: time::now()
+      };" "$WORKRAVE_DEMO_PRODUCT_ID" | surql >/dev/null
+      log "Created Workrave Demo product (id: ${WORKRAVE_DEMO_PRODUCT_ID})"
+
+      printf "INSERT INTO crash_groups [
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0004', signal: 'bad_access_kern_protection_failure', count: 242, first_seen: d'2026-04-17T12:44:56Z', last_seen: d'2026-04-23T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0016', signal: 'bad_access_kern_protection_failure', count:  72, first_seen: d'2026-04-12T12:44:56Z', last_seen: d'2026-04-20T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0008', signal: 'breakpoint',                         count:  40, first_seen: d'2026-03-29T12:44:56Z', last_seen: d'2026-04-21T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0021', signal: 'bad_access_kern_invalid_address',     count:  28, first_seen: d'2026-03-04T13:44:56Z', last_seen: d'2026-04-23T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0057', signal: 'bad_access_kern_invalid_address',     count:  26, first_seen: d'2026-03-10T13:44:56Z', last_seen: d'2026-04-23T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0042', signal: 'bus_bus_adrerr',                     count:  24, first_seen: d'2026-03-31T12:44:56Z', last_seen: d'2026-04-21T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0051', signal: 'bad_access_kern_invalid_address',     count:  19, first_seen: d'2026-03-29T13:44:56Z', last_seen: d'2026-04-21T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0027', signal: 'bad_access_kern_invalid_address',     count:  17, first_seen: d'2026-04-08T12:44:56Z', last_seen: d'2026-04-22T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0010', signal: 'bad_access_kern_protection_failure', count:  15, first_seen: d'2026-03-22T13:44:56Z', last_seen: d'2026-04-21T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0036', signal: 'bus_bus_adrerr',                     count:  14, first_seen: d'2026-04-03T12:44:56Z', last_seen: d'2026-04-22T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0030', signal: 'bus_bus_adrerr',                     count:  12, first_seen: d'2026-04-16T12:44:56Z', last_seen: d'2026-04-22T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0046', signal: 'bad_access_kern_protection_failure', count:   9, first_seen: d'2026-03-11T13:44:56Z', last_seen: d'2026-04-22T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0038', signal: 'breakpoint',                         count:   6, first_seen: d'2026-02-23T13:44:56Z', last_seen: d'2026-04-21T12:44:56Z', status: 'new',     created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0043', signal: 'access_violation_write',             count:   5, first_seen: d'2026-04-12T12:44:56Z', last_seen: d'2026-04-23T12:44:56Z', status: 'resolved', created_at: time::now(), updated_at: time::now() },
+        { product_id: type::record('products', u'%s'), fingerprint: 'seed-GR-0024', signal: 'bus_bus_adrerr',                     count:   2, first_seen: d'2026-03-24T13:44:56Z', last_seen: d'2026-04-23T12:44:56Z', status: 'triaged',  created_at: time::now(), updated_at: time::now() }
+      ];" \
+        "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" \
+        "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" \
+        "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" \
+        "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" \
+        "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID" \
+        | surql >/dev/null
+      log "Seeded 15 Workrave Demo crash groups"
+    else
+      log "Workrave Demo product already exists (id: ${EXISTING_DEMO_ID})"
+    fi
+
     log "Guardrail setup complete"
