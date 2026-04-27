@@ -7,5 +7,5 @@ configMapGenerator:
   - name: guardrail-auth-config
     options:
       disableNameSuffixHash: true
-    envs:
-      - config.env
+    files:
+      - setup-config.yaml
