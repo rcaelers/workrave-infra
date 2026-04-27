@@ -14,15 +14,21 @@ data:
     log() { printf '%s\n' "$*"; }
 
     # Execute SurrealQL - reads SQL text from stdin, returns JSON
+    # Fails if SurrealDB returns any statement with status ERR.
     surql() {
-      curl -sf \
+      __r=$(curl -sf \
         -X POST "${SURREAL_URL}/sql" \
         -H "Accept: application/json" \
         -H "Content-Type: text/plain" \
         -H "Surreal-NS: ${SURREAL_NS}" \
         -H "Surreal-DB: ${SURREAL_DB}" \
         -u "${SURREAL_USER}:${SURREAL_PASS}" \
-        --data-binary @-
+        --data-binary @-)
+      if printf '%s' "$__r" | jq -e 'map(select(.status == "ERR")) | length > 0' >/dev/null 2>&1; then
+        log "SurrealDB error: $(printf '%s' "$__r" | jq -r '[.[] | select(.status == "ERR") | (.detail // .result | tostring)] | join("; ")' 2>/dev/null || printf '%s' "$__r")" >&2
+        return 1
+      fi
+      printf '%s\n' "$__r"
     }
 
     # Wait for guardrail API to be ready (which also implies SurrealDB is up)
@@ -53,7 +59,7 @@ data:
         metadata: {},
         created_at: time::now(),
         updated_at: time::now()
-      };" "$WORKRAVE_PRODUCT_ID" | surql >/dev/null
+      };" "$WORKRAVE_PRODUCT_ID" | surql
       log "Created Workrave product (id: ${WORKRAVE_PRODUCT_ID})"
     else
       log "Workrave product already exists (id: ${EXISTING_ID})"
@@ -68,7 +74,7 @@ data:
       is_admin: false,
       created_at: time::now(),
       updated_at: time::now()
-    };" | surql >/dev/null
+    };" | surql
     log "Anonymous user record ensured"
 
     # Insert a token record if none exists yet for the given entitlement+product.
@@ -101,7 +107,7 @@ data:
         updated_at: time::now()
       };" \
         "$token_id" "$description" "$token_id" "$token_hash" "$WORKRAVE_PRODUCT_ID" "$entitlement" \
-        | surql >/dev/null
+        | surql
 
       log "${description} token created (id: ${token_id})"
       log "${description} bearer token: ${token}"
@@ -112,8 +118,11 @@ data:
     create_token_if_needed "symbol-upload" "Symbol upload" \
       "$WORKRAVE_SYMBOLS_TOKEN" "$WORKRAVE_SYMBOLS_TOKEN_ID" "$WORKRAVE_SYMBOLS_TOKEN_HASH"
 
-    # Upsert Workrave Demo product (unconditional so it always exists with correct settings)
-    printf "UPSERT type::record('products', u'%s') CONTENT {
+    # ── Workrave Demo product ────────────────────────────────────────────
+    # INSERT IGNORE creates the record only if it doesn't exist.
+    # The subsequent UPDATE SET enforces public:true even on existing records.
+    printf "INSERT IGNORE INTO products {
+      id: type::record('products', u'%s'),
       name: 'Workrave Demo',
       slug: 'workrave-demo',
       description: 'Demo Workrave data set',
@@ -123,15 +132,28 @@ data:
       metadata: {},
       created_at: time::now(),
       updated_at: time::now()
-    };" "$WORKRAVE_DEMO_PRODUCT_ID" | surql >/dev/null
-    log "Workrave Demo product upserted (id: ${WORKRAVE_DEMO_PRODUCT_ID})"
+    };" "$WORKRAVE_DEMO_PRODUCT_ID" | surql
+    printf "UPDATE type::record('products', u'%s') SET
+      public = true, accepting_crashes = true, updated_at = time::now();"\
+      "$WORKRAVE_DEMO_PRODUCT_ID" | surql
+    log "Workrave Demo product ready (id: ${WORKRAVE_DEMO_PRODUCT_ID})"
 
-    # Seed demo crash groups - INSERT IGNORE is idempotent (skips on unique-index conflict)
+    # Clean up any old seed data that may have been created with auto-generated IDs
+    # so we can re-insert with stable IDs (required for crash->group references).
+    printf "DELETE crash_groups WHERE product_id = type::record('products', u'%s')
+      AND string::starts_with(fingerprint, 'seed-');"\
+      "$WORKRAVE_DEMO_PRODUCT_ID" | surql
+    printf "DELETE crashes WHERE product_id = type::record('products', u'%s')
+      AND string::starts_with(fingerprint, 'seed-');"\
+      "$WORKRAVE_DEMO_PRODUCT_ID" | surql
+
+    # Insert a crash group with a stable record ID (idempotent via INSERT IGNORE).
     seed_demo_group() {
-      fingerprint="$1" signal="$2" count="$3" first_seen="$4" last_seen="$5" status="$6"
+      group_key="$1" signal="$2" count="$3" first_seen="$4" last_seen="$5" status="$6"
       printf "INSERT IGNORE INTO crash_groups {
+        id: type::record('crash_groups', 'seed-%s'),
         product_id: type::record('products', u'%s'),
-        fingerprint: '%s',
+        fingerprint: 'seed-%s',
         signal: '%s',
         count: %s,
         first_seen: d'%s',
@@ -140,27 +162,89 @@ data:
         created_at: time::now(),
         updated_at: time::now()
       };" \
-        "$WORKRAVE_DEMO_PRODUCT_ID" "$fingerprint" "$signal" "$count" \
-        "$first_seen" "$last_seen" "$status" \
-        | surql >/dev/null
-      log "Seeded demo crash group: $fingerprint"
+        "$group_key" "$WORKRAVE_DEMO_PRODUCT_ID" "$group_key" \
+        "$signal" "$count" "$first_seen" "$last_seen" "$status" | surql
     }
 
-    seed_demo_group "seed-GR-0004" "bad_access_kern_protection_failure" 242 "2026-04-17T12:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0016" "bad_access_kern_protection_failure"  72 "2026-04-12T12:44:56Z" "2026-04-20T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0008" "breakpoint"                          40 "2026-03-29T12:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0021" "bad_access_kern_invalid_address"     28 "2026-03-04T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0057" "bad_access_kern_invalid_address"     26 "2026-03-10T13:44:56Z" "2026-04-23T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0042" "bus_bus_adrerr"                      24 "2026-03-31T12:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0051" "bad_access_kern_invalid_address"     19 "2026-03-29T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0027" "bad_access_kern_invalid_address"     17 "2026-04-08T12:44:56Z" "2026-04-22T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0010" "bad_access_kern_protection_failure"  15 "2026-03-22T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0036" "bus_bus_adrerr"                      14 "2026-04-03T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0030" "bus_bus_adrerr"                      12 "2026-04-16T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
-    seed_demo_group "seed-GR-0046" "bad_access_kern_protection_failure"   9 "2026-03-11T13:44:56Z" "2026-04-22T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0038" "breakpoint"                           6 "2026-02-23T13:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_group "seed-GR-0043" "access_violation_write"               5 "2026-04-12T12:44:56Z" "2026-04-23T12:44:56Z" "resolved"
-    seed_demo_group "seed-GR-0024" "bus_bus_adrerr"                       2 "2026-03-24T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    log "Workrave Demo crash groups seeded"
+    # Insert a crash record linked to a crash group (idempotent via INSERT IGNORE).
+    seed_demo_crash() {
+      crash_id="$1" group_key="$2" version="$3" platform="$4" os="$5" created_at="$6"
+      printf "INSERT IGNORE INTO crashes {
+        id: type::record('crashes', 'seed-%s'),
+        product_id: type::record('products', u'%s'),
+        group_id: type::record('crash_groups', 'seed-%s'),
+        fingerprint: 'seed-%s',
+        report: {
+          annotations: { product: 'workrave-demo', version: '%s', platform: '%s' },
+          system_info: { os: '%s' }
+        },
+        created_at: d'%s',
+        updated_at: d'%s'
+      };" \
+        "$crash_id" "$WORKRAVE_DEMO_PRODUCT_ID" "$group_key" "$group_key" \
+        "$version" "$platform" "$os" "$created_at" "$created_at" | surql
+    }
+
+    seed_demo_group "GR-0004" "bad_access_kern_protection_failure" 242 "2026-04-17T12:44:56Z" "2026-04-23T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0004-001" "GR-0004" "2.13.4" "macos" "Mac OS X 14.6.1" "2026-04-22T09:00:00Z"
+    seed_demo_crash "GR-0004-002" "GR-0004" "2.13.4" "macos" "Mac OS X 14.5.0" "2026-04-21T14:00:00Z"
+
+    seed_demo_group "GR-0016" "bad_access_kern_protection_failure"  72 "2026-04-12T12:44:56Z" "2026-04-20T12:44:56Z" "new"
+    seed_demo_crash "GR-0016-001" "GR-0016" "2.13.2" "macos" "Mac OS X 14.4.1" "2026-04-20T10:00:00Z"
+    seed_demo_crash "GR-0016-002" "GR-0016" "2.13.2" "macos" "Mac OS X 14.3.0" "2026-04-18T16:00:00Z"
+
+    seed_demo_group "GR-0008" "breakpoint"                          40 "2026-03-29T12:44:56Z" "2026-04-21T12:44:56Z" "new"
+    seed_demo_crash "GR-0008-001" "GR-0008" "2.14.0" "windows" "Windows 11 22H2" "2026-04-21T11:00:00Z"
+    seed_demo_crash "GR-0008-002" "GR-0008" "2.14.0" "windows" "Windows 10 21H2" "2026-04-19T08:00:00Z"
+
+    seed_demo_group "GR-0021" "bad_access_kern_invalid_address"     28 "2026-03-04T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0021-001" "GR-0021" "2.12.9" "macos" "Mac OS X 14.2.1" "2026-04-23T07:00:00Z"
+    seed_demo_crash "GR-0021-002" "GR-0021" "2.12.9" "macos" "Mac OS X 14.1.0" "2026-04-20T12:00:00Z"
+
+    seed_demo_group "GR-0057" "bad_access_kern_invalid_address"     26 "2026-03-10T13:44:56Z" "2026-04-23T12:44:56Z" "new"
+    seed_demo_crash "GR-0057-001" "GR-0057" "2.13.2" "macos" "Mac OS X 14.3.0" "2026-04-23T06:00:00Z"
+    seed_demo_crash "GR-0057-002" "GR-0057" "2.13.2" "macos" "Mac OS X 14.2.0" "2026-04-22T13:00:00Z"
+
+    seed_demo_group "GR-0042" "bus_bus_adrerr"                      24 "2026-03-31T12:44:56Z" "2026-04-21T12:44:56Z" "new"
+    seed_demo_crash "GR-0042-001" "GR-0042" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-21T10:00:00Z"
+    seed_demo_crash "GR-0042-002" "GR-0042" "2.12.7" "linux" "Debian 12"       "2026-04-19T09:00:00Z"
+
+    seed_demo_group "GR-0051" "bad_access_kern_invalid_address"     19 "2026-03-29T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0051-001" "GR-0051" "2.12.9" "macos" "Mac OS X 14.0.0" "2026-04-21T08:00:00Z"
+    seed_demo_crash "GR-0051-002" "GR-0051" "2.12.9" "macos" "Mac OS X 13.6.1" "2026-04-18T11:00:00Z"
+
+    seed_demo_group "GR-0027" "bad_access_kern_invalid_address"     17 "2026-04-08T12:44:56Z" "2026-04-22T12:44:56Z" "new"
+    seed_demo_crash "GR-0027-001" "GR-0027" "2.13.2" "macos" "Mac OS X 14.4.0" "2026-04-22T05:00:00Z"
+    seed_demo_crash "GR-0027-002" "GR-0027" "2.13.2" "macos" "Mac OS X 14.3.1" "2026-04-20T15:00:00Z"
+
+    seed_demo_group "GR-0010" "bad_access_kern_protection_failure"  15 "2026-03-22T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0010-001" "GR-0010" "2.12.7" "macos" "Mac OS X 14.1.0" "2026-04-21T07:00:00Z"
+    seed_demo_crash "GR-0010-002" "GR-0010" "2.12.7" "macos" "Mac OS X 13.7.0" "2026-04-19T16:00:00Z"
+
+    seed_demo_group "GR-0036" "bus_bus_adrerr"                      14 "2026-04-03T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0036-001" "GR-0036" "2.13.2" "linux" "Fedora 39"       "2026-04-22T04:00:00Z"
+    seed_demo_crash "GR-0036-002" "GR-0036" "2.13.2" "linux" "Ubuntu 24.04"    "2026-04-20T11:00:00Z"
+
+    seed_demo_group "GR-0030" "bus_bus_adrerr"                      12 "2026-04-16T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0030-001" "GR-0030" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-22T03:00:00Z"
+    seed_demo_crash "GR-0030-002" "GR-0030" "2.12.7" "linux" "Debian 11"       "2026-04-21T18:00:00Z"
+
+    seed_demo_group "GR-0046" "bad_access_kern_protection_failure"   9 "2026-03-11T13:44:56Z" "2026-04-22T12:44:56Z" "new"
+    seed_demo_crash "GR-0046-001" "GR-0046" "2.12.9" "macos" "Mac OS X 14.1.1" "2026-04-22T02:00:00Z"
+    seed_demo_crash "GR-0046-002" "GR-0046" "2.12.9" "macos" "Mac OS X 13.5.0" "2026-04-18T14:00:00Z"
+
+    seed_demo_group "GR-0038" "breakpoint"                           6 "2026-02-23T13:44:56Z" "2026-04-21T12:44:56Z" "new"
+    seed_demo_crash "GR-0038-001" "GR-0038" "2.13.3" "windows" "Windows 11 23H2" "2026-04-21T06:00:00Z"
+    seed_demo_crash "GR-0038-002" "GR-0038" "2.13.3" "windows" "Windows 10 22H2" "2026-04-17T09:00:00Z"
+
+    seed_demo_group "GR-0043" "access_violation_write"               5 "2026-04-12T12:44:56Z" "2026-04-23T12:44:56Z" "resolved"
+    seed_demo_crash "GR-0043-001" "GR-0043" "2.13.2" "windows" "Windows 11 22H2" "2026-04-23T05:00:00Z"
+    seed_demo_crash "GR-0043-002" "GR-0043" "2.13.2" "windows" "Windows 10 21H2" "2026-04-19T13:00:00Z"
+
+    seed_demo_group "GR-0024" "bus_bus_adrerr"                       2 "2026-03-24T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
+    seed_demo_crash "GR-0024-001" "GR-0024" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-23T04:00:00Z"
+    seed_demo_crash "GR-0024-002" "GR-0024" "2.12.7" "linux" "Arch Linux"      "2026-04-22T20:00:00Z"
+
+    log "Workrave Demo seeded: 15 crash groups, 30 crashes"
 
     log "Guardrail setup complete"
