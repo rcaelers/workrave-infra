@@ -42,7 +42,7 @@ jobs:
                 $1 == "-" && $2 == "name:" && $3 == image {
                   print
                   getline
-                  sub(/newTag: .*/, "newTag: " tag)
+                  sub(/newTag: .*/, "newTag: \"" tag "\"")
                   print
                   next
                 }
