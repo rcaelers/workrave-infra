@@ -68,8 +68,6 @@ data:
     # Ensure the anonymous user record exists so anonymous JWT authentication succeeds.
     printf "UPSERT type::record('users', 'anonymous') CONTENT {
       username: 'anonymous',
-      email: 'anonymous@localhost',
-      name: 'Anonymous',
       is_admin: false,
       created_at: time::now(),
       updated_at: time::now()
