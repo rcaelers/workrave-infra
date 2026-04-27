@@ -31,7 +31,7 @@ spec:
               value: "http://guardrail-web/api/v1"
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -39,7 +39,7 @@ spec:
             failureThreshold: 6
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
