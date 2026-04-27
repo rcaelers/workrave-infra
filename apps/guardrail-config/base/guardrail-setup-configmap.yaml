@@ -70,7 +70,6 @@ data:
       username: 'anonymous',
       email: 'anonymous@localhost',
       name: 'Anonymous',
-      avatar: 'A',
       is_admin: false,
       created_at: time::now(),
       updated_at: time::now()
