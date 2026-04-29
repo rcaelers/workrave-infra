@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: minio-tailnet
+  annotations:
+    tailscale.com/tags: tag:k8s,tag:shared-minio-dev
 spec:
   defaultBackend:
     service:

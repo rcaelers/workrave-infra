@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: argocd-tailnet
   namespace: argocd
+  annotations:
+    tailscale.com/tags: tag:k8s,tag:shared-argocd
 spec:
   defaultBackend:
     service:
