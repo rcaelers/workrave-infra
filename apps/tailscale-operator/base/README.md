@@ -64,24 +64,28 @@ The operator OAuth identity must be allowed to apply these tags:
 }
 ```
 
-The ProxyGroup devices must also be allowed to advertise the tagged Tailscale
-Services:
+The ProxyGroup devices must also be allowed to advertise the Tailscale Services.
+Use explicit `svc:` entries while debugging because they do not depend on service
+tag matching:
 
 ```json
 {
   "autoApprovers": {
     "services": {
-      "tag:shared-argocd": ["tag:k8s-ingress"],
-      "tag:shared-longhorn": ["tag:k8s-ingress"],
-      "tag:shared-minio-dev": ["tag:k8s-ingress"],
-      "tag:shared-minio": ["tag:k8s-ingress"],
-      "tag:shared-surrealdb-dev": ["tag:k8s-ingress"],
-      "tag:shared-surrealdb": ["tag:k8s-ingress"],
-      "tag:shared-victorialogs": ["tag:k8s-ingress"]
+      "svc:argocd": ["tag:k8s-ingress"],
+      "svc:longhorn": ["tag:k8s-ingress"],
+      "svc:minio-dev": ["tag:k8s-ingress"],
+      "svc:minio": ["tag:k8s-ingress"],
+      "svc:surrealdb-dev": ["tag:k8s-ingress"],
+      "svc:surrealdb": ["tag:k8s-ingress"],
+      "svc:victorialogs": ["tag:k8s-ingress"]
     }
   }
 }
 ```
+
+After the services are working, these entries can be replaced or supplemented by
+tag-based entries such as `"tag:shared-argocd": ["tag:k8s-ingress"]`.
 
 To share a service with someone outside this tailnet:
 
@@ -95,12 +99,12 @@ Example grant for one recipient:
   "grants": [
     {
       "src": ["alice@example.com"],
-      "dst": ["tag:shared-minio-dev"],
+      "dst": ["svc:minio-dev"],
       "ip": ["443"]
     },
     {
       "src": ["alice@example.com"],
-      "dst": ["tag:shared-victorialogs"],
+      "dst": ["svc:victorialogs"],
       "ip": ["443"]
     }
   ]
@@ -116,8 +120,8 @@ accepted shares for:
     {
       "src": ["autogroup:shared"],
       "dst": [
-        "tag:shared-minio-dev",
-        "tag:shared-victorialogs"
+        "svc:minio-dev",
+        "svc:victorialogs"
       ],
       "ip": ["443"]
     }
