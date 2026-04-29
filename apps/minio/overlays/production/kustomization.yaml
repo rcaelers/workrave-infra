@@ -4,6 +4,7 @@ namespace: guardrail-prd
 resources:
   - ../../base
   - minio-secrets.yaml
+  - tailnet-ingress.yaml
 helmCharts:
   - name: minio
     repo: https://charts.min.io/

@@ -49,7 +49,7 @@ buckets:
     versioning: false
 
 consoleIngress:
-  enabled: true
+  enabled: false
   ingressClassName: nginx
   path: /
   hosts:
@@ -64,4 +64,3 @@ consoleIngress:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-

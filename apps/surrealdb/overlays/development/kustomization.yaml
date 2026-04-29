@@ -4,6 +4,7 @@ namespace: guardrail-dev
 resources:
   - ../../base
   - surrealdb-secrets.yaml
+  - tailnet-ingress.yaml
 helmCharts:
   - name: surrealdb
     repo: https://helm.surrealdb.com

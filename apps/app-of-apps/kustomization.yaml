@@ -5,6 +5,7 @@ namespace: argocd
 resources:
   - sops-secrets-operator-app.yaml
   - ingress-nginx-app.yaml
+  - tailscale-operator-app.yaml
   - cert-manager-app.yaml
   - victorialogs-app.yaml
   - fluent-bit-app.yaml
@@ -40,3 +41,4 @@ resources:
   #- guardrail-web-production-app.yaml
   - guardrail-ui-development-app.yaml
   #- guardrail-ui-production-app.yaml
+  - tailnet-admin-app.yaml

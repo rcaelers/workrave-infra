@@ -26,6 +26,9 @@ spec:
     - podSelector:
         matchLabels:
           app: guardrail-web
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: tailscale
     ports:
     - protocol: TCP
       port: 8000

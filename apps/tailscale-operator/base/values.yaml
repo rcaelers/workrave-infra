@@ -1,0 +1,19 @@
+operatorConfig:
+  defaultTags:
+    - tag:k8s-operator
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+proxyConfig:
+  defaultTags: tag:k8s
+  image:
+    repository: tailscale/tailscale
+    tag: v1.96.5
+
+apiServerProxyConfig:
+  mode: "false"

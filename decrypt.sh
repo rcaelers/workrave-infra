@@ -1,19 +1,19 @@
- sops -d -i apps/guardrail-config/overlays/development/02-secrets.yaml 
- sops -d -i apps/guardrail-config/overlays/production/02-secrets.yaml 
- sops -d -i apps/guardrail-config/overlays/development/guardrail-setup-secrets.yaml
- sops -d -i apps/guardrail-config/overlays/production/guardrail-setup-secrets.yaml
- sops -d -i apps/guardrail-db/overlays/production/guardrail-db-secrets.yaml 
- sops -d -i apps/guardrail-db/overlays/production/postgresql-secrets.yaml 
- sops -d -i apps/guardrail-db/overlays/development/postgresql-secrets.yaml 
- sops -d -i apps/guardrail-db/overlays/development/guardrail-db-secrets.yaml 
- sops -d -i apps/valkey/overlays/development/valkey-secrets.yaml 
- sops -d -i apps/valkey/overlays/production/valkey-secrets.yaml 
- sops -d -i apps/minio/overlays/development/minio-secrets.yaml 
- sops -d -i apps/minio/overlays/production/minio-secrets.yaml
- sops -d -i apps/postgrest/overlays/development/postgrest-secrets.yaml 
- sops -d -i apps/postgrest/overlays/production/postgrest-secrets.yaml
- sops -d -i apps/surrealdb/overlays/production/surrealdb-secrets.yaml
- sops -d -i apps/surrealdb/overlays/development/surrealdb-secrets.yaml
- sops -d -i apps/pocket-id/overlays/development/pocket-id-secrets.yaml
- sops -d -i apps/pocket-id/overlays/production/pocket-id-secrets.yaml
- 
+sops -d -i apps/guardrail-config/overlays/development/02-secrets.yaml 
+sops -d -i apps/guardrail-config/overlays/production/02-secrets.yaml 
+sops -d -i apps/guardrail-config/overlays/development/guardrail-setup-secrets.yaml
+sops -d -i apps/guardrail-config/overlays/production/guardrail-setup-secrets.yaml
+sops -d -i apps/guardrail-db/overlays/production/guardrail-db-secrets.yaml 
+sops -d -i apps/guardrail-db/overlays/production/postgresql-secrets.yaml 
+sops -d -i apps/guardrail-db/overlays/development/postgresql-secrets.yaml 
+sops -d -i apps/guardrail-db/overlays/development/guardrail-db-secrets.yaml 
+sops -d -i apps/valkey/overlays/development/valkey-secrets.yaml 
+sops -d -i apps/valkey/overlays/production/valkey-secrets.yaml 
+sops -d -i apps/minio/overlays/development/minio-secrets.yaml 
+sops -d -i apps/minio/overlays/production/minio-secrets.yaml
+sops -d -i apps/postgrest/overlays/development/postgrest-secrets.yaml 
+sops -d -i apps/postgrest/overlays/production/postgrest-secrets.yaml
+sops -d -i apps/surrealdb/overlays/production/surrealdb-secrets.yaml
+sops -d -i apps/surrealdb/overlays/development/surrealdb-secrets.yaml
+sops -d -i apps/pocket-id/overlays/development/pocket-id-secrets.yaml
+sops -d -i apps/pocket-id/overlays/production/pocket-id-secrets.yaml
+sops -d -i apps/tailscale-operator/base/operator-oauth-secrets.yaml

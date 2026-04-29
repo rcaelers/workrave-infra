@@ -3,6 +3,9 @@ kind: Kustomization
 
 namespace: longhorn-system
 
+resources:
+  - tailnet-ingress.yaml
+
 helmCharts:
   - name: longhorn
     repo: https://longhorn.github.io/charts
