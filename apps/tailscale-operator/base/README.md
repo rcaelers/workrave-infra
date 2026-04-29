@@ -26,7 +26,7 @@ The tailnet policy needs these tag owners:
 ```
 
 Tailscale Ingress requires MagicDNS and HTTPS to be enabled for the tailnet.
-Ingresses in this repo use the shared `tailnet-ingress` ProxyGroup. That keeps
+Ingresses in this repo use the shared `ingress-proxies` ProxyGroup. That keeps
 one proxy replica running while still exposing each admin service as a separate
 Tailscale Service with its own DNS name and ACL tag.
 
@@ -133,7 +133,7 @@ this narrow by granting only ICMP to `tag:k8s-ingress`:
   "grants": [
     {
       "src": ["alice@example.com"],
-      "dst": ["tag:k8s-ingress:*"],
+      "dst": ["tag:k8s-ingress"],
       "ip": ["icmp:*"]
     }
   ]

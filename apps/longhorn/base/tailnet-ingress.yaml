@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: longhorn-tailnet
   annotations:
-    tailscale.com/proxy-group: tailnet-ingress
+    tailscale.com/proxy-group: ingress-proxies
     tailscale.com/tags: tag:shared-longhorn
 spec:
   defaultBackend:
