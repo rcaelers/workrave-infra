@@ -6,6 +6,7 @@ resources:
   - sops-secrets-operator-app.yaml
   - ingress-nginx-app.yaml
   - tailscale-operator-app.yaml
+  - tailscale-proxygroup-app.yaml
   - cert-manager-app.yaml
   - victorialogs-app.yaml
   - fluent-bit-app.yaml

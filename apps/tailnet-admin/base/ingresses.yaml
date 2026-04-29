@@ -4,7 +4,8 @@ metadata:
   name: argocd-tailnet
   namespace: argocd
   annotations:
-    tailscale.com/tags: tag:k8s,tag:shared-argocd
+    tailscale.com/proxy-group: tailnet-ingress
+    tailscale.com/tags: tag:shared-argocd
 spec:
   defaultBackend:
     service:
