@@ -44,12 +44,37 @@ data:
     done
     log "Guardrail API is ready"
 
+    # Migrate any products or api_tokens whose SurrealDB record key was created with
+    # u'UUID' (UUID-typed) to plain string keys.  Runs idempotently: if the
+    # UUID-typed record is gone the IF block is skipped; if the string-typed record
+    # already exists it is not recreated.
+    for migrate_uuid in "$WORKRAVE_PRODUCT_ID" "$WORKRAVE_DEMO_PRODUCT_ID"; do
+      printf "
+        LET \$old = type::record('products', type::uuid('%s'));
+        LET \$new = type::record('products', '%s');
+        LET \$content = (SELECT * EXCEPT id FROM ONLY \$old);
+        IF \$content IS NOT NONE THEN
+          IF (SELECT id FROM ONLY \$new LIMIT 1).id IS NONE THEN
+            CREATE \$new CONTENT \$content;
+          END;
+          UPDATE user_access  SET product_id = \$new WHERE product_id = \$old;
+          UPDATE crashes      SET product_id = \$new WHERE product_id = \$old;
+          UPDATE crash_groups SET product_id = \$new WHERE product_id = \$old;
+          UPDATE symbols      SET product_id = \$new WHERE product_id = \$old;
+          UPDATE api_tokens   SET product_id = \$new WHERE product_id = \$old;
+          UPDATE annotations  SET product_id = \$new WHERE product_id = \$old;
+          DELETE \$old;
+        END;
+      " "$migrate_uuid" "$migrate_uuid" | surql
+    done
+    log "UUID-to-string key migration complete"
+
     # Create Workrave product if it doesn't exist; retrieve existing id otherwise
     EXISTING_ID=$(printf "SELECT meta::id(id) as id FROM products WHERE name = 'Workrave' LIMIT 1;" \
       | surql | jq -r '.[0].result[0].id // empty')
 
     if [ -z "$EXISTING_ID" ]; then
-      printf "CREATE type::record('products', u'%s') CONTENT {
+      printf "CREATE type::record('products', '%s') CONTENT {
         name: 'Workrave',
         slug: 'workrave',
         description: 'Workrave is a free program that assists in the recovery and prevention of Repetitive Strain Injury (RSI)',
@@ -87,7 +112,7 @@ data:
       token_id="$4"
       token_hash="$5"
 
-      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = type::record('products', u'%s') AND '%s' INSIDE entitlements GROUP ALL;" \
+      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = type::record('products', '%s') AND '%s' INSIDE entitlements GROUP ALL;" \
         "$WORKRAVE_PRODUCT_ID" "$entitlement" \
         | surql | jq -r '.[0].result[0].count // 0')
 
@@ -96,11 +121,11 @@ data:
         return
       fi
 
-      printf "CREATE type::record('api_tokens', u'%s') CONTENT {
+      printf "CREATE type::record('api_tokens', '%s') CONTENT {
         description: '%s',
-        token_id: u'%s',
+        token_id: '%s',
         token_hash: '%s',
-        product_id: type::record('products', u'%s'),
+        product_id: type::record('products', '%s'),
         entitlements: ['%s'],
         is_active: true,
         created_at: time::now(),
@@ -122,7 +147,7 @@ data:
     # INSERT IGNORE creates the record only if it doesn't exist.
     # The subsequent UPDATE SET enforces public:true even on existing records.
     printf "INSERT IGNORE INTO products {
-      id: type::record('products', u'%s'),
+      id: type::record('products', '%s'),
       name: 'Workrave Demo',
       slug: 'workrave-demo',
       description: 'Demo Workrave data set',
@@ -133,17 +158,17 @@ data:
       created_at: time::now(),
       updated_at: time::now()
     };" "$WORKRAVE_DEMO_PRODUCT_ID" | surql
-    printf "UPDATE type::record('products', u'%s') SET
+    printf "UPDATE type::record('products', '%s') SET
       public = true, accepting_crashes = true, updated_at = time::now();"\
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
     log "Workrave Demo product ready (id: ${WORKRAVE_DEMO_PRODUCT_ID})"
 
     # Clean up any old seed data that may have been created with auto-generated IDs
     # so we can re-insert with stable IDs (required for crash->group references).
-    printf "DELETE crash_groups WHERE product_id = type::record('products', u'%s')
+    printf "DELETE crash_groups WHERE product_id = type::record('products', '%s')
       AND string::starts_with(fingerprint, 'seed-');"\
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
-    printf "DELETE crashes WHERE product_id = type::record('products', u'%s')
+    printf "DELETE crashes WHERE product_id = type::record('products', '%s')
       AND string::starts_with(fingerprint, 'seed-');"\
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
 
@@ -152,7 +177,7 @@ data:
       group_key="$1" signal="$2" count="$3" first_seen="$4" last_seen="$5" status="$6"
       printf "INSERT IGNORE INTO crash_groups {
         id: type::record('crash_groups', 'seed-%s'),
-        product_id: type::record('products', u'%s'),
+        product_id: type::record('products', '%s'),
         fingerprint: 'seed-%s',
         signal: '%s',
         count: %s,
@@ -171,7 +196,7 @@ data:
       crash_id="$1" group_key="$2" version="$3" platform="$4" os="$5" created_at="$6"
       printf "INSERT IGNORE INTO crashes {
         id: type::record('crashes', 'seed-%s'),
-        product_id: type::record('products', u'%s'),
+        product_id: type::record('products', '%s'),
         group_id: type::record('crash_groups', 'seed-%s'),
         fingerprint: 'seed-%s',
         report: {
