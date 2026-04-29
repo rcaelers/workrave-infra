@@ -87,7 +87,7 @@ data:
       token_id="$4"
       token_hash="$5"
 
-      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = u'%s' AND '%s' INSIDE entitlements GROUP ALL;" \
+      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = type::record('products', u'%s') AND '%s' INSIDE entitlements GROUP ALL;" \
         "$WORKRAVE_PRODUCT_ID" "$entitlement" \
         | surql | jq -r '.[0].result[0].count // 0')
 
@@ -100,7 +100,7 @@ data:
         description: '%s',
         token_id: u'%s',
         token_hash: '%s',
-        product_id: u'%s',
+        product_id: type::record('products', u'%s'),
         entitlements: ['%s'],
         is_active: true,
         created_at: time::now(),
