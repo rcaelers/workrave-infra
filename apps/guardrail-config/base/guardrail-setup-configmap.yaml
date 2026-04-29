@@ -69,6 +69,8 @@ data:
     printf "UPSERT type::record('users', 'anonymous') CONTENT {
       username: 'anonymous',
       email: 'anonymous@workrave.org',
+      name: 'Anonymous',
+      avatar: 'A',
       is_admin: false,
       created_at: time::now(),
       updated_at: time::now()
