@@ -14,6 +14,6 @@ patches:
     version: v1
 images:
 - name: ghcr.io/rcaelers/guardrail-server
-  newTag: "ecece39"
+  newTag: "42309a0"
 - name: ghcr.io/rcaelers/guardrail-schema-sync
-  newTag: "ecece39"
+  newTag: "42309a0"
