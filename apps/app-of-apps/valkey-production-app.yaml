@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
-    targetRevision: HEAD
+    targetRevision: main
     path: apps/valkey/overlays/production
   destination:
     server: https://kubernetes.default.svc
