@@ -5,7 +5,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: garage
+      app.kubernetes.io/name: garage
+      app.kubernetes.io/instance: garage
   policyTypes:
     - Ingress
   ingress:
@@ -26,6 +27,13 @@ spec:
         - podSelector:
             matchLabels:
               app: garage-setup
+      ports:
+        - protocol: TCP
+          port: 3903
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale
       ports:
         - protocol: TCP
           port: 3903

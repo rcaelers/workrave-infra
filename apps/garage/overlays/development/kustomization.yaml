@@ -5,3 +5,22 @@ resources:
   - ../../base
   - garage-secrets.yaml
   - tailnet-ingress.yaml
+helmGlobals:
+  chartHome: ../../base/charts
+helmCharts:
+  - name: garage
+    releaseName: garage
+    namespace: guardrail-dev
+    valuesFile: values.yaml
+patches:
+  - target:
+      kind: Service
+      name: garage
+    patch: |-
+      - op: add
+        path: /spec/ports/-
+        value:
+          name: admin
+          port: 3903
+          targetPort: 3903
+          protocol: TCP

@@ -1,0 +1,73 @@
+garage:
+  dbEngine: lmdb
+  replicationFactor: "1"
+  consistencyMode: consistent
+  metadataAutoSnapshotInterval: 6h
+  existingRpcSecret: garage-secrets
+  s3:
+    api:
+      bindAddr: "[::]:3900"
+      region: us-east-1
+      rootDomain: garage
+    web:
+      bindAddr: "[::]:3902"
+      rootDomain: garage
+      index: index.html
+  admin:
+    apiBindAddr: "[::]:3903"
+
+deployment:
+  kind: StatefulSet
+  replicaCount: 1
+  podManagementPolicy: OrderedReady
+
+image:
+  repository: dxflrs/amd64_garage
+  tag: v2.1.0
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  meta:
+    storageClass: local-path
+    size: 1Gi
+  data:
+    storageClass: local-path
+    size: 5Gi
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 384Mi
+
+livenessProbe:
+  tcpSocket:
+    port: admin
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: admin
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 12
+
+environment:
+  - name: GARAGE_ADMIN_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: garage-secrets
+        key: adminToken
+  - name: GARAGE_METRICS_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: garage-secrets
+        key: metricsToken
