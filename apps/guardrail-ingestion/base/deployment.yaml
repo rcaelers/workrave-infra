@@ -21,9 +21,9 @@ spec:
         fsGroup: 1000
       containers:
         - name: guardrail-ingestion
-          image: ghcr.io/rcaelers/guardrail-ingestion:placeholder
-          command: ["/app/ingestion"]
-          args: ["-C", "/config"]
+          image: ghcr.io/rcaelers/guardrail-server:placeholder
+          command: ["/app/guardrail"]
+          args: ["ingestion", "-C", "/config"]
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

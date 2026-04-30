@@ -28,15 +28,8 @@ jobs:
             TAG="${SHA:0:7}"
           fi
 
-          for SERVICE in ${SERVICES}; do
-            IMAGE="ghcr.io/rcaelers/guardrail-${SERVICE}"
-
-            if [[ "${SERVICE}" == "schema-sync" ]]; then
-              KUSTOMIZATION="apps/guardrail-api/overlays/${OVERLAY}/kustomization.yaml"
-            else
-              KUSTOMIZATION="apps/guardrail-${SERVICE}/overlays/${OVERLAY}/kustomization.yaml"
-            fi
-
+          update_image() {
+            local IMAGE="$1" TAG="$2" KUSTOMIZATION="$3"
             if [[ -f "${KUSTOMIZATION}" ]]; then
               awk -v image="${IMAGE}" -v tag="${TAG}" '
                 $1 == "-" && $2 == "name:" && $3 == image {
@@ -49,9 +42,25 @@ jobs:
                 { print }
               ' "${KUSTOMIZATION}" > "${KUSTOMIZATION}.tmp"
               mv "${KUSTOMIZATION}.tmp" "${KUSTOMIZATION}"
-              echo "Updated ${SERVICE} to ${TAG}"
+              echo "Updated ${KUSTOMIZATION} to ${TAG}"
             else
               echo "Warning: ${KUSTOMIZATION} not found, skipping"
+            fi
+          }
+
+          for SERVICE in ${SERVICES}; do
+            IMAGE="ghcr.io/rcaelers/guardrail-${SERVICE}"
+
+            if [[ "${SERVICE}" == "schema-sync" ]]; then
+              # schema-sync tag lives in the api overlay alongside the server tag
+              update_image "${IMAGE}" "${TAG}" "apps/guardrail-api/overlays/${OVERLAY}/kustomization.yaml"
+            elif [[ "${SERVICE}" == "server" ]]; then
+              # single image, used by all five backend app deployments
+              for APP in guardrail-api guardrail-curator guardrail-ingestion guardrail-processor guardrail-web; do
+                update_image "${IMAGE}" "${TAG}" "apps/${APP}/overlays/${OVERLAY}/kustomization.yaml"
+              done
+            else
+              update_image "${IMAGE}" "${TAG}" "apps/guardrail-${SERVICE}/overlays/${OVERLAY}/kustomization.yaml"
             fi
           done
 

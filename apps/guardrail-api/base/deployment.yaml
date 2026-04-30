@@ -16,9 +16,9 @@ spec:
       serviceAccountName: guardrail-api-sa
       containers:
         - name: guardrail-api
-          image: ghcr.io/rcaelers/guardrail-api:placeholder
-          command: ["/app/api"]
-          args: ["-C", "/config"]
+          image: ghcr.io/rcaelers/guardrail-server:placeholder
+          command: ["/app/guardrail"]
+          args: ["api", "-C", "/config"]
           ports:
             - name: http
               containerPort: 80

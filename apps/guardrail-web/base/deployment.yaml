@@ -15,9 +15,9 @@ spec:
     spec:
       containers:
         - name: guardrail-web
-          image: ghcr.io/rcaelers/guardrail-web:placeholder
-          command: ["/app/web"]
-          args: ["-C", "/config"]
+          image: ghcr.io/rcaelers/guardrail-server:placeholder
+          command: ["/app/guardrail"]
+          args: ["web", "-C", "/config"]
           ports:
             - name: http
               containerPort: 80

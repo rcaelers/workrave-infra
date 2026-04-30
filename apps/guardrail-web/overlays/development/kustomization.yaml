@@ -12,5 +12,5 @@ patches:
       version: v1
   - path: database-env-patch.yaml
 images:
-- name: ghcr.io/rcaelers/guardrail-web
+- name: ghcr.io/rcaelers/guardrail-server
   newTag: "a022dbb"

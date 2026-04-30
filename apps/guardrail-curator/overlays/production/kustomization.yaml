@@ -7,5 +7,5 @@ patches:
   - path: database-env-patch.yaml
 namespace: guardrail-prd
 images:
-- name: ghcr.io/rcaelers/guardrail-curator
+- name: ghcr.io/rcaelers/guardrail-server
   newTag: production

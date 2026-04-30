@@ -13,5 +13,5 @@ patches:
     name: guardrail-ingestion
     version: v1
 images:
-- name: ghcr.io/rcaelers/guardrail-ingestion
+- name: ghcr.io/rcaelers/guardrail-server
   newTag: "a022dbb"
