@@ -14,7 +14,7 @@ resources:
   - guardrail-security-app.yaml
   # - longhorn-app.yaml
   # - cloudnativepg-operator-app.yaml
-  - garage-development-app.yaml
+  ###- garage-development-app.yaml
   # - garage-production-app.yaml
   ###- guardrail-config-development-app.yaml
   #- guardrail-config-production-app.yaml
