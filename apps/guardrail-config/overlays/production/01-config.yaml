@@ -24,7 +24,7 @@ database:
 object_storage:
   region: us-east-1
   bucket: guardrail
-  endpoint: http://minio:9000
+  endpoint: http://garage:3900
   allow_http: true
 auth:
   id: guardrail.workrave.org

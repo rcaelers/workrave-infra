@@ -39,8 +39,8 @@ ingress creates a Tailscale Service tagged with a service-specific sharing tag:
 | --- | --- |
 | Argo CD | `tag:shared-argocd` |
 | Longhorn | `tag:shared-longhorn` |
-| MinIO development | `tag:shared-minio-dev` |
-| MinIO production | `tag:shared-minio` |
+| Garage development | `tag:shared-garage-dev` |
+| Garage production | `tag:shared-garage` |
 | SurrealDB development | `tag:shared-surrealdb-dev` |
 | SurrealDB production | `tag:shared-surrealdb` |
 | VictoriaLogs | `tag:shared-victorialogs` |
@@ -55,8 +55,8 @@ The operator OAuth identity must be allowed to apply these tags:
     "tag:k8s-ingress": ["tag:k8s-operator"],
     "tag:shared-argocd": ["tag:k8s-operator"],
     "tag:shared-longhorn": ["tag:k8s-operator"],
-    "tag:shared-minio-dev": ["tag:k8s-operator"],
-    "tag:shared-minio": ["tag:k8s-operator"],
+    "tag:shared-garage-dev": ["tag:k8s-operator"],
+    "tag:shared-garage": ["tag:k8s-operator"],
     "tag:shared-surrealdb-dev": ["tag:k8s-operator"],
     "tag:shared-surrealdb": ["tag:k8s-operator"],
     "tag:shared-victorialogs": ["tag:k8s-operator"]
@@ -74,8 +74,8 @@ tag matching:
     "services": {
       "svc:argocd": ["tag:k8s-ingress"],
       "svc:longhorn": ["tag:k8s-ingress"],
-      "svc:minio-dev": ["tag:k8s-ingress"],
-      "svc:minio": ["tag:k8s-ingress"],
+      "svc:garage-dev": ["tag:k8s-ingress"],
+      "svc:garage": ["tag:k8s-ingress"],
       "svc:surrealdb-dev": ["tag:k8s-ingress"],
       "svc:surrealdb": ["tag:k8s-ingress"],
       "svc:victorialogs": ["tag:k8s-ingress"]
@@ -99,7 +99,7 @@ Example grant for one recipient:
   "grants": [
     {
       "src": ["alice@example.com"],
-      "dst": ["svc:minio-dev"],
+      "dst": ["svc:garage-dev"],
       "ip": ["443"]
     },
     {
@@ -120,7 +120,7 @@ accepted shares for:
     {
       "src": ["autogroup:shared"],
       "dst": [
-        "svc:minio-dev",
+        "svc:garage-dev",
         "svc:victorialogs"
       ],
       "ip": ["443"]

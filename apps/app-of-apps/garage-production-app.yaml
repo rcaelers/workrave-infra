@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio-guardrail-production
+  name: garage-guardrail-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -16,7 +16,7 @@ spec:
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: HEAD
-    path: apps/minio/overlays/production
+    path: apps/garage/overlays/production
   destination:
     server: https://kubernetes.default.svc
     namespace: guardrail-prd

@@ -8,8 +8,8 @@ sops -d -i apps/guardrail-db/overlays/development/postgresql-secrets.yaml
 sops -d -i apps/guardrail-db/overlays/development/guardrail-db-secrets.yaml 
 sops -d -i apps/valkey/overlays/development/valkey-secrets.yaml 
 sops -d -i apps/valkey/overlays/production/valkey-secrets.yaml 
-sops -d -i apps/minio/overlays/development/minio-secrets.yaml 
-sops -d -i apps/minio/overlays/production/minio-secrets.yaml
+sops -d -i apps/garage/overlays/development/garage-secrets.yaml 
+sops -d -i apps/garage/overlays/production/garage-secrets.yaml
 sops -d -i apps/postgrest/overlays/development/postgrest-secrets.yaml 
 sops -d -i apps/postgrest/overlays/production/postgrest-secrets.yaml
 sops -d -i apps/surrealdb/overlays/production/surrealdb-secrets.yaml

@@ -14,8 +14,8 @@ resources:
   - guardrail-security-app.yaml
   - longhorn-app.yaml
   - cloudnativepg-operator-app.yaml
-  - minio-development-app.yaml
-  # - minio-production-app.yaml
+  - garage-development-app.yaml
+  # - garage-production-app.yaml
   - guardrail-config-development-app.yaml
   #- guardrail-config-production-app.yaml
   - guardrail-surrealdb-development-app.yaml

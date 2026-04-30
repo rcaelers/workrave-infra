@@ -1,0 +1,86 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-setup
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: garage-setup
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: setup
+          image: curlimages/curl:8.13.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GARAGE_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: garage-secrets
+                  key: adminToken
+            - name: GARAGE_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: garage-secrets
+                  key: accessKey
+            - name: GARAGE_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: garage-secrets
+                  key: secretKey
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              base="http://garage:3903"
+
+              get() {
+                curl -fsS -H "Authorization: Bearer ${GARAGE_ADMIN_TOKEN}" "$base/v2/$1"
+              }
+
+              post() {
+                curl -fsS -X POST \
+                  -H "Authorization: Bearer ${GARAGE_ADMIN_TOKEN}" \
+                  -H "Content-Type: application/json" \
+                  -d "$2" \
+                  "$base/v2/$1"
+              }
+
+              until status="$(get GetClusterStatus)"; do
+                sleep 5
+              done
+
+              node_id="$(printf '%s\n' "$status" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+              layout_version="$(printf '%s\n' "$status" | sed -n 's/.*"layoutVersion"[[:space:]]*:[[:space:]]*\([0-9][0-9]*\).*/\1/p' | head -n 1)"
+              if [ -z "$node_id" ] || [ -z "$layout_version" ]; then
+                echo "Unable to determine Garage node id or layout version" >&2
+                exit 1
+              fi
+
+              if ! printf '%s\n' "$status" | grep -q '"role"[[:space:]]*:[[:space:]]*{'; then
+                next_version="$((layout_version + 1))"
+                post UpdateClusterLayout "{\"roles\":[{\"id\":\"$node_id\",\"zone\":\"workrave\",\"capacity\":5368709120,\"tags\":[\"guardrail\"]}],\"parameters\":{\"zoneRedundancy\":{\"atLeast\":1}}}"
+                post ApplyClusterLayout "{\"version\":$next_version}"
+              fi
+
+              bucket_json="$(get 'GetBucketInfo?globalAlias=guardrail' || true)"
+              if [ -z "$bucket_json" ]; then
+                bucket_json="$(post CreateBucket '{"globalAlias":"guardrail"}')"
+              fi
+
+              bucket_id="$(printf '%s\n' "$bucket_json" | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+              if [ -z "$bucket_id" ]; then
+                echo "Unable to determine guardrail bucket id" >&2
+                exit 1
+              fi
+
+              if ! get "GetKeyInfo?id=${GARAGE_ACCESS_KEY_ID}" >/dev/null 2>&1; then
+                post ImportKey "{\"accessKeyId\":\"${GARAGE_ACCESS_KEY_ID}\",\"secretAccessKey\":\"${GARAGE_SECRET_ACCESS_KEY}\",\"name\":\"guardrail\"}"
+              fi
+
+              post AllowBucketKey "{\"bucketId\":\"$bucket_id\",\"accessKeyId\":\"${GARAGE_ACCESS_KEY_ID}\",\"permissions\":{\"read\":true,\"write\":true,\"owner\":true}}"

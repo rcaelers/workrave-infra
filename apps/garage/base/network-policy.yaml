@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: garage-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: garage
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - guardrail-api
+                  - guardrail-curator
+                  - guardrail-ingestion
+                  - guardrail-processor
+      ports:
+        - protocol: TCP
+          port: 3900
+    - from:
+        - podSelector:
+            matchLabels:
+              app: garage-setup
+      ports:
+        - protocol: TCP
+          port: 3903

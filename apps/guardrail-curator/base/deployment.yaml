@@ -46,12 +46,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: minio-secrets
+                  name: garage-secrets
                   key: accessKey
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: minio-secrets
+                  name: garage-secrets
                   key: secretKey
           volumeMounts:
             - name: config-volume

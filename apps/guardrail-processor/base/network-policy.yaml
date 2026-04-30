@@ -22,10 +22,10 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: minio
+          app: garage
     ports:
     - protocol: TCP
-      port: 9000
+      port: 3900
   - to:
     - namespaceSelector:
         matchLabels:

@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: minio-tailnet
+  name: garage-tailnet
   annotations:
     tailscale.com/proxy-group: ingress-proxies
-    tailscale.com/tags: tag:shared-minio
+    tailscale.com/tags: tag:shared-garage
 spec:
   defaultBackend:
     service:
-      name: minio-console
+      name: garage
       port:
-        name: http
+        name: admin
   ingressClassName: tailscale
   tls:
     - hosts:
-        - minio
+        - garage
