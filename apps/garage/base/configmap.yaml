@@ -21,6 +21,7 @@ data:
 
     [s3_web]
     bind_addr = "[::]:3902"
+    root_domain = "garage"
 
     [admin]
     api_bind_addr = "[::]:3903"
