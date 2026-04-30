@@ -38,7 +38,6 @@ ingress creates a Tailscale Service tagged with a service-specific sharing tag:
 | Service | Tag |
 | --- | --- |
 | Argo CD | `tag:shared-argocd` |
-| Longhorn | `tag:shared-longhorn` |
 | Garage development | `tag:shared-garage-dev` |
 | Garage production | `tag:shared-garage` |
 | SurrealDB development | `tag:shared-surrealdb-dev` |
@@ -54,7 +53,6 @@ The operator OAuth identity must be allowed to apply these tags:
     "tag:k8s": ["tag:k8s-operator"],
     "tag:k8s-ingress": ["tag:k8s-operator"],
     "tag:shared-argocd": ["tag:k8s-operator"],
-    "tag:shared-longhorn": ["tag:k8s-operator"],
     "tag:shared-garage-dev": ["tag:k8s-operator"],
     "tag:shared-garage": ["tag:k8s-operator"],
     "tag:shared-surrealdb-dev": ["tag:k8s-operator"],
@@ -73,7 +71,6 @@ tag matching:
   "autoApprovers": {
     "services": {
       "svc:argocd": ["tag:k8s-ingress"],
-      "svc:longhorn": ["tag:k8s-ingress"],
       "svc:garage-dev": ["tag:k8s-ingress"],
       "svc:garage": ["tag:k8s-ingress"],
       "svc:surrealdb-dev": ["tag:k8s-ingress"],

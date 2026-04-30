@@ -18,4 +18,4 @@ patches:
     patch: |-
       - op: add
         path: /spec/storageClassName
-        value: longhorn-surrealdb-storage
+        value: local-path

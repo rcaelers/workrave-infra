@@ -9,7 +9,7 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:17
   storage:
     size: 5Gi
-    storageClass: longhorn-postgres-storage
+    storageClass: local-path
   resources:
     requests:
       cpu: 100m
