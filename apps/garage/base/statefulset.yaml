@@ -18,6 +18,30 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      initContainers:
+        - name: prepare-secrets
+          image: busybox:1.37.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -ec
+          args:
+            - |
+              for file in /garage-secret-src/*; do
+                target="/garage-secrets-private/$(basename "$file")"
+                cp "$file" "$target"
+                chmod 0600 "$target"
+              done
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: secrets
+              mountPath: /garage-secret-src
+              readOnly: true
+            - name: private-secrets
+              mountPath: /garage-secrets-private
       containers:
         - name: garage
           image: dxflrs/amd64_garage:v2.1.0
