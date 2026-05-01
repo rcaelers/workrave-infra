@@ -9,7 +9,9 @@ resources:
   - guardrail-setup-garage-development-app.yaml
   - guardrail-config-development-app.yaml
   - valkey-development-app.yaml
-  ###- guardrail-surrealdb-development-app.yaml
+  - guardrail-surrealdb-development-app.yaml
+  #- guardrail-setup-surrealdb-secrets-development-app.yaml
+  #- guardrail-setup-db-development-app.yaml
   ###- guardrail-processor-development-app.yaml
   ###- guardrail-curator-development-app.yaml
   ###- guardrail-api-development-app.yaml
