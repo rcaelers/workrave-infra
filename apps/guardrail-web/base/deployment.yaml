@@ -31,14 +31,14 @@ spec:
               subPath: secrets
           startupProbe:
             httpGet:
-              path: /healthz
+              path: /live
               port: http
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 24
+            failureThreshold: 30
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: /live
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -46,7 +46,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /ready
               port: http
             initialDelaySeconds: 3
             periodSeconds: 10

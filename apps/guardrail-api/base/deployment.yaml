@@ -43,11 +43,11 @@ spec:
               subPath: secrets
           startupProbe:
             httpGet:
-              path: /api/ready
+              path: /api/live
               port: http
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 24
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /api/live

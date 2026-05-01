@@ -41,18 +41,29 @@ spec:
             requests:
               cpu: "100m"
               memory: "64Mi"
+          startupProbe:
+            httpGet:
+              path: /api/live
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /api/live
               port: http
-            initialDelaySeconds: 3
+            initialDelaySeconds: 10
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /api/ready
               port: http
             initialDelaySeconds: 3
             periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
