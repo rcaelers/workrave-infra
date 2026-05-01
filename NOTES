@@ -1,0 +1,11 @@
+10	sops-secrets-operator, kyverno, tailscale-operator
+20  guardrail-security, fluent-bit, victorialogs
+    
+30  tailscale-proxygroup, cert-manager, ingress-nginx, longhorn
+40  tailnet-admin, garage-*, surrealdb-*, valkey-*, pocket-id-*, cloudnative
+
+50  guardrail-db-*, guardrail-config-resources-*
+60	guardrail-api-*, guardrail-ingestion-*, guardrail-processor-*, guardrail-curator-*, guardrail-web-*, guardrail-auth-*
+70  guardrail-ui-*, guardrail-setup-*, 
+
+

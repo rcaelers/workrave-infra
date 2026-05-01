@@ -9,7 +9,6 @@ spec:
       operator: In
       values:
       - guardrail-api
-      - guardrail-schema-rollout
   policyTypes:
   - Ingress
   - Egress

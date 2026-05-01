@@ -16,13 +16,13 @@ spec:
           app: guardrail-api
     - podSelector:
         matchLabels:
-          app: guardrail-schema-rollout
+          app: guardrail-setup-surrealdb-schema
     - podSelector:
         matchLabels:
           app: guardrail-curator
     - podSelector:
         matchLabels:
-          app: guardrail-setup-surrealdb
+          app: guardrail-setup-surrealdb-seed
     - podSelector:
         matchLabels:
           app: guardrail-web

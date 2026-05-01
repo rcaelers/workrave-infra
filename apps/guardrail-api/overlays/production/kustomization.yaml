@@ -15,5 +15,3 @@ patches:
 images:
 - name: ghcr.io/rcaelers/guardrail-server
   newTag: production
-- name: ghcr.io/rcaelers/guardrail-schema-sync
-  newTag: production

@@ -15,5 +15,3 @@ patches:
 images:
 - name: ghcr.io/rcaelers/guardrail-server
   newTag: "42309a0"
-- name: ghcr.io/rcaelers/guardrail-schema-sync
-  newTag: "42309a0"

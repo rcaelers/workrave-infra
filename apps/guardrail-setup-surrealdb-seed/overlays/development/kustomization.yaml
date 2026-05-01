@@ -3,9 +3,9 @@ kind: Kustomization
 namespace: guardrail-dev
 resources:
   - ../../base
-  - guardrail-setup-surrealdb-secrets.yaml
+  - guardrail-setup-surrealdb-seed-secrets.yaml
 configMapGenerator:
-  - name: guardrail-setup-surrealdb-config
+  - name: guardrail-setup-surrealdb-seed-config
     literals:
       - WORKRAVE_PRODUCT_ID=17638AE6-CAC9-43E2-BFDE-8E2150896740
       - WORKRAVE_DEMO_PRODUCT_ID=5EA11EBA-D762-4B50-AEC6-3409596E617F

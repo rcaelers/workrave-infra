@@ -7,6 +7,7 @@ resources:
   #- guardrail-setup-garage-production-app.yaml
   #- guardrail-config-production-app.yaml
   #- guardrail-surrealdb-production-app.yaml
+  #- guardrail-setup-surrealdb-schema-production-app.yaml
   #- valkey-production-app.yaml
   #- guardrail-processor-production-app.yaml
   #- guardrail-curator-production-app.yaml
@@ -14,6 +15,6 @@ resources:
   #- guardrail-ingestion-production-app.yaml
   #- pocket-id-production-app.yaml
   #- guardrail-setup-pocket-id-production-app.yaml
-  #- guardrail-setup-surrealdb-production-app.yaml
+  #- guardrail-setup-surrealdb-seed-production-app.yaml
   #- guardrail-web-production-app.yaml
   #- guardrail-ui-production-app.yaml
