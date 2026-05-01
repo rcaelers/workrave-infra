@@ -22,7 +22,8 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: garage
+          app.kubernetes.io/name: garage
+          app.kubernetes.io/instance: garage
     ports:
     - protocol: TCP
       port: 3900
