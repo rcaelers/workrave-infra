@@ -12,7 +12,7 @@ spec:
       envoyDeployment:
         replicas: 1
         patch:
-          type: StrategicMergePatch
+          type: StrategicMerge
           value:
             spec:
               template:
