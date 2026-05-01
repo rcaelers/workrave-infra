@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guardrail-pocket-id-config-development
+  name: guardrail-setup-pocket-id-production
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -13,10 +13,10 @@ spec:
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: main
-    path: apps/guardrail-pocket-id-config/overlays/development
+    path: apps/guardrail-setup-pocket-id/overlays/production
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-dev
+    namespace: guardrail-prd
   syncPolicy:
     automated:
       prune: true

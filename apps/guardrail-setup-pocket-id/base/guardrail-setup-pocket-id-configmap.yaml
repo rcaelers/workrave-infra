@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: guardrail-pocket-id-config-setup-script
+  name: guardrail-setup-pocket-id-script
 data:
   setup.sh: |
     #!/bin/sh
