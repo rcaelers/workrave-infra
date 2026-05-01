@@ -160,6 +160,7 @@ data:
       fi
       sleep 2
     done
+    log "Pocket ID API is ready (attempt $attempt)"
 
     log "Ensuring initial admin user exists..."
     users_json=$(request_json GET "$POCKET_ID_URL/api/users")
@@ -175,6 +176,7 @@ data:
     ' | head -n 1)
 
     if [ -z "$admin_id" ]; then
+      log "No admin user found; calling /api/signup/setup to create '$POCKET_ID_ADMIN_USERNAME'..."
       setup_payload=$(jq -nc \
         --arg username "$POCKET_ID_ADMIN_USERNAME" \
         --arg email "$POCKET_ID_ADMIN_EMAIL" \
@@ -199,6 +201,14 @@ data:
         | select(.username == $username or (.isAdmin == true and .username != "Static API User"))
         | .username
       ' | head -n 1)
+
+      if [ -z "$admin_id" ]; then
+        log "ERROR: admin user was not found after /api/signup/setup call"
+        exit 1
+      fi
+      log "Admin user created: $admin_username ($admin_id)"
+    else
+      log "Admin user already exists: $admin_username ($admin_id), skipping creation"
     fi
 
     if [ -z "$admin_id" ]; then
