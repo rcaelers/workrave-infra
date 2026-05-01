@@ -1,3 +1,3 @@
 installCRDs: true
 
-featureGates: "ExperimentalGatewayAPISupport=true"
+enableGatewayAPI: true
