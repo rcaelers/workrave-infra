@@ -26,7 +26,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: garage-setup
+              app: guardrail-setup-garage
       ports:
         - protocol: TCP
           port: 3903

@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: argocd
 resources:
   # - garage-production-app.yaml
+  #- guardrail-setup-garage-production-app.yaml
   #- guardrail-config-production-app.yaml
   #- guardrail-surrealdb-production-app.yaml
   #- valkey-production-app.yaml

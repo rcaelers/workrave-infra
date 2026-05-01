@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: garage-setup
+  name: guardrail-setup-garage
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: garage-setup
+        app: guardrail-setup-garage
     spec:
       restartPolicy: OnFailure
       containers:
