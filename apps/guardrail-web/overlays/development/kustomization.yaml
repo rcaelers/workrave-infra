@@ -6,8 +6,8 @@ resources:
 patches:
   - path: ingress-host-patch.json
     target:
-      group: networking.k8s.io
-      kind: Ingress
+      group: gateway.networking.k8s.io
+      kind: HTTPRoute
       name: guardrail-web
       version: v1
   - path: database-env-patch.yaml

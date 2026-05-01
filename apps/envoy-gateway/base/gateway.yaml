@@ -1,0 +1,64 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main-gateway
+  namespace: envoy-gateway-system
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  gatewayClassName: envoy
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: crashes-https
+      hostname: crashes.workrave.org
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: crashes-workrave-org-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: crashes-dev-https
+      hostname: crashes-dev.workrave.org
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: crashes-dev-workrave-org-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: auth-https
+      hostname: auth.workrave.org
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: auth-workrave-org-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: auth-dev-https
+      hostname: auth-dev.workrave.org
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: auth-dev-workrave-org-tls
+      allowedRoutes:
+        namespaces:
+          from: All

@@ -4,12 +4,6 @@ namespace: guardrail-prd
 resources:
   - ../../base
 patches:
-  - path: ingress-host-patch.json
-    target:
-      group: networking.k8s.io
-      kind: Ingress
-      name: guardrail-web
-      version: v1
   - path: database-env-patch.yaml
 images:
 - name: ghcr.io/rcaelers/guardrail-server

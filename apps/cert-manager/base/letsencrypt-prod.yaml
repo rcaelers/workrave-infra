@@ -10,5 +10,8 @@ spec:
       name: letsencrypt-prod
     solvers:
       - http01:
-          ingress:
-            class: nginx
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: main-gateway
+                namespace: envoy-gateway-system
+                kind: Gateway

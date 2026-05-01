@@ -13,8 +13,8 @@ configMapGenerator:
 patches:
   - path: ingress-host-patch.json
     target:
-      group: networking.k8s.io
-      kind: Ingress
+      group: gateway.networking.k8s.io
+      kind: HTTPRoute
       name: pocket-id
       version: v1
 images:

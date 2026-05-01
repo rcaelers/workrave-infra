@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - deployment.yaml
   - service.yaml
-  - ingress.yaml
+  - httproute.yaml
   - pvc.yaml
   - pocket-id-setup-configmap.yaml
   - pocket-id-setup-job.yaml
