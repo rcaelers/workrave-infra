@@ -12,9 +12,9 @@ resources:
   - guardrail-surrealdb-development-app.yaml
   - guardrail-setup-surrealdb-schema-development-app.yaml
   - guardrail-setup-surrealdb-seed-development-app.yaml
-  ###- guardrail-processor-development-app.yaml
-  ###- guardrail-curator-development-app.yaml
-  ###- guardrail-api-development-app.yaml
-  ###- guardrail-ingestion-development-app.yaml
+  - guardrail-processor-development-app.yaml
+  - guardrail-curator-development-app.yaml
+  - guardrail-api-development-app.yaml
+  - guardrail-ingestion-development-app.yaml
   ###- guardrail-web-development-app.yaml
   ###- guardrail-ui-development-app.yaml
