@@ -16,6 +16,12 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
+  ignoreDifferences:
+    - group: cert-manager.io
+      kind: ClusterIssuer
+      jqPathExpressions:
+        - .spec.acme.solvers[].http01.gatewayHTTPRoute.parentRefs[]?.group
+        - .spec.acme.solvers[].http01.gatewayHTTPRoute.parentRefs[]?.kind
   syncPolicy:
     automated:
       prune: true
