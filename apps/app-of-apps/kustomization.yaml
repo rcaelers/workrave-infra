@@ -7,11 +7,12 @@ resources:
   - tailscale-operator-app.yaml
   - tailscale-proxygroup-app.yaml
   - kyverno-app.yaml
+  - guardrail-setup-kyverno-app.yaml
   - ingress-nginx-app.yaml
   - cert-manager-app.yaml
   - victorialogs-app.yaml
   - fluent-bit-app.yaml
-  - guardrail-security-app.yaml
+  - guardrail-resources-app.yaml
   - dev
   # - prod
   - tailnet-admin-app.yaml

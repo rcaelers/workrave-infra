@@ -1,21 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guardrail-security
+  name: guardrail-setup-kyverno
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/compare-options: ServerSideDiff=true,IncludeMutationWebhook=true
 spec:
   project: default
   source:
     repoURL: https://github.com/rcaelers/workrave-infra.git
     targetRevision: main
-    path: apps/guardrail-security/base
+    path: apps/guardrail-setup-kyverno/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: guardrail-dev
+    namespace: kyverno
   syncPolicy:
     automated:
       prune: true
@@ -23,3 +24,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
