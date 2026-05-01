@@ -16,16 +16,19 @@ data:
     # Execute SurrealQL - reads SQL text from stdin, returns JSON
     # Fails if SurrealDB returns any statement with status ERR.
     surql() {
-      __r=$(curl -sf \
+      if ! __r=$(curl -sS \
         -X POST "${SURREAL_URL}/sql" \
         -H "Accept: application/json" \
         -H "Content-Type: text/plain" \
         -H "Surreal-NS: ${SURREAL_NS}" \
         -H "Surreal-DB: ${SURREAL_DB}" \
         -u "${SURREAL_USER}:${SURREAL_PASS}" \
-        --data-binary @-)
-      if printf '%s' "$__r" | jq -e 'map(select(.status == "ERR")) | length > 0' >/dev/null 2>&1; then
-        log "SurrealDB error: $(printf '%s' "$__r" | jq -r '[.[] | select(.status == "ERR") | (.detail // .result | tostring)] | join("; ")' 2>/dev/null || printf '%s' "$__r")" >&2
+        --data-binary @-); then
+        log "SurrealDB request failed" >&2
+        return 1
+      fi
+      if printf '%s' "$__r" | jq -e 'if type == "object" and has("code") then true elif type == "array" then ([.[] | select(.status == "ERR")] | length > 0) else false end' >/dev/null 2>&1; then
+        log "SurrealDB error: $(printf '%s' "$__r" | jq -r 'if type == "array" then [.[] | select(.status == "ERR") | (.detail // .result // tostring)] | join("; ") elif type == "object" then (.information // .description // .details // tostring) else tostring end' 2>/dev/null || printf '%s' "$__r")" >&2
         return 1
       fi
       printf '%s\n' "$__r"
@@ -61,19 +64,13 @@ data:
       printf "
         LET \$old = type::record('products', type::uuid('%s'));
         LET \$new = type::record('products', '%s');
-        LET \$content = (SELECT * EXCEPT id FROM ONLY \$old);
-        IF \$content IS NOT NONE THEN
-          IF (SELECT id FROM ONLY \$new LIMIT 1).id IS NONE THEN
-            CREATE \$new CONTENT \$content;
-          END;
-          UPDATE user_access  SET product_id = \$new WHERE product_id = \$old;
-          UPDATE crashes      SET product_id = \$new WHERE product_id = \$old;
-          UPDATE crash_groups SET product_id = \$new WHERE product_id = \$old;
-          UPDATE symbols      SET product_id = \$new WHERE product_id = \$old;
-          UPDATE api_tokens   SET product_id = \$new WHERE product_id = \$old;
-          UPDATE annotations  SET product_id = \$new WHERE product_id = \$old;
-          DELETE \$old;
-        END;
+        UPDATE user_access  SET product_id = \$new WHERE product_id = \$old;
+        UPDATE crashes      SET product_id = \$new WHERE product_id = \$old;
+        UPDATE crash_groups SET product_id = \$new WHERE product_id = \$old;
+        UPDATE symbols      SET product_id = \$new WHERE product_id = \$old;
+        UPDATE api_tokens   SET product_id = \$new WHERE product_id = \$old;
+        UPDATE annotations  SET product_id = \$new WHERE product_id = \$old;
+        DELETE \$old;
       " "$migrate_uuid" "$migrate_uuid" | surql
     done
     log "UUID-to-string key migration complete"
@@ -132,7 +129,7 @@ data:
 
       printf "CREATE type::record('api_tokens', '%s') CONTENT {
         description: '%s',
-        token_id: '%s',
+        token_id: type::uuid('%s'),
         token_hash: '%s',
         product_id: type::record('products', '%s'),
         entitlements: ['%s'],
