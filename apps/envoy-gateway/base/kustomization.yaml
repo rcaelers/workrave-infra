@@ -8,4 +8,5 @@ resources:
   - gatewayclass.yaml
   - gateway.yaml
   - http-redirect.yaml
+  - certificates.yaml
 
