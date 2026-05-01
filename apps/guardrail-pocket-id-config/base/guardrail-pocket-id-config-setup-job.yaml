@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: guardrail-auth-setup
+  name: guardrail-pocket-id-config-setup
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
@@ -31,11 +31,11 @@ spec:
       volumes:
         - name: scripts
           configMap:
-            name: guardrail-auth-setup-script
+            name: guardrail-pocket-id-config-setup-script
             defaultMode: 0755
         - name: config
           configMap:
             name: guardrail-config
         - name: setup-config
           configMap:
-            name: guardrail-auth-config
+            name: guardrail-pocket-id-config-config

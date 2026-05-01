@@ -14,6 +14,6 @@ resources:
   ###- guardrail-api-development-app.yaml
   ###- guardrail-ingestion-development-app.yaml
   - pocket-id-development-app.yaml
-  ###- guardrail-auth-development-app.yaml
+  - guardrail-pocket-id-config-development-app.yaml
   ###- guardrail-web-development-app.yaml
   ###- guardrail-ui-development-app.yaml

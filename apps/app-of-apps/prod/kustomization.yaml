@@ -14,6 +14,6 @@ resources:
   #- guardrail-api-production-app.yaml
   #- guardrail-ingestion-production-app.yaml
   #- pocket-id-production-app.yaml
-  #- guardrail-auth-production-app.yaml
+  #- guardrail-pocket-id-config-production-app.yaml
   #- guardrail-web-production-app.yaml
   #- guardrail-ui-production-app.yaml
