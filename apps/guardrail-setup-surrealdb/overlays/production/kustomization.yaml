@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: guardrail-prd
+resources:
+  - ../../base
+  - guardrail-setup-surrealdb-secrets.yaml
+configMapGenerator:
+  - name: guardrail-setup-surrealdb-config
+    literals:
+      - WORKRAVE_PRODUCT_ID=17638AE6-CAC9-43E2-BFDE-8E2150896740
+      - WORKRAVE_DEMO_PRODUCT_ID=5EA11EBA-D762-4B50-AEC6-3409596E617F
+    options:
+      disableNameSuffixHash: true

@@ -22,7 +22,7 @@ spec:
           app: guardrail-curator
     - podSelector:
         matchLabels:
-          app: guardrail-setup
+          app: guardrail-setup-surrealdb
     - podSelector:
         matchLabels:
           app: guardrail-web

@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: argocd
 resources:
   ###- garage-development-app.yaml
-  ###- guardrail-config-development-app.yaml
+  - guardrail-config-development-app.yaml
   ###- guardrail-surrealdb-development-app.yaml
   - valkey-development-app.yaml
   ###- guardrail-processor-development-app.yaml
@@ -13,5 +13,6 @@ resources:
   ###- guardrail-ingestion-development-app.yaml
   - pocket-id-development-app.yaml
   - guardrail-pocket-id-config-development-app.yaml
+  ###- guardrail-setup-surrealdb-development-app.yaml
   ###- guardrail-web-development-app.yaml
   ###- guardrail-ui-development-app.yaml

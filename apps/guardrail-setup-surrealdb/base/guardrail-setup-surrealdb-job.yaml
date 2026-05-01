@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: guardrail-setup
+  name: guardrail-setup-surrealdb
   annotations:
     argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookFailed
@@ -10,7 +10,7 @@ spec:
   template:
     metadata:
       labels:
-        app: guardrail-setup
+        app: guardrail-setup-surrealdb
     spec:
       restartPolicy: OnFailure
       containers:
@@ -36,14 +36,14 @@ spec:
               value: guardrail
           envFrom:
             - secretRef:
-                name: guardrail-setup-secrets
+                name: guardrail-setup-surrealdb-secrets
             - configMapRef:
-                name: guardrail-setup-config
+                name: guardrail-setup-surrealdb-config
           volumeMounts:
             - name: scripts
               mountPath: /scripts
       volumes:
         - name: scripts
           configMap:
-            name: guardrail-setup-script
+            name: guardrail-setup-surrealdb-script
             defaultMode: 0755
