@@ -16,5 +16,5 @@ resources:
   - guardrail-curator-development-app.yaml
   - guardrail-api-development-app.yaml
   - guardrail-ingestion-development-app.yaml
-  ###- guardrail-web-development-app.yaml
+  - guardrail-web-development-app.yaml
   ###- guardrail-ui-development-app.yaml
