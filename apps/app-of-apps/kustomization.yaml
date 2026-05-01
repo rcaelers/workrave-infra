@@ -8,6 +8,7 @@ resources:
   - tailscale-proxygroup-app.yaml
   - kyverno-app.yaml
   - guardrail-setup-kyverno-app.yaml
+  - envoy-gateway-helm-app.yaml
   - envoy-gateway-app.yaml
   - cert-manager-app.yaml
   - victorialogs-app.yaml

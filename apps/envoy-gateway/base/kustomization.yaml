@@ -9,11 +9,3 @@ resources:
   - gateway.yaml
   - http-redirect.yaml
 
-helmCharts:
-  - name: gateway-helm
-    repo: oci://docker.io/envoyproxy
-    version: v1.7.2
-    releaseName: envoy-gateway
-    namespace: envoy-gateway-system
-    valuesFile: values.yaml
-    includeCRDs: true
