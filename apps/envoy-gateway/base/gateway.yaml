@@ -4,6 +4,7 @@ metadata:
   name: main-gateway
   namespace: envoy-gateway-system
   annotations:
+    argocd.argoproj.io/sync-wave: "3"
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   gatewayClassName: envoy
