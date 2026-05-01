@@ -52,6 +52,9 @@ patches:
       name: garage
     patch: |-
       - op: add
+        path: /spec/publishNotReadyAddresses
+        value: true
+      - op: add
         path: /spec/ports/-
         value:
           name: admin
