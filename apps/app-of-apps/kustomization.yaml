@@ -4,42 +4,14 @@ kind: Kustomization
 namespace: argocd
 resources:
   - sops-secrets-operator-app.yaml
-  - ingress-nginx-app.yaml
   - tailscale-operator-app.yaml
   - tailscale-proxygroup-app.yaml
+  - kyverno-app.yaml
+  - ingress-nginx-app.yaml
   - cert-manager-app.yaml
   - victorialogs-app.yaml
   - fluent-bit-app.yaml
-  - kyverno-app.yaml
   - guardrail-security-app.yaml
-  # - longhorn-app.yaml
-  # - cloudnativepg-operator-app.yaml
-  ###- garage-development-app.yaml
-  # - garage-production-app.yaml
-  ###- guardrail-config-development-app.yaml
-  #- guardrail-config-production-app.yaml
-  ###- guardrail-surrealdb-development-app.yaml
-  #- guardrail-surrealdb-production-app.yaml
-  #- guardrail-db-development-app.yaml
-  #- guardrail-db-production-app.yaml
-  #- guardrail-postgrest-development-app.yaml
-  #- guardrail-postgrest-production-app.yaml
-  - valkey-development-app.yaml
-  #- valkey-production-app.yaml
-  ###- guardrail-processor-development-app.yaml
-  #- guardrail-processor-production-app.yaml
-  ###- guardrail-curator-development-app.yaml
-  #- guardrail-curator-production-app.yaml
-  ###- guardrail-api-development-app.yaml
-  #- guardrail-api-production-app.yaml
-  ###- guardrail-ingestion-development-app.yaml
-  #- guardrail-ingestion-production-app.yaml
-  - pocket-id-development-app.yaml
-  #- pocket-id-production-app.yaml
-  ###- guardrail-auth-development-app.yaml
-  #- guardrail-auth-production-app.yaml
-  ###- guardrail-web-development-app.yaml
-  #- guardrail-web-production-app.yaml
-  ###- guardrail-ui-development-app.yaml
-  #- guardrail-ui-production-app.yaml
+  - dev
+  # - prod
   - tailnet-admin-app.yaml
