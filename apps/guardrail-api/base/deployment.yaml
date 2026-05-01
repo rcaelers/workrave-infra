@@ -62,7 +62,7 @@ spec:
               port: http
             initialDelaySeconds: 3
             periodSeconds: 10
-            timeoutSeconds: 15
+            timeoutSeconds: 30
             failureThreshold: 6
       volumes:
         - name: config-volume
