@@ -16,6 +16,18 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
+  ignoreDifferences:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      jqPathExpressions:
+        - .spec.addresses
+        - .spec.listeners[].tls.certificateRefs[].group
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      jqPathExpressions:
+        - .spec.parentRefs[].group
+        - .spec.parentRefs[].kind
+        - .spec.rules[].matches
   syncPolicy:
     automated:
       prune: true
