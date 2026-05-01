@@ -17,7 +17,14 @@ spec:
             spec:
               template:
                 spec:
-                  hostNetwork: true
-                  dnsPolicy: ClusterFirstWithHostNet
+                  containers:
+                    - name: envoy
+                      ports:
+                        - containerPort: 10080
+                          hostPort: 80
+                          protocol: TCP
+                        - containerPort: 10443
+                          hostPort: 443
+                          protocol: TCP
       envoyService:
         type: ClusterIP
