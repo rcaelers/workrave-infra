@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: inject-ca-certs
+          image: alpine:3.23.4
+          command: ["/bin/sh", "-c"]
+          args:
+            - apk add --no-cache ca-certificates >/dev/null 2>&1 && cp /etc/ssl/certs/ca-certificates.crt /shared-certs/ca-certificates.crt
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /shared-certs
+      containers:
+        - name: argocd-server
+          env:
+            - name: SSL_CERT_FILE
+              value: /shared-certs/ca-certificates.crt
+          volumeMounts:
+            - name: ca-bundle
+              mountPath: /shared-certs
+      volumes:
+        - name: ca-bundle
+          emptyDir: {}
