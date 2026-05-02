@@ -8,4 +8,4 @@ patches:
 namespace: guardrail-dev
 images:
 - name: ghcr.io/rcaelers/guardrail-server
-  newTag: "fb421c6"
+  newTag: "031c082"
