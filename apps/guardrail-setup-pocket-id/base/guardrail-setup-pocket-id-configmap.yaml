@@ -264,3 +264,42 @@ data:
     rm -f "$client_tmp"
 
     log "Guardrail auth bootstrap completed"
+
+    log "Ensuring ArgoCD OIDC client exists..."
+    argocd_client_tmp=$(mktemp)
+    argocd_client_status=$(request_status GET "$POCKET_ID_URL/api/oidc/clients/argocd" "$argocd_client_tmp")
+
+    argocd_client_payload=$(jq -nc '{
+      id: "argocd",
+      name: "ArgoCD",
+      callbackURLs: ["https://argocd.tailc4583f.ts.net/auth/callback"],
+      logoutCallbackURLs: ["https://argocd.tailc4583f.ts.net"],
+      isPublic: false,
+      pkceEnabled: true,
+      requiresReauthentication: false,
+      credentials: {
+        federatedIdentities: []
+      },
+      launchURL: "https://argocd.tailc4583f.ts.net",
+      isGroupRestricted: false
+    }')
+
+    case "$argocd_client_status" in
+      200)
+        request_json PUT "$POCKET_ID_URL/api/oidc/clients/argocd" "$argocd_client_payload" >/dev/null
+        log "Updated ArgoCD OIDC client"
+        ;;
+      404)
+        request_json POST "$POCKET_ID_URL/api/oidc/clients" "$argocd_client_payload" >/dev/null
+        log "Created ArgoCD OIDC client"
+        ;;
+      *)
+        log "Unexpected response while checking ArgoCD OIDC client: HTTP $argocd_client_status"
+        cat "$argocd_client_tmp"
+        rm -f "$argocd_client_tmp"
+        exit 1
+        ;;
+    esac
+    rm -f "$argocd_client_tmp"
+
+    log "ArgoCD OIDC client bootstrap completed"
