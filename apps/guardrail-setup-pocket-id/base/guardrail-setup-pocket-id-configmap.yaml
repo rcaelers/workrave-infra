@@ -302,4 +302,29 @@ data:
     esac
     rm -f "$argocd_client_tmp"
 
+    log "Ensuring ArgoCD OIDC client secret is stored in argocd-secret..."
+    K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    K8S_URL=https://kubernetes.default.svc
+
+    existing_secret=$(curl -s --cacert "$K8S_CA" \
+      -H "Authorization: Bearer $K8S_TOKEN" \
+      "$K8S_URL/api/v1/namespaces/argocd/secrets/argocd-secret" \
+      | jq -r '.data["oidc.pocket-id.clientSecret"] // empty')
+
+    if [ -z "$existing_secret" ]; then
+      client_secret=$(curl -s -X POST \
+        -H "X-API-KEY: $POCKET_ID_API_KEY" \
+        "$POCKET_ID_URL/api/oidc/clients/argocd/secret" | jq -r '.secret')
+      client_secret_b64=$(printf '%s' "$client_secret" | base64 | tr -d '\n')
+      curl -s -X PATCH --cacert "$K8S_CA" \
+        -H "Authorization: Bearer $K8S_TOKEN" \
+        -H "Content-Type: application/merge-patch+json" \
+        "$K8S_URL/api/v1/namespaces/argocd/secrets/argocd-secret" \
+        -d "{\"data\":{\"oidc.pocket-id.clientSecret\":\"$client_secret_b64\"}}" > /dev/null
+      log "ArgoCD OIDC client secret stored in argocd-secret"
+    else
+      log "ArgoCD OIDC client secret already exists in argocd-secret, skipping rotation"
+    fi
+
     log "ArgoCD OIDC client bootstrap completed"

@@ -6,3 +6,4 @@ namespace: argocd
 resources:
   - argocd-cm-patch.yaml
   - argocd-rbac-cm-patch.yaml
+  - pocket-id-setup-rbac.yaml

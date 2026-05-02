@@ -9,7 +9,7 @@ data:
     name: PocketID
     issuer: https://auth-dev.workrave.org
     clientID: argocd
-    clientSecret: ""
+    clientSecret: $oidc.pocket-id.clientSecret
     enablePKCEAuthentication: true
     requestedScopes:
       - openid
