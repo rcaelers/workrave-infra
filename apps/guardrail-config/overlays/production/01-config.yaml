@@ -27,8 +27,8 @@ object_storage:
   endpoint: http://garage:3900
   allow_http: true
 auth:
-  id: guardrail.workrave.org
-  origin: https://guardrail.workrave.org/
+  id: crashes.workrave.org
+  origin: https://crashes.workrave.org/
   name: Guardrail
   jwk:
     token_validity_in_minutes: 30
@@ -40,9 +40,9 @@ auth:
     issuer_url: https://auth.workrave.org
     internal_issuer_url: http://pocket-id
     client_id: guardrail
-    callback_url: https://guardrail.workrave.org/auth/oidc/callback
-    logout_callback_url: https://guardrail.workrave.org/
-    launch_url: https://guardrail.workrave.org/
+    callback_url: https://crashes.workrave.org/auth/oidc/callback
+    logout_callback_url: https://crashes.workrave.org/
+    launch_url: https://crashes.workrave.org/
     self_service_url: https://auth.workrave.org
     pkce: true
 provisioner:
