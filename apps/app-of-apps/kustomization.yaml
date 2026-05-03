@@ -12,6 +12,7 @@ resources:
   - envoy-gateway-helm-app.yaml
   - envoy-gateway-app.yaml
   - cert-manager-app.yaml
+  - reloader-app.yaml
   - victorialogs-app.yaml
   - fluent-bit-app.yaml
   - guardrail-resources-app.yaml

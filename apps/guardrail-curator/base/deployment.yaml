@@ -17,6 +17,9 @@ spec:
     metadata:
       labels:
         app: guardrail-curator
+      annotations:
+        configmap.reloader.stakater.com/reload: "guardrail-config"
+        secret.reloader.stakater.com/reload: "guardrail-secrets"
     spec:
       serviceAccountName: guardrail-curator-sa
       securityContext:

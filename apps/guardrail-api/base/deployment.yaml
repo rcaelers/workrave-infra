@@ -12,6 +12,9 @@ spec:
     metadata:
       labels:
         app: guardrail-api
+      annotations:
+        configmap.reloader.stakater.com/reload: "guardrail-config"
+        secret.reloader.stakater.com/reload: "guardrail-secrets"
     spec:
       serviceAccountName: guardrail-api-sa
       containers:

@@ -17,6 +17,9 @@ spec:
     metadata:
       labels:
         app: guardrail-processor
+      annotations:
+        configmap.reloader.stakater.com/reload: "guardrail-config"
+        secret.reloader.stakater.com/reload: "guardrail-secrets"
     spec:
       serviceAccountName: guardrail-processor-sa
       securityContext:

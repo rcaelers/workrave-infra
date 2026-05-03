@@ -12,6 +12,9 @@ spec:
     metadata:
       labels:
         app: guardrail-ingestion
+      annotations:
+        configmap.reloader.stakater.com/reload: "guardrail-config"
+        secret.reloader.stakater.com/reload: "guardrail-secrets"
     spec:
       serviceAccountName: guardrail-ingestion-sa
       securityContext:
