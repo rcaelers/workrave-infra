@@ -14,7 +14,7 @@ spec:
         app: guardrail-web
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-secrets,guardrail-oidc-secret"
     spec:
       containers:
         - name: guardrail-web
@@ -32,6 +32,9 @@ spec:
             - name: secret-volume
               mountPath: /config/02-secret.yaml
               subPath: secrets
+            - name: oidc-secret-volume
+              mountPath: /config/03-oidc-secret.yaml
+              subPath: 03-oidc-secret.yaml
           startupProbe:
             httpGet:
               path: /live
@@ -62,3 +65,7 @@ spec:
         - name: secret-volume
           secret:
             secretName: guardrail-secrets
+        - name: oidc-secret-volume
+          secret:
+            secretName: guardrail-oidc-secret
+            optional: true

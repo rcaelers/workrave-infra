@@ -221,6 +221,7 @@ data:
     fi
 
     log "Ensuring Guardrail OIDC client exists..."
+    oidc_client_created=false
     client_tmp=$(mktemp)
     client_status=$(request_status GET "$POCKET_ID_URL/api/oidc/clients/$OIDC_CLIENT_ID" "$client_tmp")
 
@@ -253,6 +254,7 @@ data:
       404)
         request_json POST "$POCKET_ID_URL/api/oidc/clients" "$client_payload" >/dev/null
         log "Created Guardrail OIDC client: $OIDC_CLIENT_ID"
+        oidc_client_created=true
         ;;
       *)
         log "Unexpected response while checking OIDC client: HTTP $client_status"
@@ -264,6 +266,44 @@ data:
     rm -f "$client_tmp"
 
     log "Guardrail auth bootstrap completed"
+
+    log "Ensuring Guardrail OIDC client secret is stored..."
+    K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    K8S_URL=https://kubernetes.default.svc
+    GUARDRAIL_NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    guardrail_secret_status=$(curl -s -o /dev/null -w '%{http_code}' --cacert "$K8S_CA" \
+      -H "Authorization: Bearer $K8S_TOKEN" \
+      "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets/guardrail-oidc-secret")
+
+    if [ "$guardrail_secret_status" = "404" ] || [ "$oidc_client_created" = "true" ]; then
+      new_client_secret=$(curl -s -X POST \
+        -H "X-API-KEY: $POCKET_ID_API_KEY" \
+        "$POCKET_ID_URL/api/oidc/clients/$OIDC_CLIENT_ID/secret" | jq -r '.secret')
+      yaml_b64=$(printf 'auth:\n  oidc:\n    client_secret: "%s"\n' "$new_client_secret" | base64 | tr -d '\n')
+      if [ "$guardrail_secret_status" = "404" ]; then
+        secret_payload=$(jq -nc \
+          --arg ns "$GUARDRAIL_NS" \
+          --arg data "$yaml_b64" \
+          '{"apiVersion":"v1","kind":"Secret","metadata":{"name":"guardrail-oidc-secret","namespace":$ns},"data":{"03-oidc-secret.yaml":$data}}')
+        curl -s -X POST --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/json" \
+          "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets" \
+          -d "$secret_payload" > /dev/null
+        log "Guardrail OIDC client secret created in guardrail-oidc-secret"
+      else
+        curl -s -X PATCH --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/merge-patch+json" \
+          "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets/guardrail-oidc-secret" \
+          -d "{\"data\":{\"03-oidc-secret.yaml\":\"$yaml_b64\"}}" > /dev/null
+        log "Guardrail OIDC client secret updated in guardrail-oidc-secret (client was recreated)"
+      fi
+    else
+      log "Guardrail OIDC client secret already exists in guardrail-oidc-secret, skipping"
+    fi
 
     log "Ensuring ArgoCD OIDC client exists..."
     argocd_client_tmp=$(mktemp)
@@ -303,10 +343,6 @@ data:
     rm -f "$argocd_client_tmp"
 
     log "Ensuring ArgoCD OIDC client secret is stored in argocd-secret..."
-    K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-    K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    K8S_URL=https://kubernetes.default.svc
-
     existing_secret=$(curl -s --cacert "$K8S_CA" \
       -H "Authorization: Bearer $K8S_TOKEN" \
       "$K8S_URL/api/v1/namespaces/argocd/secrets/argocd-secret" \
