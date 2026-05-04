@@ -13,4 +13,4 @@ patches:
       name: guardrail-ui
 images:
   - name: ghcr.io/rcaelers/guardrail-ui
-    newTag: "8e1ebcc"
+    newTag: "210b908"
