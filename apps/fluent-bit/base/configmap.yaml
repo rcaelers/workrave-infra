@@ -29,22 +29,21 @@ data:
         Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
         Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
         Merge_Log           On
-        Keep_Log            Off
+        Keep_Log            On
         K8S-Logging.Parser  On
         K8S-Logging.Exclude On
         Labels              On
         Annotations         Off
 
     [OUTPUT]
-        Name          loki
-        Match         kube.*
-        Host          victorialogs.monitoring.svc.cluster.local
-        Port          9428
-        URI           /insert/loki/api/v1/push
-        Labels        job=fluent-bit
-        label_keys    $kubernetes['namespace_name'],$kubernetes['pod_name'],$kubernetes['container_name']
-        line_format   json
-        remove_keys   stream
+        Name              http
+        Match             kube.*
+        Host              victorialogs.monitoring.svc.cluster.local
+        Port              9428
+        URI               /insert/jsonline?_stream_fields=kubernetes.namespace_name,kubernetes.pod_name,kubernetes.container_name&_msg_field=log,message,msg&_time_field=date
+        Format            json_lines
+        Json_date_format  iso8601
+        Compress          gzip
 
   parsers.conf: |
     [PARSER]
