@@ -8,6 +8,8 @@ spec:
       app: fluent-bit
   template:
     metadata:
+      annotations:
+        configmap.reloader.stakater.com/reload: "fluent-bit-config"
       labels:
         app: fluent-bit
     spec:
