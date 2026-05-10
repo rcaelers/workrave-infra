@@ -5,6 +5,7 @@ metadata:
   namespace: argocd
 data:
   policy.csv: |
+    g, admin, role:admin
     g, rob.caelers@gmail.com, role:admin
   policy.default: role:readonly
   scopes: '[groups, email]'
