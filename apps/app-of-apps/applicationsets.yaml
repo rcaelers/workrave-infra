@@ -73,11 +73,6 @@ spec:
                   namespace: envoy-gateway-system
                   syncWave: "25"
                   serverSideApply: "true"
-                - appName: ingress-nginx
-                  path: apps/nginx-ingress/base
-                  namespace: ingress-nginx
-                  syncWave: "30"
-                  serverSideApply: "true"
                 - appName: cert-manager
                   path: apps/cert-manager/base
                   namespace: cert-manager
