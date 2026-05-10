@@ -37,6 +37,7 @@ spec:
                   namespace: sops
                   syncWave: "10"
                   serverSideApply: "true"
+                  kubeVersion: "1.35.0"
                 - appName: kyverno
                   path: apps/kyverno/base
                   namespace: kyverno
@@ -227,6 +228,10 @@ spec:
         path: {{ printf "apps/argocd-config/overlays/%s" (index .metadata.labels "workrave.org/environment") | quote }}
         {{- else }}
         path: {{ .path | quote }}
+        {{- end }}
+        {{- if ne (dig "kubeVersion" "" .) "" }}
+        kustomize:
+          kubeVersion: {{ dig "kubeVersion" "" . | quote }}
         {{- end }}
       {{- end }}
       {{- if eq (dig "ignoreProfile" "" .) "cert-manager" }}
