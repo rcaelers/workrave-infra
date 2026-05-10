@@ -223,7 +223,11 @@ spec:
         {{- else }}
         targetRevision: staging
         {{- end }}
+        {{- if eq .appName "argocd-config" }}
+        path: {{ printf "apps/argocd-config/overlays/%s" (index .metadata.labels "workrave.org/environment") | quote }}
+        {{- else }}
         path: {{ .path | quote }}
+        {{- end }}
       {{- end }}
       {{- if eq (dig "ignoreProfile" "" .) "cert-manager" }}
       ignoreDifferences:
