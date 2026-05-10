@@ -3,6 +3,29 @@ name: Update Guardrail Images
 on:
   repository_dispatch:
     types: [update-dev-images, update-prod-images]
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: Branch in workrave-infra to update
+        required: true
+        default: main
+        type: choice
+        options:
+          - main
+          - staging
+      sha:
+        description: Guardrail commit SHA for short-SHA image tags
+        required: true
+        type: string
+      tag:
+        description: Image tag to write; defaults to the short SHA when omitted
+        required: false
+        type: string
+      services:
+        description: Space-separated services to update
+        required: true
+        default: server schema-sync ui
+        type: string
 
 jobs:
   update-images:
@@ -10,20 +33,26 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    env:
+      TARGET_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.target_branch || (github.event.action == 'update-dev-images' && 'staging' || 'main') }}
+      GUARDRAIL_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.sha || github.event.client_payload.sha }}
+      IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.client_payload.tag }}
+      SERVICES: ${{ github.event_name == 'workflow_dispatch' && inputs.services || github.event.client_payload.services }}
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
 
       - name: Update image tags
         run: |
-          SHA="${{ github.event.client_payload.sha }}"
-          SERVICES="${{ github.event.client_payload.services }}"
-          if [[ "${{ github.event.action }}" == "update-prod-images" ]]; then
-            OVERLAY="production"
+          SHA="${GUARDRAIL_SHA}"
+          SERVICES="${SERVICES}"
+          OVERLAY="cluster"
+          if [[ -n "${IMAGE_TAG}" ]]; then
             ENV_NAME="prod"
-            TAG="${{ github.event.client_payload.tag }}"
+            TAG="${IMAGE_TAG}"
           else
-            OVERLAY="development"
             ENV_NAME="dev"
             TAG="${SHA:0:7}"
           fi
@@ -52,8 +81,7 @@ jobs:
             IMAGE="ghcr.io/rcaelers/guardrail-${SERVICE}"
 
             if [[ "${SERVICE}" == "schema-sync" ]]; then
-              # schema-sync tag lives in the api overlay alongside the server tag
-              update_image "${IMAGE}" "${TAG}" "apps/guardrail-api/overlays/${OVERLAY}/kustomization.yaml"
+              update_image "${IMAGE}" "${TAG}" "apps/guardrail-setup-surrealdb-schema/overlays/${OVERLAY}/kustomization.yaml"
             elif [[ "${SERVICE}" == "server" ]]; then
               # single image, used by all five backend app deployments
               for APP in guardrail-api guardrail-curator guardrail-ingestion guardrail-processor guardrail-web; do
@@ -66,10 +94,10 @@ jobs:
 
       - name: Commit and push
         run: |
-          SHA="${{ github.event.client_payload.sha }}"
-          if [[ "${{ github.event.action }}" == "update-prod-images" ]]; then
+          SHA="${GUARDRAIL_SHA}"
+          if [[ -n "${IMAGE_TAG}" ]]; then
             ENV_NAME="prod"
-            TAG="${{ github.event.client_payload.tag }}"
+            TAG="${IMAGE_TAG}"
           else
             ENV_NAME="dev"
             TAG="${SHA:0:7}"
@@ -80,4 +108,4 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore: update ${ENV_NAME} images to ${TAG}"
-          git push
+          git push origin HEAD:${TARGET_BRANCH}
