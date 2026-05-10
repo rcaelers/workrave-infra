@@ -48,7 +48,6 @@ jobs:
         run: |
           SHA="${GUARDRAIL_SHA}"
           SERVICES="${SERVICES}"
-          OVERLAY="cluster"
           if [[ -n "${IMAGE_TAG}" ]]; then
             TAG="${IMAGE_TAG}"
           else
@@ -84,14 +83,14 @@ jobs:
             IMAGE="ghcr.io/rcaelers/guardrail-${SERVICE}"
 
             if [[ "${SERVICE}" == "schema-sync" ]]; then
-              update_image "${IMAGE}" "${TAG}" "apps/guardrail-setup-surrealdb-schema/overlays/${OVERLAY}/kustomization.yaml"
+              update_image "${IMAGE}" "${TAG}" "apps/guardrail-setup-surrealdb-schema/base/kustomization.yaml"
             elif [[ "${SERVICE}" == "server" ]]; then
               # single image, used by all five backend app deployments
               for APP in guardrail-api guardrail-curator guardrail-ingestion guardrail-processor guardrail-web; do
-                update_image "${IMAGE}" "${TAG}" "apps/${APP}/overlays/${OVERLAY}/kustomization.yaml"
+                update_image "${IMAGE}" "${TAG}" "apps/${APP}/base/kustomization.yaml"
               done
             else
-              update_image "${IMAGE}" "${TAG}" "apps/guardrail-${SERVICE}/overlays/${OVERLAY}/kustomization.yaml"
+              update_image "${IMAGE}" "${TAG}" "apps/guardrail-${SERVICE}/base/kustomization.yaml"
             fi
           done
 

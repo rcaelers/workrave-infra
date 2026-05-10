@@ -7,3 +7,7 @@ resources:
   - pvc.yaml
   - pocket-id-setup-configmap.yaml
   - pocket-id-setup-job.yaml
+  - pocket-id-secrets.yaml
+images:
+  - name: ghcr.io/pocket-id/pocket-id
+    newTag: v2.6.2

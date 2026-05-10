@@ -1,0 +1,17 @@
+[
+  {
+    "op": "replace",
+    "path": "/metadata/name",
+    "value": "auth-dev-workrave-org"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/secretName",
+    "value": "auth-dev-workrave-org-tls"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/dnsNames/0",
+    "value": "auth-dev.workrave.org"
+  }
+]

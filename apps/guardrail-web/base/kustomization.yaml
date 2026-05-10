@@ -4,3 +4,8 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
+patches:
+  - path: database-env-patch.yaml
+images:
+  - name: ghcr.io/rcaelers/guardrail-server
+    newTag: "2bc4f27"

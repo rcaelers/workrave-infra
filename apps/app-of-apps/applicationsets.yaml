@@ -21,7 +21,7 @@ spec:
           - list:
               elements:
                 - appName: argocd-config
-                  path: apps/argocd-config/base
+                  overlayRoot: apps/argocd-config/overlays
                   namespace: argocd
                   syncWave: "5"
                   createNamespace: "false"
@@ -47,7 +47,7 @@ spec:
                   ignoreProfile: kyverno
                   respectIgnoreDifferences: "true"
                 - appName: fluent-bit
-                  path: apps/fluent-bit/overlays/cluster
+                  overlayRoot: apps/fluent-bit/overlays
                   namespace: monitoring
                   syncWave: "20"
                 - appName: reloader
@@ -55,7 +55,7 @@ spec:
                   namespace: reloader
                   syncWave: "20"
                 - appName: victorialogs
-                  path: apps/victorialogs/overlays/cluster
+                  overlayRoot: apps/victorialogs/overlays
                   namespace: monitoring
                   syncWave: "20"
                 - appName: guardrail-setup-kyverno
@@ -80,78 +80,78 @@ spec:
                   serverSideApply: "true"
                   ignoreProfile: cert-manager
                 - appName: envoy-gateway
-                  path: apps/envoy-gateway/base
+                  overlayRoot: apps/envoy-gateway/overlays
                   namespace: envoy-gateway-system
                   syncWave: "35"
                   serverSideApply: "true"
                   ignoreProfile: envoy-gateway
                 - appName: garage-guardrail
-                  path: apps/garage/overlays/cluster
+                  overlayRoot: apps/garage/overlays
                   namespace: guardrail
                   syncWave: "40"
                   syncOptionsAnnotation: SkipDryRunOnMissingResource=true
                 - appName: pocket-id
-                  path: apps/pocket-id/overlays/cluster
+                  overlayRoot: apps/pocket-id/overlays
                   namespace: guardrail
                   syncWave: "40"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: valkey
-                  path: apps/valkey/overlays/cluster
+                  overlayRoot: apps/valkey/overlays
                   namespace: guardrail
                   syncWave: "40"
                 - appName: guardrail-config
-                  path: apps/guardrail-config/overlays/cluster
+                  overlayRoot: apps/guardrail-config/overlays
                   namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-setup-garage
-                  path: apps/guardrail-setup-garage/overlays/cluster
+                  overlayRoot: apps/guardrail-setup-garage/overlays
                   namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-setup-surrealdb-schema
-                  path: apps/guardrail-setup-surrealdb-schema/overlays/cluster
+                  overlayRoot: apps/guardrail-setup-surrealdb-schema/overlays
                   namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-api
-                  path: apps/guardrail-api/overlays/cluster
+                  overlayRoot: apps/guardrail-api/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-curator
-                  path: apps/guardrail-curator/overlays/cluster
+                  overlayRoot: apps/guardrail-curator/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-ingestion
-                  path: apps/guardrail-ingestion/overlays/cluster
+                  overlayRoot: apps/guardrail-ingestion/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-processor
-                  path: apps/guardrail-processor/overlays/cluster
+                  overlayRoot: apps/guardrail-processor/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-pocket-id
-                  path: apps/guardrail-setup-pocket-id/overlays/cluster
+                  overlayRoot: apps/guardrail-setup-pocket-id/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-web
-                  path: apps/guardrail-web/overlays/cluster
+                  overlayRoot: apps/guardrail-web/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-surrealdb-seed
-                  path: apps/guardrail-setup-surrealdb-seed/overlays/cluster
+                  overlayRoot: apps/guardrail-setup-surrealdb-seed/overlays
                   namespace: guardrail
                   syncWave: "70"
                 - appName: guardrail-ui
-                  path: apps/guardrail-ui/overlays/cluster
+                  overlayRoot: apps/guardrail-ui/overlays
                   namespace: guardrail
                   syncWave: "70"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-surrealdb
-                  path: apps/surrealdb/overlays/cluster
+                  overlayRoot: apps/surrealdb/overlays
                   namespace: guardrail
                   syncWave: "1402"
     - matrix:
@@ -219,8 +219,8 @@ spec:
         {{- else }}
         targetRevision: staging
         {{- end }}
-        {{- if eq .appName "argocd-config" }}
-        path: {{ printf "apps/argocd-config/overlays/%s" (index .metadata.labels "workrave.org/environment") | quote }}
+        {{- if ne (dig "overlayRoot" "" .) "" }}
+        path: {{ printf "%s/%s" (dig "overlayRoot" "" .) (index .metadata.labels "workrave.org/environment") | quote }}
         {{- else }}
         path: {{ .path | quote }}
         {{- end }}

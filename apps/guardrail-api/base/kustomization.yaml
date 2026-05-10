@@ -7,3 +7,9 @@ resources:
   - service-account.yaml
   - role.yaml
   - network-policy.yaml
+patches:
+  - path: rolebinding-patch.yaml
+  - path: database-env-patch.yaml
+images:
+  - name: ghcr.io/rcaelers/guardrail-server
+    newTag: "2bc4f27"

@@ -5,3 +5,6 @@ resources:
   - guardrail-setup-surrealdb-schema-start-job.yaml
   - guardrail-setup-surrealdb-schema-complete-job.yaml
   - network-policy.yaml
+images:
+  - name: ghcr.io/rcaelers/guardrail-schema-sync
+    newTag: "2bc4f27"

@@ -26,18 +26,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: crashes-dev-https
-      hostname: crashes-dev.workrave.org
-      port: 443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: crashes-dev-workrave-org-tls
-      allowedRoutes:
-        namespaces:
-          from: All
     - name: auth-https
       hostname: auth.workrave.org
       port: 443
@@ -47,18 +35,6 @@ spec:
         certificateRefs:
           - kind: Secret
             name: auth-workrave-org-tls
-      allowedRoutes:
-        namespaces:
-          from: All
-    - name: auth-dev-https
-      hostname: auth-dev.workrave.org
-      port: 443
-      protocol: HTTPS
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: auth-dev-workrave-org-tls
       allowedRoutes:
         namespaces:
           from: All

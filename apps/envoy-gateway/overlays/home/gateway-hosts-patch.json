@@ -1,0 +1,32 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/listeners/1/name",
+    "value": "crashes-dev-https"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/listeners/1/hostname",
+    "value": "crashes-dev.workrave.org"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/listeners/1/tls/certificateRefs/0/name",
+    "value": "crashes-dev-workrave-org-tls"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/listeners/2/name",
+    "value": "auth-dev-https"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/listeners/2/hostname",
+    "value": "auth-dev.workrave.org"
+  },
+  {
+    "op": "replace",
+    "path": "/spec/listeners/2/tls/certificateRefs/0/name",
+    "value": "auth-dev-workrave-org-tls"
+  }
+]

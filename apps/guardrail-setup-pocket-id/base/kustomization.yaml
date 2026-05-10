@@ -4,3 +4,9 @@ resources:
   - setup-serviceaccount.yaml
   - guardrail-setup-pocket-id-configmap.yaml
   - guardrail-setup-pocket-id-job.yaml
+configMapGenerator:
+  - name: guardrail-setup-pocket-id-config
+    options:
+      disableNameSuffixHash: true
+    files:
+      - setup-config.yaml
