@@ -50,11 +50,14 @@ jobs:
           SERVICES="${SERVICES}"
           OVERLAY="cluster"
           if [[ -n "${IMAGE_TAG}" ]]; then
-            ENV_NAME="prod"
             TAG="${IMAGE_TAG}"
           else
-            ENV_NAME="dev"
             TAG="${SHA:0:7}"
+          fi
+          if [[ "${TARGET_BRANCH}" == "main" ]]; then
+            ENV_NAME="prod"
+          else
+            ENV_NAME="dev"
           fi
 
           update_image() {
@@ -96,11 +99,14 @@ jobs:
         run: |
           SHA="${GUARDRAIL_SHA}"
           if [[ -n "${IMAGE_TAG}" ]]; then
-            ENV_NAME="prod"
             TAG="${IMAGE_TAG}"
           else
-            ENV_NAME="dev"
             TAG="${SHA:0:7}"
+          fi
+          if [[ "${TARGET_BRANCH}" == "main" ]]; then
+            ENV_NAME="prod"
+          else
+            ENV_NAME="dev"
           fi
 
           git config user.name "github-actions[bot]"
