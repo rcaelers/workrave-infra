@@ -8,4 +8,5 @@ helmCharts:
     repo: https://isindir.github.io/sops-secrets-operator
     version: 0.26.0
     releaseName: sops
+    includeCRDs: true
     valuesFile: values.yaml
