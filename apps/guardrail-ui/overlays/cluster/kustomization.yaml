@@ -5,4 +5,4 @@ resources:
   - ../../base
 images:
   - name: ghcr.io/rcaelers/guardrail-ui
-    newTag: production
+    newTag: "2bc4f27"
