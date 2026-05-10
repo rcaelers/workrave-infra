@@ -1,0 +1,27 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/acme/solvers",
+    "value": [
+      {
+        "selector": {
+          "dnsZones": [
+            "workrave.org"
+          ]
+        },
+        "dns01": {
+          "webhook": {
+            "groupName": "acme.workrave.org",
+            "solverName": "linode",
+            "config": {
+              "apiKeySecretRef": {
+                "name": "linode-credentials",
+                "key": "token"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+]

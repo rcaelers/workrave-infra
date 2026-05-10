@@ -74,7 +74,7 @@ spec:
                   syncWave: "25"
                   serverSideApply: "true"
                 - appName: cert-manager
-                  path: apps/cert-manager/base
+                  overlayRoot: apps/cert-manager/overlays
                   namespace: cert-manager
                   syncWave: "30"
                   serverSideApply: "true"
@@ -180,6 +180,26 @@ spec:
                   syncWave: "40"
                   createNamespace: "false"
                   serverSideApply: "true"
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  workrave.org/environment: home
+          - list:
+              elements:
+                - appName: cert-manager-linode-webhook
+                  sourceType: gitHelm
+                  repoURL: https://github.com/linode/cert-manager-webhook-linode.git
+                  targetRevision: v0.4.1
+                  path: deploy/cert-manager-webhook-linode
+                  releaseName: cert-manager-webhook-linode
+                  groupName: acme.workrave.org
+                  imageTag: v0.4.1
+                  namespace: cert-manager
+                  syncWave: "32"
+                  createNamespace: "false"
+                  serverSideApply: "true"
   template:
     metadata:
       name: '{{ .appName }}'
@@ -207,6 +227,26 @@ spec:
         chart: {{ .chart | quote }}
         repoURL: {{ .repoURL | quote }}
         targetRevision: {{ .chartVersion | quote }}
+      {{- else if eq (dig "sourceType" "git" .) "gitHelm" }}
+      source:
+        repoURL: {{ .repoURL | quote }}
+        targetRevision: {{ .targetRevision | quote }}
+        path: {{ .path | quote }}
+        helm:
+          releaseName: {{ dig "releaseName" .appName . | quote }}
+          parameters:
+            - name: api.groupName
+              value: {{ dig "groupName" "" . | quote }}
+            - name: certManager.namespace
+              value: {{ .namespace | quote }}
+            - name: certManager.serviceAccountName
+              value: cert-manager
+            - name: deployment.secretName
+              value: linode-credentials
+            - name: deployment.secretKey
+              value: token
+            - name: image.tag
+              value: {{ dig "imageTag" "" . | quote }}
       {{- else }}
       source:
         {{- if eq (index .metadata.labels "workrave.org/environment") "home" }}
