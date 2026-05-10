@@ -5,3 +5,12 @@ namespace: envoy-gateway-system
 
 resources:
   - ../../base
+  - certificates.yaml
+
+patches:
+  - path: gateway-listeners-patch.json
+    target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: Gateway
+      name: main-gateway

@@ -1,0 +1,50 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/listeners/-",
+    "value": {
+      "name": "crashes-https",
+      "hostname": "crashes.workrave.org",
+      "port": 443,
+      "protocol": "HTTPS",
+      "tls": {
+        "mode": "Terminate",
+        "certificateRefs": [
+          {
+            "kind": "Secret",
+            "name": "crashes-workrave-org-tls"
+          }
+        ]
+      },
+      "allowedRoutes": {
+        "namespaces": {
+          "from": "All"
+        }
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/listeners/-",
+    "value": {
+      "name": "auth-https",
+      "hostname": "auth.workrave.org",
+      "port": 443,
+      "protocol": "HTTPS",
+      "tls": {
+        "mode": "Terminate",
+        "certificateRefs": [
+          {
+            "kind": "Secret",
+            "name": "auth-workrave-org-tls"
+          }
+        ]
+      },
+      "allowedRoutes": {
+        "namespaces": {
+          "from": "All"
+        }
+      }
+    }
+  }
+]

@@ -5,23 +5,12 @@ namespace: envoy-gateway-system
 
 resources:
   - ../../base
+  - certificates.yaml
 
 patches:
-  - path: gateway-hosts-patch.json
+  - path: gateway-listeners-patch.json
     target:
       group: gateway.networking.k8s.io
       version: v1
       kind: Gateway
       name: main-gateway
-  - path: crashes-certificate-patch.json
-    target:
-      group: cert-manager.io
-      version: v1
-      kind: Certificate
-      name: crashes-workrave-org
-  - path: auth-certificate-patch.json
-    target:
-      group: cert-manager.io
-      version: v1
-      kind: Certificate
-      name: auth-workrave-org

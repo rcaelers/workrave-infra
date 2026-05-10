@@ -1,0 +1,29 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: crashes-dev-workrave-org
+  namespace: envoy-gateway-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  secretName: crashes-dev-workrave-org-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - crashes-dev.workrave.org
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-dev-workrave-org
+  namespace: envoy-gateway-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  secretName: auth-dev-workrave-org-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - auth-dev.workrave.org
