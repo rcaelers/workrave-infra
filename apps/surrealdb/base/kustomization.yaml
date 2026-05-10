@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - network-policy.yaml
   - surrealdb-secrets.yaml
-  - tailnet-ingress.yaml
 helmCharts:
   - name: surrealdb
     repo: https://helm.surrealdb.com
