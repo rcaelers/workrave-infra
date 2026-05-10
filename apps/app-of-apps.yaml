@@ -23,7 +23,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/rcaelers/workrave-infra.git
+        repoURL: '{{ if eq (index .metadata.labels "workrave.org/environment") "production" }}https://github.com/rcaelers/workrave-infra.git{{ else }}https://k3s.home.krandor.org/rcaelers/workrave-infra.git{{ end }}'
         targetRevision: '{{ if eq (index .metadata.labels "workrave.org/environment") "production" }}main{{ else }}staging{{ end }}'
         path: apps/app-of-apps
       destination:

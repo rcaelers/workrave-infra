@@ -213,10 +213,11 @@ spec:
         targetRevision: {{ .chartVersion | quote }}
       {{- else }}
       source:
-        repoURL: https://github.com/rcaelers/workrave-infra.git
         {{- if eq (index .metadata.labels "workrave.org/environment") "production" }}
+        repoURL: https://github.com/rcaelers/workrave-infra.git
         targetRevision: main
         {{- else }}
+        repoURL: https://k3s.home.krandor.org/rcaelers/workrave-infra.git
         targetRevision: staging
         {{- end }}
         {{- if eq .appName "argocd-config" }}
