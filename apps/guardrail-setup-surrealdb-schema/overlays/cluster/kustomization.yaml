@@ -7,4 +7,4 @@ resources:
 
 images:
   - name: ghcr.io/rcaelers/guardrail-schema-sync
-    newTag: production
+    newTag: "2bc4f27"

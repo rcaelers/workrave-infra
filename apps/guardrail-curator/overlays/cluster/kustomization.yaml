@@ -8,4 +8,4 @@ patches:
 namespace: guardrail
 images:
 - name: ghcr.io/rcaelers/guardrail-server
-  newTag: production
+  newTag: "2bc4f27"
