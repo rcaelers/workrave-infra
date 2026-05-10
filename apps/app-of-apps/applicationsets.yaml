@@ -1,0 +1,267 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workrave-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                matchExpressions:
+                  - key: workrave.org/environment
+                    operator: In
+                    values:
+                      - production
+                      - home
+          - list:
+              elements:
+                - appName: argocd-config
+                  path: apps/argocd-config/base
+                  namespace: argocd
+                  syncWave: "5"
+                  createNamespace: "false"
+                  serverSideApply: "true"
+                  prune: "false"
+                - appName: guardrail-resources
+                  path: apps/guardrail-resources/base
+                  namespace: guardrail-prd
+                  syncWave: "10"
+                  serverSideApply: "true"
+                - appName: sops-secrets-operator
+                  path: apps/sops-secrets-operator/base
+                  namespace: sops
+                  syncWave: "10"
+                  serverSideApply: "true"
+                - appName: kyverno
+                  path: apps/kyverno/base
+                  namespace: kyverno
+                  syncWave: "10"
+                  serverSideApply: "true"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                  ignoreProfile: kyverno
+                  respectIgnoreDifferences: "true"
+                - appName: fluent-bit
+                  path: apps/fluent-bit/overlays/cluster
+                  namespace: monitoring
+                  syncWave: "20"
+                - appName: reloader
+                  path: apps/reloader/base
+                  namespace: reloader
+                  syncWave: "20"
+                - appName: victorialogs
+                  path: apps/victorialogs/overlays/cluster
+                  namespace: monitoring
+                  syncWave: "20"
+                - appName: guardrail-setup-kyverno
+                  path: apps/guardrail-setup-kyverno/base
+                  namespace: kyverno
+                  syncWave: "20"
+                  serverSideApply: "true"
+                  skipDryRunOption: "true"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: envoy-gateway-helm
+                  sourceType: helm
+                  repoURL: docker.io/envoyproxy
+                  chart: gateway-helm
+                  chartVersion: v1.7.2
+                  namespace: envoy-gateway-system
+                  syncWave: "25"
+                  serverSideApply: "true"
+                - appName: ingress-nginx
+                  path: apps/nginx-ingress/base
+                  namespace: ingress-nginx
+                  syncWave: "30"
+                  serverSideApply: "true"
+                - appName: cert-manager
+                  path: apps/cert-manager/base
+                  namespace: cert-manager
+                  syncWave: "30"
+                  serverSideApply: "true"
+                  ignoreProfile: cert-manager
+                - appName: envoy-gateway
+                  path: apps/envoy-gateway/base
+                  namespace: envoy-gateway-system
+                  syncWave: "35"
+                  serverSideApply: "true"
+                  ignoreProfile: envoy-gateway
+                - appName: garage-guardrail
+                  path: apps/garage/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "40"
+                  syncOptionsAnnotation: SkipDryRunOnMissingResource=true
+                - appName: pocket-id
+                  path: apps/pocket-id/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "40"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: valkey
+                  path: apps/valkey/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "40"
+                - appName: guardrail-config
+                  path: apps/guardrail-config/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "50"
+                - appName: guardrail-setup-garage
+                  path: apps/guardrail-setup-garage/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "50"
+                - appName: guardrail-setup-surrealdb-schema
+                  path: apps/guardrail-setup-surrealdb-schema/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "50"
+                - appName: guardrail-api
+                  path: apps/guardrail-api/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-curator
+                  path: apps/guardrail-curator/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-ingestion
+                  path: apps/guardrail-ingestion/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-processor
+                  path: apps/guardrail-processor/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-setup-pocket-id
+                  path: apps/guardrail-setup-pocket-id/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-web
+                  path: apps/guardrail-web/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-setup-surrealdb-seed
+                  path: apps/guardrail-setup-surrealdb-seed/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "70"
+                - appName: guardrail-ui
+                  path: apps/guardrail-ui/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "70"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-surrealdb
+                  path: apps/surrealdb/overlays/cluster
+                  namespace: guardrail-prd
+                  syncWave: "1402"
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  workrave.org/environment: production
+          - list:
+              elements:
+                - appName: tailscale-operator
+                  path: apps/tailscale-operator/base
+                  namespace: tailscale
+                  syncWave: "10"
+                  serverSideApply: "true"
+                - appName: tailscale-proxygroup
+                  path: apps/tailscale-proxygroup/base
+                  namespace: tailscale
+                  syncWave: "30"
+                  createNamespace: "false"
+                  serverSideApply: "true"
+                  skipDryRunOption: "true"
+                - appName: tailnet-admin
+                  path: apps/tailnet-admin/base
+                  namespace: argocd
+                  syncWave: "40"
+                  createNamespace: "false"
+                  serverSideApply: "true"
+  template:
+    metadata:
+      name: '{{ .appName }}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      destination:
+        server: '{{ .server }}'
+        namespace: '{{ .namespace }}'
+  templatePatch: |
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{ .syncWave }}'
+        {{- if ne (dig "compareOptions" "" .) "" }}
+        argocd.argoproj.io/compare-options: {{ dig "compareOptions" "" . | quote }}
+        {{- end }}
+        {{- if ne (dig "syncOptionsAnnotation" "" .) "" }}
+        argocd.argoproj.io/sync-options: {{ dig "syncOptionsAnnotation" "" . | quote }}
+        {{- end }}
+    spec:
+      {{- if eq (dig "sourceType" "git" .) "helm" }}
+      source:
+        chart: {{ .chart | quote }}
+        repoURL: {{ .repoURL | quote }}
+        targetRevision: {{ .chartVersion | quote }}
+      {{- else }}
+      source:
+        repoURL: https://github.com/rcaelers/workrave-infra.git
+        {{- if eq (index .metadata.labels "workrave.org/environment") "production" }}
+        targetRevision: main
+        {{- else }}
+        targetRevision: staging
+        {{- end }}
+        path: {{ .path | quote }}
+      {{- end }}
+      {{- if eq (dig "ignoreProfile" "" .) "cert-manager" }}
+      ignoreDifferences:
+        - group: cert-manager.io
+          kind: ClusterIssuer
+          jqPathExpressions:
+            - .spec.acme.solvers[].http01.gatewayHTTPRoute.parentRefs[]?.group
+            - .spec.acme.solvers[].http01.gatewayHTTPRoute.parentRefs[]?.kind
+      {{- else if eq (dig "ignoreProfile" "" .) "envoy-gateway" }}
+      ignoreDifferences:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          jqPathExpressions:
+            - .spec.listeners[].tls?.certificateRefs[]?.group
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jqPathExpressions:
+            - .spec.parentRefs[]?.group
+            - .spec.parentRefs[]?.kind
+            - .spec.rules[]?.matches
+      {{- else if eq (dig "ignoreProfile" "" .) "kyverno" }}
+      ignoreDifferences:
+        - group: apiextensions.k8s.io
+          kind: CustomResourceDefinition
+          jqPathExpressions:
+            - .metadata.labels
+            - .metadata.annotations
+      {{- end }}
+      syncPolicy:
+        automated:
+          prune: {{ eq (dig "prune" "true" .) "true" }}
+          selfHeal: true
+        syncOptions:
+          {{- if eq (dig "createNamespace" "true" .) "true" }}
+          - CreateNamespace=true
+          {{- end }}
+          {{- if eq (dig "serverSideApply" "false" .) "true" }}
+          - ServerSideApply=true
+          {{- end }}
+          {{- if eq (dig "respectIgnoreDifferences" "false" .) "true" }}
+          - RespectIgnoreDifferences=true
+          {{- end }}
+          {{- if eq (dig "skipDryRunOption" "false" .) "true" }}
+          - SkipDryRunOnMissingResource=true
+          {{- end }}

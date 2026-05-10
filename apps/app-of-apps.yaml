@@ -1,26 +1,43 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: workrave-apps
+  name: workrave-apps-bootstrap
   namespace: argocd
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/rcaelers/workrave-infra.git
-    targetRevision: main
-    path: apps/app-of-apps
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  ignoreDifferences:
-    - group: argoproj.io
-      kind: Application
-      jqPathExpressions:
-        - .metadata.finalizers[]? | select(. == "post-delete-finalizer.argocd.argoproj.io" or . == "post-delete-finalizer.argocd.argoproj.io/cleanup" or . == "pre-delete-finalizer.argocd.argoproj.io" or . == "pre-delete-finalizer.argocd.argoproj.io/cleanup")
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - RespectIgnoreDifferences=true
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+            - key: workrave.org/environment
+              operator: In
+              values:
+                - production
+                - home
+  template:
+    metadata:
+      name: workrave-apps
+      namespace: argocd
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rcaelers/workrave-infra.git
+        targetRevision: '{{ if eq (index .metadata.labels "workrave.org/environment") "production" }}main{{ else }}staging{{ end }}'
+        path: apps/app-of-apps
+      destination:
+        server: '{{ .server }}'
+        namespace: argocd
+      ignoreDifferences:
+        - group: argoproj.io
+          kind: Application
+          jqPathExpressions:
+            - .metadata.finalizers[]? | select(. == "post-delete-finalizer.argocd.argoproj.io" or . == "post-delete-finalizer.argocd.argoproj.io/cleanup" or . == "pre-delete-finalizer.argocd.argoproj.io" or . == "pre-delete-finalizer.argocd.argoproj.io/cleanup")
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true

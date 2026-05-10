@@ -1,7 +1,0 @@
-[
-  {
-    "op": "replace",
-    "path": "/spec/hostnames/0",
-    "value": "auth-dev.workrave.org"
-  }
-]
