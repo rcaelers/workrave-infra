@@ -21,7 +21,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: pocket-id-setup
-    namespace: guardrail-dev
+    namespace: guardrail
   - kind: ServiceAccount
     name: pocket-id-setup
-    namespace: guardrail-prd
+    namespace: guardrail

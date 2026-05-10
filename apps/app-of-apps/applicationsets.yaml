@@ -29,7 +29,7 @@ spec:
                   prune: "false"
                 - appName: guardrail-resources
                   path: apps/guardrail-resources/base
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "10"
                   serverSideApply: "true"
                 - appName: sops-secrets-operator
@@ -92,72 +92,72 @@ spec:
                   ignoreProfile: envoy-gateway
                 - appName: garage-guardrail
                   path: apps/garage/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "40"
                   syncOptionsAnnotation: SkipDryRunOnMissingResource=true
                 - appName: pocket-id
                   path: apps/pocket-id/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "40"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: valkey
                   path: apps/valkey/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "40"
                 - appName: guardrail-config
                   path: apps/guardrail-config/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-setup-garage
                   path: apps/guardrail-setup-garage/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-setup-surrealdb-schema
                   path: apps/guardrail-setup-surrealdb-schema/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "50"
                 - appName: guardrail-api
                   path: apps/guardrail-api/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-curator
                   path: apps/guardrail-curator/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-ingestion
                   path: apps/guardrail-ingestion/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-processor
                   path: apps/guardrail-processor/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-pocket-id
                   path: apps/guardrail-setup-pocket-id/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-web
                   path: apps/guardrail-web/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-surrealdb-seed
                   path: apps/guardrail-setup-surrealdb-seed/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "70"
                 - appName: guardrail-ui
                   path: apps/guardrail-ui/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "70"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-surrealdb
                   path: apps/surrealdb/overlays/cluster
-                  namespace: guardrail-prd
+                  namespace: guardrail
                   syncWave: "1402"
     - matrix:
         generators:

@@ -23,8 +23,8 @@ spec:
               kinds:
                 - Pod
               namespaces:
-                - guardrail-dev
-                - guardrail-prd
+                - guardrail
+                - guardrail
       verifyImages:
         - imageReferences:
             - "ghcr.io/rcaelers/guardrail-*"

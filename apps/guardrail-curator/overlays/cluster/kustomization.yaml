@@ -5,7 +5,7 @@ resources:
 patches:
   - path: rolebinding-patch.yaml
   - path: database-env-patch.yaml
-namespace: guardrail-prd
+namespace: guardrail
 images:
 - name: ghcr.io/rcaelers/guardrail-server
   newTag: production

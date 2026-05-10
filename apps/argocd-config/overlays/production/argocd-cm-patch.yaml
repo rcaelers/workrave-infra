@@ -7,7 +7,7 @@ data:
   url: https://argocd.tailc4583f.ts.net
   oidc.config: |
     name: PocketID
-    issuer: https://auth-dev.workrave.org
+    issuer: https://auth.workrave.org
     clientID: argocd
     clientSecret: $oidc.pocket-id.clientSecret
     enablePKCEAuthentication: true
