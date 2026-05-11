@@ -39,6 +39,7 @@ patches:
                 - ALL
               add:
                 - CHOWN
+                - DAC_OVERRIDE
                 - FOWNER
           volumeMounts:
             - name: meta
