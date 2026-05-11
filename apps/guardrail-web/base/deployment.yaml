@@ -68,4 +68,3 @@ spec:
         - name: oidc-secret-volume
           secret:
             secretName: guardrail-oidc-secret
-            optional: true
