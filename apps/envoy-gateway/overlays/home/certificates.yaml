@@ -27,3 +27,18 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - auth-dev.workrave.org
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: garage-dev-workrave-org
+  namespace: envoy-gateway-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  secretName: garage-dev-workrave-org-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - garage-dev.workrave.org

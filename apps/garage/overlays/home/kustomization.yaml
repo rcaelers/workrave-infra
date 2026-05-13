@@ -4,5 +4,5 @@ namespace: guardrail
 
 resources:
   - ../../base
-  - s3-load-balancer.yaml
+  - s3-httproute.yaml
   - s3-network-policy.yaml
