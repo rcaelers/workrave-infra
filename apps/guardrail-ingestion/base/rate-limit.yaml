@@ -1,0 +1,26 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: guardrail-ingestion-rate-limit
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: guardrail-ingestion
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        - limit:
+            requests: 100
+            unit: Minute
+        - clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+            - sourceCIDR:
+                value: "::/0"
+                type: Distinct
+          limit:
+            requests: 4
+            unit: Hour

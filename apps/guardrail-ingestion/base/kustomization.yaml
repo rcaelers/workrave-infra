@@ -4,6 +4,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - httproute.yaml
+  - rate-limit.yaml
   - network-policy.yaml
   - service-account.yaml
   - role.yaml
