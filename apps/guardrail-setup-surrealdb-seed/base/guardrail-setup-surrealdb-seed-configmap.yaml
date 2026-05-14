@@ -75,9 +75,10 @@ data:
     done
     log "UUID-to-string key migration complete"
 
-    # Backfill product_token for any products created before the field was required.
-    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE product_token IS NONE OR product_token = '';" \
-      | surql
+    # Backfill product_token for any products created before the field was required,
+    # or where it was stored as a UUID type (from rand::uuid::v4()).
+    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE !type::is::string(product_token);" | surql
+    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE product_token = '';" | surql
     log "product_token backfill complete"
 
     # Create Workrave product if it doesn't exist; retrieve existing id otherwise
@@ -150,8 +151,6 @@ data:
       log "${description} bearer token: ${token}"
     }
 
-    create_token_if_needed "minidump-upload" "Minidump upload" \
-      "$WORKRAVE_MINIDUMP_TOKEN" "$WORKRAVE_MINIDUMP_TOKEN_ID" "$WORKRAVE_MINIDUMP_TOKEN_HASH"
     create_token_if_needed "symbol-upload" "Symbol upload" \
       "$WORKRAVE_SYMBOLS_TOKEN" "$WORKRAVE_SYMBOLS_TOKEN_ID" "$WORKRAVE_SYMBOLS_TOKEN_HASH"
 
@@ -166,7 +165,7 @@ data:
       color: '#9333ea',
       public: true,
       accepting_crashes: true,
-      product_token: rand::uuid::v4(),
+      product_token: string::lowercase(rand::string(24)),
       metadata: {},
       created_at: time::now(),
       updated_at: time::now()
