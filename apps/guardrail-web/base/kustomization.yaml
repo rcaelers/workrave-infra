@@ -8,4 +8,4 @@ patches:
   - path: database-env-patch.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "2553840"
+    newTag: "3eee699"
