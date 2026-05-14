@@ -4,3 +4,5 @@ namespace: guardrail
 
 resources:
   - ../../base
+  - httproute.yaml
+  - network-policy.yaml

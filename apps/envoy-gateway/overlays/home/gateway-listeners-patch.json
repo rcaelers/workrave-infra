@@ -70,5 +70,29 @@
         }
       }
     }
+  },
+  {
+    "op": "add",
+    "path": "/spec/listeners/-",
+    "value": {
+      "name": "surrealdb-dev-https",
+      "hostname": "surrealdb-dev.workrave.org",
+      "port": 443,
+      "protocol": "HTTPS",
+      "tls": {
+        "mode": "Terminate",
+        "certificateRefs": [
+          {
+            "kind": "Secret",
+            "name": "surrealdb-dev-workrave-org-tls"
+          }
+        ]
+      },
+      "allowedRoutes": {
+        "namespaces": {
+          "from": "All"
+        }
+      }
+    }
   }
 ]
