@@ -77,7 +77,7 @@ data:
 
     # Backfill product_token for any products created before the field was required,
     # or where it was stored as a UUID type (from rand::uuid::v4()).
-    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE !type::is::string(product_token);" | surql
+    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE !type::is_string(product_token);" | surql
     printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE product_token = '';" | surql
     log "product_token backfill complete"
 
