@@ -115,45 +115,6 @@ data:
     };" | surql
     log "Anonymous user record ensured"
 
-    # Insert a token record if none exists yet for the given entitlement+product.
-    # token_id is used as the SurrealDB record key (it is already unique).
-    # token, token_id, token_hash come from SOPS secrets; product_id from plain ConfigMap.
-    create_token_if_needed() {
-      entitlement="$1"
-      description="$2"
-      token="$3"
-      token_id="$4"
-      token_hash="$5"
-
-      count=$(printf "SELECT count() as count FROM api_tokens WHERE product_id = type::record('products', '%s') AND '%s' INSIDE entitlements GROUP ALL;" \
-        "$WORKRAVE_PRODUCT_ID" "$entitlement" \
-        | surql | jq -r '.[0].result[0].count // 0')
-
-      if [ "$count" != "0" ]; then
-        log "${description} token already exists, skipping"
-        return
-      fi
-
-      printf "CREATE type::record('api_tokens', '%s') CONTENT {
-        description: '%s',
-        token_id: type::uuid('%s'),
-        token_hash: '%s',
-        product_id: type::record('products', '%s'),
-        entitlements: ['%s'],
-        is_active: true,
-        created_at: time::now(),
-        updated_at: time::now()
-      };" \
-        "$token_id" "$description" "$token_id" "$token_hash" "$WORKRAVE_PRODUCT_ID" "$entitlement" \
-        | surql
-
-      log "${description} token created (id: ${token_id})"
-      log "${description} bearer token: ${token}"
-    }
-
-    create_token_if_needed "symbol-upload" "Symbol upload" \
-      "$WORKRAVE_SYMBOLS_TOKEN" "$WORKRAVE_SYMBOLS_TOKEN_ID" "$WORKRAVE_SYMBOLS_TOKEN_HASH"
-
     # ── Workrave Demo product ────────────────────────────────────────────
     # INSERT IGNORE creates the record only if it doesn't exist.
     # The subsequent UPDATE SET enforces public:true even on existing records.

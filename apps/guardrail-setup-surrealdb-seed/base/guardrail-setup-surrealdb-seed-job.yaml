@@ -35,8 +35,6 @@ spec:
             - name: DATABASE_NAME
               value: guardrail
           envFrom:
-            - secretRef:
-                name: guardrail-setup-surrealdb-seed-secrets
             - configMapRef:
                 name: guardrail-setup-surrealdb-seed-config
           volumeMounts:

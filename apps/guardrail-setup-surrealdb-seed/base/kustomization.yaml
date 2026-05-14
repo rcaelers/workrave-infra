@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - guardrail-setup-surrealdb-seed-configmap.yaml
   - guardrail-setup-surrealdb-seed-job.yaml
-  - guardrail-setup-surrealdb-seed-secrets.yaml
 configMapGenerator:
   - name: guardrail-setup-surrealdb-seed-config
     literals:
