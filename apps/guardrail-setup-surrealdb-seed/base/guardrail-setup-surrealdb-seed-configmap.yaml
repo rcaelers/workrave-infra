@@ -76,7 +76,7 @@ data:
     log "UUID-to-string key migration complete"
 
     # Backfill product_token for any products created before the field was required.
-    printf "UPDATE products SET product_token = rand::uuid::v4() WHERE product_token IS NONE OR product_token = '';" \
+    printf "UPDATE products SET product_token = string::lowercase(rand::string(24)) WHERE product_token IS NONE OR product_token = '';" \
       | surql
     log "product_token backfill complete"
 
@@ -92,7 +92,7 @@ data:
         color: '#9333ea',
         public: true,
         accepting_crashes: true,
-        product_token: rand::uuid::v4(),
+        product_token: string::lowercase(rand::string(24)),
         metadata: {},
         created_at: time::now(),
         updated_at: time::now()
