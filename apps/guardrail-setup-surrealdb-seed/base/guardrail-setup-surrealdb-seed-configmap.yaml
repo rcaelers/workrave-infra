@@ -75,6 +75,11 @@ data:
     done
     log "UUID-to-string key migration complete"
 
+    # Backfill product_token for any products created before the field was required.
+    printf "UPDATE products SET product_token = rand::uuid::v4() WHERE product_token IS NONE OR product_token = '';" \
+      | surql
+    log "product_token backfill complete"
+
     # Create Workrave product if it doesn't exist; retrieve existing id otherwise
     EXISTING_ID=$(printf "SELECT meta::id(id) as id FROM products WHERE name = 'Workrave' LIMIT 1;" \
       | surql | jq -r '.[0].result[0].id // empty')
@@ -87,6 +92,7 @@ data:
         color: '#9333ea',
         public: true,
         accepting_crashes: true,
+        product_token: rand::uuid::v4(),
         metadata: {},
         created_at: time::now(),
         updated_at: time::now()
@@ -160,6 +166,7 @@ data:
       color: '#9333ea',
       public: true,
       accepting_crashes: true,
+      product_token: rand::uuid::v4(),
       metadata: {},
       created_at: time::now(),
       updated_at: time::now()
