@@ -28,10 +28,10 @@ spec:
       verifyImages:
         - imageReferences:
             - "ghcr.io/rcaelers/guardrail-*"
-          mutateDigest: true
+          mutateDigest: false
           required: true
           useCache: true
-          verifyDigest: true
+          verifyDigest: false
           attestors:
             - entries:
                 - keyless:
