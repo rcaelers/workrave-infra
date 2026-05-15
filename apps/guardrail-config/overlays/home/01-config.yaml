@@ -32,9 +32,9 @@ auth:
   name: Guardrail
   jwk:
     token_validity_in_minutes: 30
-    public_key:  |
+    public_key: |
       -----BEGIN PUBLIC KEY-----
-      MCowBQYDK2VwAyEA+kw52Fhenb9GDfSq/LaV7RgxPv6f2M5RBB5vuoR6I4k=
+      MCowBQYDK2VwAyEAkwGw4x4MJDdwmDJ5sSs7rQajEqyV7aIxPHldQRI4c+0=
       -----END PUBLIC KEY-----
   oidc:
     issuer_url: https://auth-dev.workrave.org
