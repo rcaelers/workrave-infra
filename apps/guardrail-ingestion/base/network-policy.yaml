@@ -10,6 +10,9 @@ spec:
   - Ingress
   - Egress
   ingress:
+  - ports:
+    - protocol: TCP
+      port: 80
   egress:
   - to:
     - podSelector:
