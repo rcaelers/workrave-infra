@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: guardrail-processor-quota
+  name: guardrail-quota
 spec:
   hard:
     requests.cpu: "4"
