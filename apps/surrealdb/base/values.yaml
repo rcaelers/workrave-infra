@@ -5,6 +5,7 @@ image:
 surrealdb:
   path: rocksdb:///data
   port: 8000
+  log: trace
 
 podExtraEnv:
   - name: SURREAL_USER
