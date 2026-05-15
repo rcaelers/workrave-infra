@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: guardrail-processor-limit-range
+  name: guardrail-limit-range
 spec:
   limits:
   - default:
