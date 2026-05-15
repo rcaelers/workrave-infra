@@ -18,7 +18,9 @@ podExtraEnv:
       secretKeyRef:
         name: surrealdb-secrets
         key: rootPassword
-
+  - name: SURREAL_LOG
+    value: trace
+    
 podSecurityContext:
   fsGroup: 65532
 
