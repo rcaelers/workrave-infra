@@ -24,11 +24,10 @@ spec:
                 - Pod
               namespaces:
                 - guardrail
-                - guardrail
       verifyImages:
         - imageReferences:
             - "ghcr.io/rcaelers/guardrail-*"
-          mutateDigest: false
+          mutateDigest: true
           required: true
           useCache: true
           verifyDigest: false
