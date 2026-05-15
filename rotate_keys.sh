@@ -2,11 +2,16 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}" && pwd)"
+
+gen_alnum() {
+  local n="${1:-32}"
+  ( set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$n" )
+}
 
 # ── Generate new secrets ──────────────────────────────────────────────────────
 
-VALKEY_PASSWORD="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
+VALKEY_PASSWORD="$(gen_alnum 32)"
 
 GARAGE_ACCESS_KEY="GK$(openssl rand -hex 16)"
 GARAGE_SECRET_KEY="$(openssl rand -hex 32)"
@@ -14,13 +19,13 @@ GARAGE_RPC_SECRET="$(openssl rand -hex 32)"
 GARAGE_METRICS_TOKEN="$(openssl rand -base64 32)"
 GARAGE_ADMIN_TOKEN="$(openssl rand -base64 32)"
 
-POCKETID_STATIC_API_KEY="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
+POCKETID_STATIC_API_KEY="$(gen_alnum 32)"
 POCKETID_ENCRYPTION_KEY="$(openssl rand -base64 32)"
 
-SURREALDB_ROOT_PASSWORD="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
+SURREALDB_ROOT_PASSWORD="$(gen_alnum 32)"
 
-OIDC_CLIENT_SECRET="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
-RESEND_API_KEY="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
+OIDC_CLIENT_SECRET="$(gen_alnum 32)"
+RESEND_API_KEY="$(gen_alnum 32)"
 # Extract only the base64 body (single line) from the Ed25519 PKCS8 PEM
 JWK_PRIVATE_KEY_B64="$(openssl genpkey -algorithm Ed25519 2>/dev/null | grep -v '^-----' | tr -d '\n')"
 # Derive the public key from the generated private key
