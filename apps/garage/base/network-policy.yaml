@@ -20,6 +20,7 @@ spec:
                   - guardrail-curator
                   - guardrail-ingestion
                   - guardrail-processor
+                  - guardrail-web
       ports:
         - protocol: TCP
           port: 3900
