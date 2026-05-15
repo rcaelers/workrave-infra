@@ -7,4 +7,4 @@ resources:
   - network-policy.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-schema-sync
-    newTag: "6f65751"
+    newTag: "33113e7"
