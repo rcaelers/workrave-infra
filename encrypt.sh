@@ -4,7 +4,7 @@ set -u
 failed_files="$(mktemp "${TMPDIR:-/tmp}/encrypt-failed.XXXXXX")"
 trap 'rm -f "$failed_files"' EXIT
 
-find apps -type f \( -name '*.yaml' -o -name '*.yml' \) -print | sort | while IFS= read -r file; do
+find apps -type f \( -name '*.yaml' -o -name '*.yml' \) ! -name '*-template.*' -print | sort | while IFS= read -r file; do
   if ! grep -q '^kind: SopsSecret$' "$file"; then
     continue
   fi

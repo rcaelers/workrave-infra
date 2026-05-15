@@ -14,7 +14,7 @@ spec:
         app: guardrail-api
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets"
     spec:
       serviceAccountName: guardrail-api-sa
       containers:
@@ -41,8 +41,17 @@ spec:
             - name: config-volume
               mountPath: /config/01-config.yaml
               subPath: 01-config.yaml
-            - name: secret-volume
-              mountPath: /config/02-secret.yaml
+            - name: valkey-secret-volume
+              mountPath: /config/02-valkey-secret.yaml
+              subPath: secrets
+            - name: object-storage-secret-volume
+              mountPath: /config/03-object-storage-secret.yaml
+              subPath: secrets
+            - name: jwk-secret-volume
+              mountPath: /config/04-jwk-secret.yaml
+              subPath: secrets
+            - name: provisioner-secret-volume
+              mountPath: /config/05-provisioner-secret.yaml
               subPath: secrets
           startupProbe:
             httpGet:
@@ -71,6 +80,15 @@ spec:
         - name: config-volume
           configMap:
             name: guardrail-config
-        - name: secret-volume
+        - name: valkey-secret-volume
           secret:
-            secretName: guardrail-secrets
+            secretName: guardrail-valkey-secrets
+        - name: object-storage-secret-volume
+          secret:
+            secretName: guardrail-object-storage-secrets
+        - name: jwk-secret-volume
+          secret:
+            secretName: guardrail-jwk-secrets
+        - name: provisioner-secret-volume
+          secret:
+            secretName: guardrail-provisioner-secrets

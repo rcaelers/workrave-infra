@@ -2,4 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: guardrail
 resources:
-  - 02-secrets.yaml
+  - 02-valkey-secrets.yaml
+  - 03-object-storage-secrets.yaml
+  - 04-auth-oidc-secrets.yaml
+  - 04-auth-jwk-secrets.yaml
+  - 05-provisioner-secrets.yaml
+  - 06-database-secrets.yaml
+  - 07-email-secrets.yaml
