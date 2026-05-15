@@ -73,6 +73,8 @@ spec:
               cpu: "100m"
               memory: "64Mi"
           env:
+            - name: RUST_LOG
+              value: "guardrail=debug,apalis=debug,apalis_redis=debug"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
