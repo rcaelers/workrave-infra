@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   - limit-range.yaml
-  - resource-quota.yaml
+  # - resource-quota.yaml
