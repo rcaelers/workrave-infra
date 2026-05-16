@@ -9,6 +9,16 @@ gen_alnum() {
   ( set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$n" )
 }
 
+# ── Snapshot current SurrealDB password before rotation ──────────────────────
+
+OLD_SURREALDB_ROOT_PASSWORD=""
+if [ -f "${REPO_ROOT}/apps/surrealdb/base/surrealdb-secrets.yaml" ]; then
+  OLD_SURREALDB_ROOT_PASSWORD=$(
+    sops --decrypt "${REPO_ROOT}/apps/surrealdb/base/surrealdb-secrets.yaml" 2>/dev/null \
+      | awk '/rootPassword:/{print $2}'
+  )
+fi
+
 # ── Generate new secrets ──────────────────────────────────────────────────────
 
 VALKEY_PASSWORD="$(gen_alnum 32)"
@@ -122,6 +132,24 @@ render_and_encrypt \
 render_config \
   apps/guardrail-config/base/01-database-template.yaml \
   apps/guardrail-config/base/01-database.yaml
+
+# ── Push old SurrealDB password to cluster for the rotation Job ───────────────
+
+if [ -n "$OLD_SURREALDB_ROOT_PASSWORD" ]; then
+  if command -v kubectl >/dev/null 2>&1; then
+    kubectl create secret generic surrealdb-password-rotation \
+      --namespace surrealdb \
+      --from-literal=oldPassword="${OLD_SURREALDB_ROOT_PASSWORD}" \
+      --dry-run=client -o yaml | kubectl apply -f -
+    echo "  ✓ surrealdb-password-rotation (cluster secret)"
+  else
+    echo "  ⚠ kubectl not found — skipping surrealdb-password-rotation"
+    echo "    Run manually: kubectl create secret generic surrealdb-password-rotation \\"
+    echo "      --namespace surrealdb --from-literal=oldPassword='<old-password>'"
+  fi
+else
+  echo "  ⚠ no existing surrealdb-secrets found — skipping rotation secret"
+fi
 
 echo "Done."
 

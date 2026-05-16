@@ -29,6 +29,7 @@ spec:
             values:
               - guardrail-setup-surrealdb-schema
               - guardrail-setup-surrealdb-seed
+              - surrealdb-password-rotation
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: tailscale

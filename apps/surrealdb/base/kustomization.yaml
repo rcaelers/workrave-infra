@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - network-policy.yaml
   - surrealdb-secrets.yaml
+  - surrealdb-password-rotation-job.yaml
 helmCharts:
   - name: surrealdb
     repo: https://helm.surrealdb.com
