@@ -154,6 +154,7 @@ spec:
                   overlayRoot: apps/surrealdb/overlays
                   namespace: surrealdb
                   syncWave: "1402"
+                  ignoreProfile: pvc
     - matrix:
         generators:
           - clusters:
@@ -295,6 +296,12 @@ spec:
           jqPathExpressions:
             - .metadata.labels
             - .metadata.annotations
+      {{- else if eq (dig "ignoreProfile" "" .) "pvc" }}
+      ignoreDifferences:
+        - group: ""
+          kind: PersistentVolumeClaim
+          jsonPointers:
+            - /spec/volumeName
       {{- end }}
       syncPolicy:
         automated:
