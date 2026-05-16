@@ -27,8 +27,17 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: config-volume
-              mountPath: /config/01-config.yaml
-              subPath: 01-config.yaml
+              mountPath: /config/01-ingress.yaml
+              subPath: 01-ingress.yaml
+            - name: config-volume
+              mountPath: /config/01-database.yaml
+              subPath: 01-database.yaml
+            - name: config-volume
+              mountPath: /config/01-object-storage.yaml
+              subPath: 01-object-storage.yaml
+            - name: config-volume
+              mountPath: /config/01-web.yaml
+              subPath: 01-web.yaml
             - name: oidc-secret-volume
               mountPath: /config/04-oidc-secret.yaml
               subPath: secrets

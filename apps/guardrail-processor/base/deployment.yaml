@@ -87,8 +87,8 @@ spec:
                   key: secretKey
           volumeMounts:
             - name: config-volume
-              mountPath: /config/01-config.yaml
-              subPath: 01-config.yaml
+              mountPath: /config/01-object-storage.yaml
+              subPath: 01-object-storage.yaml
             - name: valkey-secret-volume
               mountPath: /config/02-valkey-secret.yaml
               subPath: secrets

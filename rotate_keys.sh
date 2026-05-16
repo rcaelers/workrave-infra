@@ -120,12 +120,8 @@ render_and_encrypt \
   apps/guardrail-config/base/07-email-secrets.yaml
 
 render_config \
-  apps/guardrail-config/overlays/home/01-config-template.yaml \
-  apps/guardrail-config/overlays/home/01-config.yaml
-
-render_config \
-  apps/guardrail-config/overlays/production/01-config-template.yaml \
-  apps/guardrail-config/overlays/production/01-config.yaml
+  apps/guardrail-config/base/01-database-template.yaml \
+  apps/guardrail-config/base/01-database.yaml
 
 echo "Done."
 

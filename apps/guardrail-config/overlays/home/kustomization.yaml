@@ -8,7 +8,7 @@ resources:
 
 configMapGenerator:
   - name: guardrail-config
+    behavior: merge
     files:
-      - 01-config.yaml
-    options:
-      disableNameSuffixHash: true
+      - 01-ingress.yaml
+      - 01-web.yaml

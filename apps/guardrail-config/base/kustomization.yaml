@@ -9,3 +9,11 @@ resources:
   - 05-provisioner-secrets.yaml
   - 06-database-secrets.yaml
   - 07-email-secrets.yaml
+
+configMapGenerator:
+  - name: guardrail-config
+    files:
+      - 01-database.yaml
+      - 01-object-storage.yaml
+    options:
+      disableNameSuffixHash: true
