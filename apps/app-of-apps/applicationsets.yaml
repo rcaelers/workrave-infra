@@ -155,6 +155,7 @@ spec:
                   namespace: surrealdb
                   syncWave: "1402"
                   ignoreProfile: pvc
+                  respectIgnoreDifferences: "true"
     - matrix:
         generators:
           - clusters:
