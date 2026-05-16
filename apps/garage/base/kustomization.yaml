@@ -8,7 +8,7 @@ helmGlobals:
 helmCharts:
   - name: garage
     releaseName: garage
-    namespace: guardrail
+    namespace: garage
     valuesFile: values.yaml
 patches:
   - target:
