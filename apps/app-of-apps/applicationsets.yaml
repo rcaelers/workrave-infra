@@ -97,7 +97,10 @@ spec:
                   overlayRoot: apps/pocket-id/overlays
                   namespace: guardrail
                   syncWave: "40"
+                  serverSideApply: "true"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                  ignoreProfile: pvc
+                  respectIgnoreDifferences: "true"
                 - appName: valkey
                   overlayRoot: apps/valkey/overlays
                   namespace: guardrail
