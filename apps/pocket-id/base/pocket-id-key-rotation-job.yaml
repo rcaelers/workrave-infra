@@ -57,7 +57,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: rotate
-          image: bitnami/kubectl:1.32
+          image: registry.k8s.io/kubectl:v1.32.0
           env:
             - name: OLD_KEY
               valueFrom:
