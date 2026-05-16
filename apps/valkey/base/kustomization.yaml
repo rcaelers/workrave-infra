@@ -10,3 +10,13 @@ helmCharts:
     version: 0.9.4
     releaseName: valkey
     valuesFile: values.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: valkey
+    patch: |-
+      - op: add
+        path: /spec/template/metadata/annotations
+        value:
+          secret.reloader.stakater.com/reload: "valkey-secrets"
