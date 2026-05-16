@@ -302,6 +302,7 @@ spec:
           kind: PersistentVolumeClaim
           jsonPointers:
             - /spec/volumeName
+            - /spec/storageClassName
       {{- end }}
       syncPolicy:
         automated:
