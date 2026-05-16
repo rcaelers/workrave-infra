@@ -58,6 +58,9 @@ spec:
                   overlayRoot: apps/victorialogs/overlays
                   namespace: monitoring
                   syncWave: "20"
+                  serverSideApply: "true"
+                  ignoreProfile: pvc
+                  respectIgnoreDifferences: "true"
                 - appName: guardrail-setup-kyverno
                   path: apps/guardrail-setup-kyverno/base
                   namespace: kyverno
