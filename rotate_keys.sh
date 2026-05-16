@@ -44,7 +44,6 @@ POCKETID_ENCRYPTION_KEY="$(openssl rand -base64 32)"
 
 SURREALDB_ROOT_PASSWORD="$(gen_alnum 32)"
 
-OIDC_CLIENT_SECRET="$(gen_alnum 32)"
 RESEND_API_KEY="$(gen_alnum 32)"
 # Extract only the base64 body (single line) from the Ed25519 PKCS8 PEM
 JWK_PRIVATE_KEY_B64="$(openssl genpkey -algorithm Ed25519 2>/dev/null | grep -v '^-----' | tr -d '\n')"
@@ -71,7 +70,6 @@ render_and_encrypt() {
     -e "s|%POCKETID_STATIC_API_KEY%|${POCKETID_STATIC_API_KEY}|g" \
     -e "s|%POCKETID_ENCRYPTION_KEY%|${POCKETID_ENCRYPTION_KEY}|g" \
     -e "s|%SURREALDB_ROOT_PASSWORD%|${SURREALDB_ROOT_PASSWORD}|g" \
-    -e "s|%OIDC_CLIENT_SECRET%|${OIDC_CLIENT_SECRET}|g" \
     -e "s|%RESEND_API_KEY%|${RESEND_API_KEY}|g" \
     -e "s|%JWK_PRIVATE_KEY_B64%|${JWK_PRIVATE_KEY_B64}|g" \
     "$template" > "$output"
@@ -118,10 +116,6 @@ render_and_encrypt \
 render_and_encrypt \
   apps/guardrail-config/base/03-object-storage-secrets-template.yaml \
   apps/guardrail-config/base/03-object-storage-secrets.yaml
-
-render_and_encrypt \
-  apps/guardrail-config/base/04-auth-oidc-secrets-template.yaml \
-  apps/guardrail-config/base/04-auth-oidc-secrets.yaml
 
 render_and_encrypt \
   apps/guardrail-config/base/04-auth-jwk-secrets-template.yaml \
