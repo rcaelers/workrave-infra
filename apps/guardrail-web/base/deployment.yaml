@@ -14,7 +14,7 @@ spec:
         app: guardrail-web
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-oidc-secrets,guardrail-jwk-secrets,guardrail-email-secrets"
+        secret.reloader.stakater.com/reload: "surrealdb-secrets,guardrail-oidc-secrets,guardrail-jwk-secrets,guardrail-email-secrets"
     spec:
       containers:
         - name: guardrail-web

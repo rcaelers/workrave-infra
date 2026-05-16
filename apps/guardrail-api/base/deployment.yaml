@@ -14,7 +14,7 @@ spec:
         app: guardrail-api
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets"
+        secret.reloader.stakater.com/reload: "surrealdb-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets"
     spec:
       serviceAccountName: guardrail-api-sa
       containers:
