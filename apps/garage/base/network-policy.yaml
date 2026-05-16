@@ -28,10 +28,7 @@ spec:
         - protocol: TCP
           port: 3900
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: guardrail
-          podSelector:
+        - podSelector:
             matchLabels:
               app: guardrail-setup-garage
       ports:
