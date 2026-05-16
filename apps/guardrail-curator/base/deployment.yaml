@@ -19,7 +19,7 @@ spec:
         app: guardrail-curator
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets"
     spec:
       serviceAccountName: guardrail-curator-sa
       securityContext:
@@ -91,6 +91,9 @@ spec:
             - name: database-secret-volume
               mountPath: /config/06-database-secret.yaml
               subPath: secrets
+            - name: jwk-secret-volume
+              mountPath: /config/04-jwk-secret.yaml
+              subPath: secrets
             - name: tmp-volume
               mountPath: /tmp
       volumes:
@@ -106,5 +109,8 @@ spec:
         - name: database-secret-volume
           secret:
             secretName: guardrail-database-secrets
+        - name: jwk-secret-volume
+          secret:
+            secretName: guardrail-jwk-secrets
         - name: tmp-volume
           emptyDir: {}
