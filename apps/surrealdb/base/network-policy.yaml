@@ -22,6 +22,11 @@ spec:
               - guardrail-api
               - guardrail-curator
               - guardrail-web
+    - podSelector:
+        matchExpressions:
+          - key: app
+            operator: In
+            values:
               - guardrail-setup-surrealdb-schema
               - guardrail-setup-surrealdb-seed
     - namespaceSelector:
