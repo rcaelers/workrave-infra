@@ -19,6 +19,16 @@ if [ -f "${REPO_ROOT}/apps/surrealdb/base/surrealdb-secrets.yaml" ]; then
   )
 fi
 
+# ── Snapshot current pocket-id encryption key before rotation ────────────────
+
+OLD_POCKETID_ENCRYPTION_KEY=""
+if [ -f "${REPO_ROOT}/apps/pocket-id/base/pocket-id-secrets.yaml" ]; then
+  OLD_POCKETID_ENCRYPTION_KEY=$(
+    sops --decrypt "${REPO_ROOT}/apps/pocket-id/base/pocket-id-secrets.yaml" 2>/dev/null \
+      | awk '/^ +ENCRYPTION_KEY:/{print $2}'
+  )
+fi
+
 # ── Generate new secrets ──────────────────────────────────────────────────────
 
 VALKEY_PASSWORD="$(gen_alnum 32)"
@@ -152,7 +162,23 @@ else
   echo "  ⚠ no existing surrealdb-secrets found — skipping rotation secret"
 fi
 
+# ── Push pocket-id encryption key rotation secret to cluster ─────────────────
+
+if [ -n "$OLD_POCKETID_ENCRYPTION_KEY" ]; then
+  if command -v kubectl >/dev/null 2>&1; then
+    kubectl create secret generic pocket-id-key-rotation \
+      --namespace guardrail \
+      --from-literal=oldKey="${OLD_POCKETID_ENCRYPTION_KEY}" \
+      --from-literal=newKey="${POCKETID_ENCRYPTION_KEY}" \
+      --dry-run=client -o yaml | kubectl apply -f -
+    echo "  ✓ pocket-id-key-rotation (cluster secret)"
+  else
+    echo "  ⚠ kubectl not found — skipping pocket-id-key-rotation"
+    echo "    Run manually: kubectl create secret generic pocket-id-key-rotation \\"
+    echo "      --namespace guardrail --from-literal=oldKey='<old-key>' --from-literal=newKey='<new-key>'"
+  fi
+else
+  echo "  ⚠ no existing pocket-id-secrets found — skipping rotation secret"
+fi
+
 echo "Done."
-
-
-

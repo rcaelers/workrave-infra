@@ -4,7 +4,7 @@ metadata:
   name: pocket-id
   annotations:
     argocd.argoproj.io/sync-options: Replace=true
-    secret.reloader.stakater.com/reload: "pocket-id-secrets"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   replicas: 1
   revisionHistoryLimit: 3

@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pocket-id-key-rotation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pocket-id-key-rotation
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["patch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["pocket-id-key-rotation"]
+  verbs: ["delete"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["pocket-id-secrets"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pocket-id-key-rotation
+subjects:
+- kind: ServiceAccount
+  name: pocket-id-key-rotation
+roleRef:
+  kind: Role
+  name: pocket-id-key-rotation
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pocket-id-key-rotation
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: pocket-id-key-rotation
+    spec:
+      serviceAccountName: pocket-id-key-rotation
+      restartPolicy: OnFailure
+      containers:
+        - name: rotate
+          image: bitnami/kubectl:1.32
+          env:
+            - name: OLD_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-key-rotation
+                  key: oldKey
+                  optional: true
+            - name: NEW_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-key-rotation
+                  key: newKey
+                  optional: true
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              if [ -z "${OLD_KEY:-}" ] || [ "${OLD_KEY}" = "${NEW_KEY:-}" ]; then
+                echo "No key rotation needed"
+              else
+                POD=$(kubectl get pods -n guardrail \
+                  -l app=pocket-id \
+                  --field-selector=status.phase=Running \
+                  -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+                if [ -z "$POD" ]; then
+                  echo "No running pocket-id pod found"
+                  exit 1
+                fi
+
+                echo "Rotating encryption key in pod $POD..."
+                kubectl exec -n guardrail "$POD" -- \
+                  pocket-id encryption-key-rotate --new-key "${NEW_KEY}"
+
+                echo "Waiting for K8s secret to reflect new key..."
+                i=0
+                until [ "$(kubectl get secret pocket-id-secrets -n guardrail \
+                    -o jsonpath='{.data.ENCRYPTION_KEY}' | base64 -d)" = "${NEW_KEY}" ]; do
+                  i=$((i+1))
+                  if [ "$i" -ge 30 ]; then echo "Timeout waiting for secret update"; exit 1; fi
+                  sleep 2
+                done
+
+                kubectl delete secret pocket-id-key-rotation -n guardrail \
+                  && echo "Rotation secret deleted" \
+                  || echo "Rotation secret already gone"
+              fi
+
+              echo "Restarting pocket-id to pick up updated secrets..."
+              NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+              kubectl patch deployment pocket-id -n guardrail \
+                -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/restartedAt\":\"${NOW}\"}}}}}"
+              kubectl rollout status deployment/pocket-id -n guardrail --timeout=120s
