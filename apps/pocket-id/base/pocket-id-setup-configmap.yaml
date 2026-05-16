@@ -44,7 +44,7 @@ data:
 
     log "Waiting for Pocket ID API..."
     attempt=0
-    until request_json GET "$POCKET_ID_URL/api/users" >/dev/null 2>&1; do
+    until curl -sf "$POCKET_ID_URL/healthz" >/dev/null 2>&1; do
       attempt=$((attempt + 1))
       if [ "$attempt" -ge 90 ]; then
         log "Pocket ID API did not become ready in time"
