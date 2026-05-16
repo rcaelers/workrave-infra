@@ -25,7 +25,10 @@ spec:
     - protocol: TCP
       port: 5432
   - to:
-    - podSelector:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: surrealdb
+      podSelector:
         matchLabels:
           app.kubernetes.io/name: surrealdb
     ports:
@@ -40,7 +43,10 @@ spec:
     - protocol: TCP
       port: 6379
   - to:
-    - podSelector:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: garage
+      podSelector:
         matchLabels:
           app.kubernetes.io/name: garage
           app.kubernetes.io/instance: garage
