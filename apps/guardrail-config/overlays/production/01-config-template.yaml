@@ -13,17 +13,17 @@ database:
   endpoint: ws://surrealdb:8000
   namespace: guardrail
   database: guardrail
+  jwk:
+    token_validity_in_minutes: 30
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      %JWK_PUBLIC_KEY_B64%
+      -----END PUBLIC KEY-----
 object_storage:
   region: us-east-1
   bucket: guardrail
   endpoint: http://garage:3900
   allow_http: true
-jwk:
-  token_validity_in_minutes: 30
-  public_key: |
-    -----BEGIN PUBLIC KEY-----
-    %JWK_PUBLIC_KEY_B64%
-    -----END PUBLIC KEY-----
 oidc:
   issuer_url: https://auth.workrave.org
   internal_issuer_url: http://pocket-id
