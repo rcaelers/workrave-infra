@@ -119,16 +119,16 @@ data:
       yq -r "$1 // \"\"" "$SETUP_CONFIG_FILE"
     }
 
-    SETTINGS_FILE=${SETTINGS_FILE:-/config/01-config.yaml}
+    SETTINGS_FILE=${SETTINGS_FILE:-/config/01-web.yaml}
     SETUP_CONFIG_FILE=${SETUP_CONFIG_FILE:-/setup/setup-config.yaml}
 
     POCKET_ID_URL=$(settings_value '.provisioner.pocket_id.api_url')
     POCKET_ID_PUBLIC_URL=$(settings_value '.provisioner.pocket_id.public_url')
-    OIDC_CLIENT_ID=$(settings_value '.auth.oidc.client_id')
-    OIDC_CLIENT_NAME=$(settings_value '.auth.name')
-    OIDC_CALLBACK_URL=$(settings_value '.auth.oidc.callback_url')
-    OIDC_LOGOUT_CALLBACK_URL=$(settings_value '.auth.oidc.logout_callback_url')
-    OIDC_LAUNCH_URL=$(settings_value '.auth.oidc.launch_url')
+    OIDC_CLIENT_ID=$(settings_value '.oidc.client_id')
+    OIDC_CLIENT_NAME=$(settings_value '.oidc.name // "Guardrail"')
+    OIDC_CALLBACK_URL=$(settings_value '.oidc.callback_url')
+    OIDC_LOGOUT_CALLBACK_URL=$(settings_value '.oidc.logout_callback_url')
+    OIDC_LAUNCH_URL=$(settings_value '.oidc.launch_url')
     POCKET_ID_ADMIN_USERNAME=$(setup_value '.pocket_id_admin.username')
     POCKET_ID_ADMIN_EMAIL=$(setup_value '.pocket_id_admin.email')
     POCKET_ID_ADMIN_FIRST_NAME=$(setup_value '.pocket_id_admin.first_name')
