@@ -12,10 +12,6 @@ processor:
     - "WinMainCRTStartup"
     - "mainCRTStartup"
     - "main()"
-minidumps:
-  mandatory_annotations:
-    - "product"
-    - "version"
 database:
   endpoint: ws://surrealdb:8000
   namespace: guardrail
