@@ -29,10 +29,10 @@ image:
 persistence:
   enabled: true
   meta:
-    storageClass: local-path
+    storageClass: local-path-retain
     size: 1Gi
   data:
-    storageClass: local-path
+    storageClass: local-path-retain
     size: 5Gi
 
 resources:
