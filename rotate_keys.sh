@@ -140,6 +140,7 @@ if [ -n "$OLD_SURREALDB_ROOT_PASSWORD" ]; then
     kubectl create secret generic surrealdb-password-rotation \
       --namespace surrealdb \
       --from-literal=oldPassword="${OLD_SURREALDB_ROOT_PASSWORD}" \
+      --from-literal=newPassword="${SURREALDB_ROOT_PASSWORD}" \
       --dry-run=client -o yaml | kubectl apply -f -
     echo "  ✓ surrealdb-password-rotation (cluster secret)"
   else
