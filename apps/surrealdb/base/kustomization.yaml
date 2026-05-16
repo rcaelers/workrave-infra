@@ -18,7 +18,7 @@ patches:
         path: /spec/storageClassName
         value: local-path
   - target:
-      kind: StatefulSet
+      kind: Deployment
       name: surrealdb
     patch: |-
       - op: add
