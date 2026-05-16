@@ -1,5 +1,5 @@
 database:
-  endpoint: ws://surrealdb:8000
+  endpoint: ws://surrealdb.surrealdb:8000
   namespace: guardrail
   database: guardrail
   jwk:

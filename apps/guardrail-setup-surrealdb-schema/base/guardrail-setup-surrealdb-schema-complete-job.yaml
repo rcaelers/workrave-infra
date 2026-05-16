@@ -19,7 +19,7 @@ spec:
           command: ["sh", "/app/bin/surrealkit-rollout-complete.sh"]
           env:
             - name: DATABASE_HOST
-              value: ws://surrealdb:8000
+              value: ws://surrealdb.surrealdb:8000
             - name: DATABASE_NAMESPACE
               value: guardrail
             - name: DATABASE_NAME

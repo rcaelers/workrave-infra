@@ -11,7 +11,10 @@ spec:
     - Ingress
   ingress:
     - from:
-        - podSelector:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: guardrail
+          podSelector:
             matchExpressions:
               - key: app
                 operator: In
@@ -25,7 +28,10 @@ spec:
         - protocol: TCP
           port: 3900
     - from:
-        - podSelector:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: guardrail
+          podSelector:
             matchLabels:
               app: guardrail-setup-garage
       ports:

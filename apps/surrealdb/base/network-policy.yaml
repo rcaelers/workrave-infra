@@ -11,21 +11,19 @@ spec:
   - Egress
   ingress:
   - from:
-    - podSelector:
+    - namespaceSelector:
         matchLabels:
-          app: guardrail-api
-    - podSelector:
-        matchLabels:
-          app: guardrail-setup-surrealdb-schema
-    - podSelector:
-        matchLabels:
-          app: guardrail-curator
-    - podSelector:
-        matchLabels:
-          app: guardrail-setup-surrealdb-seed
-    - podSelector:
-        matchLabels:
-          app: guardrail-web
+          kubernetes.io/metadata.name: guardrail
+      podSelector:
+        matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - guardrail-api
+              - guardrail-curator
+              - guardrail-web
+              - guardrail-setup-surrealdb-schema
+              - guardrail-setup-surrealdb-seed
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: tailscale

@@ -38,7 +38,7 @@ spec:
             - -ec
           args:
             - |
-              base="http://garage:3903"
+              base="http://garage.garage:3903"
 
               get() {
                 curl -fsS -H "Authorization: Bearer ${GARAGE_ADMIN_TOKEN}" "$base/v2/$1"

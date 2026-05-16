@@ -85,9 +85,9 @@ spec:
                   syncWave: "35"
                   serverSideApply: "true"
                   ignoreProfile: envoy-gateway
-                - appName: garage-guardrail
+                - appName: garage
                   overlayRoot: apps/garage/overlays
-                  namespace: guardrail
+                  namespace: garage
                   syncWave: "40"
                   syncOptionsAnnotation: SkipDryRunOnMissingResource=true
                 - appName: pocket-id
@@ -105,11 +105,11 @@ spec:
                   syncWave: "50"
                 - appName: guardrail-setup-garage
                   overlayRoot: apps/guardrail-setup-garage/overlays
-                  namespace: guardrail
+                  namespace: garage
                   syncWave: "50"
                 - appName: guardrail-setup-surrealdb-schema
                   overlayRoot: apps/guardrail-setup-surrealdb-schema/overlays
-                  namespace: guardrail
+                  namespace: surrealdb
                   syncWave: "50"
                 - appName: guardrail-api
                   overlayRoot: apps/guardrail-api/overlays
@@ -143,16 +143,16 @@ spec:
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-surrealdb-seed
                   overlayRoot: apps/guardrail-setup-surrealdb-seed/overlays
-                  namespace: guardrail
+                  namespace: surrealdb
                   syncWave: "70"
                 - appName: guardrail-ui
                   overlayRoot: apps/guardrail-ui/overlays
                   namespace: guardrail
                   syncWave: "70"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
-                - appName: guardrail-surrealdb
+                - appName: surrealdb
                   overlayRoot: apps/surrealdb/overlays
-                  namespace: guardrail
+                  namespace: surrealdb
                   syncWave: "1402"
     - matrix:
         generators:

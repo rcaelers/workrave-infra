@@ -14,7 +14,7 @@ spec:
         app: guardrail-api
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "surrealdb-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets"
     spec:
       serviceAccountName: guardrail-api-sa
       containers:
@@ -26,17 +26,6 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          env:
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: garage-secrets
-                  key: accessKey
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: garage-secrets
-                  key: secretKey
           volumeMounts:
             - name: config-volume
               mountPath: /config/01-ingress.yaml
@@ -58,6 +47,9 @@ spec:
               subPath: secrets
             - name: provisioner-secret-volume
               mountPath: /config/05-provisioner-secret.yaml
+              subPath: secrets
+            - name: database-secret-volume
+              mountPath: /config/06-database-secret.yaml
               subPath: secrets
           startupProbe:
             httpGet:
@@ -98,3 +90,6 @@ spec:
         - name: provisioner-secret-volume
           secret:
             secretName: guardrail-provisioner-secrets
+        - name: database-secret-volume
+          secret:
+            secretName: guardrail-database-secrets

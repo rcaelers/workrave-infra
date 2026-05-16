@@ -7,7 +7,6 @@ resources:
   - role.yaml
 patches:
   - path: rolebinding-patch.yaml
-  - path: database-env-patch.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
     newTag: "067e965"

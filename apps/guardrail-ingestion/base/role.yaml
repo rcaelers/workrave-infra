@@ -9,7 +9,7 @@ rules:
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["secrets"]
-  resourceNames: ["guardrail-valkey-secrets", "guardrail-object-storage-secrets", "garage-secrets"]
+  resourceNames: ["guardrail-valkey-secrets", "guardrail-object-storage-secrets"]
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["pods"]
