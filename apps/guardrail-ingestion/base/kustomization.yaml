@@ -12,4 +12,4 @@ patches:
   - path: rolebinding-patch.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "d802bc2"
+    newTag: "97903f8"
