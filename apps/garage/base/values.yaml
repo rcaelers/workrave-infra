@@ -8,10 +8,10 @@ garage:
     api:
       bindAddr: "[::]:3900"
       region: us-east-1
-      rootDomain: garage
+      rootDomain: ""
     web:
       bindAddr: "[::]:3902"
-      rootDomain: garage
+      rootDomain: ""
       index: index.html
   admin:
     apiBindAddr: "[::]:3903"
