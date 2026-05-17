@@ -14,7 +14,7 @@ spec:
         app: guardrail-web
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-oidc-secrets,guardrail-jwk-secrets,guardrail-email-secrets,guardrail-provisioner-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-oidc-secrets,guardrail-jwk-secrets,guardrail-email-secrets,guardrail-provisioner-secrets"
     spec:
       containers:
         - name: guardrail-web
@@ -35,6 +35,9 @@ spec:
             - name: config-volume
               mountPath: /config/01-object-storage.yaml
               subPath: 01-object-storage.yaml
+            - name: object-storage-secret-volume
+              mountPath: /config/03-object-storage-secret.yaml
+              subPath: secrets
             - name: config-volume
               mountPath: /config/01-web.yaml
               subPath: 01-web.yaml
@@ -98,6 +101,9 @@ spec:
         - name: database-secret-volume
           secret:
             secretName: guardrail-database-secrets
+        - name: object-storage-secret-volume
+          secret:
+            secretName: guardrail-object-storage-secrets
         - name: email-secret-volume
           secret:
             secretName: guardrail-email-secrets
