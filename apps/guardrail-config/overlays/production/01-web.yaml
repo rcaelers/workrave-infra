@@ -19,3 +19,5 @@ provisioner:
   pocket_id:
     api_url: http://pocket-id
     public_url: https://auth.workrave.org
+email:
+  from: "noreply@workrave.org"
