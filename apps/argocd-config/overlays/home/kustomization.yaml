@@ -3,3 +3,8 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - httproute.yaml
+
+patches:
+  - path: argocd-cm-patch.yaml
+  - path: argocd-cmd-params-cm-patch.yaml

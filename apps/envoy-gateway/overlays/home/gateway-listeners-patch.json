@@ -94,5 +94,29 @@
         }
       }
     }
+  },
+  {
+    "op": "add",
+    "path": "/spec/listeners/-",
+    "value": {
+      "name": "argocd-dev-https",
+      "hostname": "argocd-dev.workrave.org",
+      "port": 443,
+      "protocol": "HTTPS",
+      "tls": {
+        "mode": "Terminate",
+        "certificateRefs": [
+          {
+            "kind": "Secret",
+            "name": "argocd-dev-workrave-org-tls"
+          }
+        ]
+      },
+      "allowedRoutes": {
+        "namespaces": {
+          "from": "All"
+        }
+      }
+    }
   }
 ]
