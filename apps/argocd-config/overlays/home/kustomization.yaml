@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
   - httproute.yaml
-  - argocd-server-deployment-patch.yaml
+  - argocd-cmd-params-cm-patch.yaml
 
 patches:
   - path: argocd-cm-patch.yaml
