@@ -6,4 +6,4 @@ resources:
   - httproute.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "260d680"
+    newTag: "812b88b"
