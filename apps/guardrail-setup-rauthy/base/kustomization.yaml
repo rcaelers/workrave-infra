@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - setup-serviceaccount.yaml
+  - guardrail-setup-rauthy-configmap.yaml
+  - guardrail-setup-rauthy-job.yaml

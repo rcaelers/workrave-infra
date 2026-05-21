@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guardrail-setup-rauthy
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: rauthy-setup
+      containers:
+        - name: setup
+          image: alpine:3.22
+          command: ["/bin/sh", "-c"]
+          args:
+            - apk add --no-cache curl jq yq >/dev/null 2>&1 && /bin/sh /scripts/setup.sh
+          env:
+            - name: RAUTHY_API_KEY_NAME
+              value: "guardrail"
+            - name: RAUTHY_API_KEY_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rauthy-secrets
+                  key: BOOTSTRAP_API_KEY_SECRET
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: scripts
+          configMap:
+            name: guardrail-setup-rauthy-script
+            defaultMode: 0755
+        - name: config
+          configMap:
+            name: guardrail-config

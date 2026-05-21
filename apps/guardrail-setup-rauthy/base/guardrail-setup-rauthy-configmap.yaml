@@ -1,0 +1,188 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: guardrail-setup-rauthy-script
+data:
+  setup.sh: |
+    #!/bin/sh
+    set -eu
+
+    log() {
+      printf '%s\n' "$*"
+    }
+
+    rauthy_request() {
+      method=$1
+      url=$2
+      body=${3-}
+      response_file=$(mktemp)
+
+      if [ -n "$body" ]; then
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H 'Content-Type: application/json' \
+          -H "Authorization: API-Key $RAUTHY_API_KEY" \
+          "$url" \
+          -d "$body")
+      else
+        status=$(curl -sS \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H "Authorization: API-Key $RAUTHY_API_KEY" \
+          "$url")
+      fi
+
+      case "$status" in
+        2*)
+          cat "$response_file"
+          rm -f "$response_file"
+          ;;
+        *)
+          log "Rauthy request failed: $method $url -> HTTP $status"
+          cat "$response_file" >&2
+          rm -f "$response_file"
+          return 1
+          ;;
+      esac
+    }
+
+    rauthy_request_status() {
+      method=$1
+      url=$2
+      output_file=$3
+      body=${4-}
+
+      if [ -n "$body" ]; then
+        curl -sS \
+          -o "$output_file" \
+          -w '%{http_code}' \
+          -X "$method" \
+          -H 'Content-Type: application/json' \
+          -H "Authorization: API-Key $RAUTHY_API_KEY" \
+          "$url" \
+          -d "$body"
+        return
+      fi
+
+      curl -sS \
+        -o "$output_file" \
+        -w '%{http_code}' \
+        -X "$method" \
+        -H "Authorization: API-Key $RAUTHY_API_KEY" \
+        "$url"
+    }
+
+    settings_value() {
+      yq -r "$1 // \"\"" "$SETTINGS_FILE"
+    }
+
+    SETTINGS_FILE=${SETTINGS_FILE:-/config/01-web.yaml}
+
+    RAUTHY_URL=$(settings_value '.provisioner.rauthy.api_url')
+    OIDC_CLIENT_ID=$(settings_value '.oidc.client_id')
+    OIDC_CALLBACK_URL=$(settings_value '.oidc.callback_url')
+    OIDC_LOGOUT_CALLBACK_URL=$(settings_value '.oidc.logout_callback_url')
+
+    : "${RAUTHY_URL:?RAUTHY_URL is required (provisioner.rauthy.api_url from settings)}"
+    : "${RAUTHY_API_KEY_NAME:?RAUTHY_API_KEY_NAME is required}"
+    : "${RAUTHY_API_KEY_SECRET:?RAUTHY_API_KEY_SECRET is required (BOOTSTRAP_API_KEY_SECRET from rauthy-secrets)}"
+    : "${OIDC_CLIENT_ID:?OIDC_CLIENT_ID is required}"
+    : "${OIDC_CALLBACK_URL:?OIDC_CALLBACK_URL is required}"
+    : "${OIDC_LOGOUT_CALLBACK_URL:?OIDC_LOGOUT_CALLBACK_URL is required}"
+
+    RAUTHY_URL=${RAUTHY_URL%/}
+    RAUTHY_API_KEY="${RAUTHY_API_KEY_NAME}\$${RAUTHY_API_KEY_SECRET}"
+
+    log "Waiting for Rauthy API..."
+    attempt=0
+    until curl -sf "$RAUTHY_URL/auth/v1/health" >/dev/null 2>&1; do
+      attempt=$((attempt + 1))
+      if [ "$attempt" -ge 90 ]; then
+        log "Rauthy API did not become ready in time"
+        exit 1
+      fi
+      sleep 2
+    done
+    log "Rauthy API is ready (attempt $attempt)"
+
+    log "Ensuring Guardrail OIDC client exists..."
+    oidc_client_created=false
+    client_tmp=$(mktemp)
+    client_status=$(rauthy_request_status GET "$RAUTHY_URL/auth/v1/clients/$OIDC_CLIENT_ID" "$client_tmp")
+
+    case "$client_status" in
+      200)
+        log "OIDC client '$OIDC_CLIENT_ID' already exists"
+        ;;
+      404)
+        client_payload=$(jq -nc \
+          --arg id "$OIDC_CLIENT_ID" \
+          --arg callback "$OIDC_CALLBACK_URL" \
+          --arg logout "$OIDC_LOGOUT_CALLBACK_URL" \
+          '{
+            id: $id,
+            name: "Guardrail",
+            confidential: true,
+            redirect_uris: [$callback],
+            post_logout_redirect_uris: [$logout]
+          }')
+        rauthy_request POST "$RAUTHY_URL/auth/v1/clients" "$client_payload" >/dev/null
+        log "Created OIDC client: $OIDC_CLIENT_ID"
+        oidc_client_created=true
+        ;;
+      *)
+        log "Unexpected response checking OIDC client: HTTP $client_status"
+        cat "$client_tmp" >&2
+        rm -f "$client_tmp"
+        exit 1
+        ;;
+    esac
+    rm -f "$client_tmp"
+
+    log "Ensuring Guardrail OIDC client secret is stored in K8s..."
+    K8S_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    K8S_CA=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    K8S_URL=https://kubernetes.default.svc
+    GUARDRAIL_NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    guardrail_secret_status=$(curl -s -o /dev/null -w '%{http_code}' --cacert "$K8S_CA" \
+      -H "Authorization: Bearer $K8S_TOKEN" \
+      "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets/guardrail-rauthy-oidc-secret")
+
+    if [ "$guardrail_secret_status" = "404" ] || [ "$oidc_client_created" = "true" ]; then
+      log "Retrieving OIDC client secret from Rauthy..."
+      client_secret=$(rauthy_request POST "$RAUTHY_URL/auth/v1/clients/$OIDC_CLIENT_ID/secret" | jq -r '.secret // empty')
+      if [ -z "$client_secret" ]; then
+        log "ERROR: Failed to retrieve client secret from Rauthy"
+        exit 1
+      fi
+
+      yaml_b64=$(printf 'oidc:\n  client_secret: "%s"\n' "$client_secret" | base64 | tr -d '\n')
+
+      if [ "$guardrail_secret_status" = "404" ]; then
+        secret_payload=$(jq -nc \
+          --arg ns "$GUARDRAIL_NS" \
+          --arg data "$yaml_b64" \
+          '{"apiVersion":"v1","kind":"Secret","metadata":{"name":"guardrail-rauthy-oidc-secret","namespace":$ns},"data":{"04-rauthy-oidc-secret.yaml":$data}}')
+        curl -s -X POST --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/json" \
+          "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets" \
+          -d "$secret_payload" >/dev/null
+        log "OIDC client secret created in guardrail-rauthy-oidc-secret"
+      else
+        curl -s -X PATCH --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/merge-patch+json" \
+          "$K8S_URL/api/v1/namespaces/$GUARDRAIL_NS/secrets/guardrail-rauthy-oidc-secret" \
+          -d "{\"data\":{\"04-rauthy-oidc-secret.yaml\":\"$yaml_b64\"}}" >/dev/null
+        log "OIDC client secret updated in guardrail-rauthy-oidc-secret (client recreated)"
+      fi
+    else
+      log "OIDC client secret already exists in guardrail-rauthy-oidc-secret, skipping"
+    fi
+
+    log "Rauthy setup complete"

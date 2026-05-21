@@ -5,6 +5,7 @@ namespace: guardrail
 
 resources:
   - ../../base
+  - 05-provisioner-rauthy-secrets.yaml
 
 configMapGenerator:
   - name: guardrail-config

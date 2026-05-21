@@ -1,0 +1,7 @@
+[
+  {
+    "op": "replace",
+    "path": "/spec/hostnames/0",
+    "value": "rauthy-dev.workrave.org"
+  }
+]

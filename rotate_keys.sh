@@ -29,6 +29,16 @@ if [ -f "${REPO_ROOT}/apps/pocket-id/base/pocket-id-secrets.yaml" ]; then
   )
 fi
 
+# ── Snapshot current Rauthy ENC_KEYS before rotation ─────────────────────────
+
+OLD_RAUTHY_ENC_KEYS=""
+if [ -f "${REPO_ROOT}/apps/rauthy/overlays/home/rauthy-secrets.yaml" ]; then
+  OLD_RAUTHY_ENC_KEYS=$(
+    sops --decrypt "${REPO_ROOT}/apps/rauthy/overlays/home/rauthy-secrets.yaml" 2>/dev/null \
+      | awk '/^ +ENC_KEYS:/{print $2}'
+  )
+fi
+
 # ── Generate new secrets ──────────────────────────────────────────────────────
 
 VALKEY_PASSWORD="$(gen_alnum 32)"
@@ -43,6 +53,26 @@ POCKETID_STATIC_API_KEY="$(gen_alnum 32)"
 POCKETID_ENCRYPTION_KEY="$(openssl rand -base64 32)"
 
 SURREALDB_ROOT_PASSWORD="$(gen_alnum 32)"
+
+RAUTHY_ENC_KEY_ID="$(openssl rand -hex 4)"
+RAUTHY_ENC_KEY="$(openssl rand -base64 32 | tr -d '\n')"
+# Prepend old keys so existing data remains decryptable after rotation
+if [ -n "$OLD_RAUTHY_ENC_KEYS" ]; then
+  RAUTHY_ENC_KEYS="${RAUTHY_ENC_KEY_ID}/${RAUTHY_ENC_KEY} ${OLD_RAUTHY_ENC_KEYS}"
+else
+  RAUTHY_ENC_KEYS="${RAUTHY_ENC_KEY_ID}/${RAUTHY_ENC_KEY}"
+fi
+RAUTHY_HQL_SECRET_RAFT="$(gen_alnum 32)"
+RAUTHY_HQL_SECRET_API="$(gen_alnum 32)"
+RAUTHY_BOOTSTRAP_API_KEY_SECRET="$(gen_alnum 64)"
+RAUTHY_ADMIN_PASSWORD="$(gen_alnum 32)"
+RAUTHY_BOOTSTRAP_API_KEY="$(printf '%s' \
+  '{"name":"guardrail","exp":9999999999,"access":[' \
+  '{"group":"Clients","access_rights":["read","create","update","delete"]},' \
+  '{"group":"Users","access_rights":["read","create","update","delete"]},' \
+  '{"group":"Secrets","access_rights":["read"]}' \
+  ']}' \
+  | base64 | tr -d '\n')"
 
 RESEND_API_KEY="$(gen_alnum 32)"
 # Extract only the base64 body (single line) from the Ed25519 PKCS8 PEM
@@ -72,7 +102,14 @@ render_and_encrypt() {
     -e "s|%SURREALDB_ROOT_PASSWORD%|${SURREALDB_ROOT_PASSWORD}|g" \
     -e "s|%RESEND_API_KEY%|${RESEND_API_KEY}|g" \
     -e "s|%JWK_PRIVATE_KEY_B64%|${JWK_PRIVATE_KEY_B64}|g" \
-    "$template" > "$output"
+    -e "s|%RAUTHY_ENC_KEYS%|${RAUTHY_ENC_KEYS}|g" \
+    -e "s|%RAUTHY_ENC_KEY_ID%|${RAUTHY_ENC_KEY_ID}|g" \
+    -e "s|%RAUTHY_HQL_SECRET_RAFT%|${RAUTHY_HQL_SECRET_RAFT}|g" \
+    -e "s|%RAUTHY_HQL_SECRET_API%|${RAUTHY_HQL_SECRET_API}|g" \
+    -e "s|%RAUTHY_BOOTSTRAP_API_KEY%|${RAUTHY_BOOTSTRAP_API_KEY}|g" \
+    -e "s|%RAUTHY_BOOTSTRAP_API_KEY_SECRET%|${RAUTHY_BOOTSTRAP_API_KEY_SECRET}|g" \
+    -e "s|%RAUTHY_ADMIN_PASSWORD%|${RAUTHY_ADMIN_PASSWORD}|g" \
+        "$template" > "$output"
 
   sops --encrypt --in-place "$output"
   echo "  ✓ $2"
@@ -108,6 +145,14 @@ render_and_encrypt \
 render_and_encrypt \
   apps/pocket-id/base/pocket-id-secrets-template.yaml \
   apps/pocket-id/base/pocket-id-secrets.yaml
+
+render_and_encrypt \
+  apps/rauthy/overlays/home/rauthy-secrets-template.yaml \
+  apps/rauthy/overlays/home/rauthy-secrets.yaml
+
+render_and_encrypt \
+  apps/guardrail-config/overlays/home/05-provisioner-rauthy-secrets-template.yaml \
+  apps/guardrail-config/overlays/home/05-provisioner-rauthy-secrets.yaml
 
 render_and_encrypt \
   apps/guardrail-config/base/02-valkey-secrets-template.yaml \

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rauthy
+  annotations:
+    argocd.argoproj.io/sync-options: Replace=true
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rauthy
+  template:
+    metadata:
+      labels:
+        app: rauthy
+    spec:
+      containers:
+        - name: rauthy
+          image: ghcr.io/sebadob/rauthy:placeholder
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: rauthy-config
+            - secretRef:
+                name: rauthy-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: bootstrap
+              mountPath: /app/bootstrap
+          readinessProbe:
+            httpGet:
+              path: /auth/v1/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: rauthy-data
+        - name: bootstrap
+          configMap:
+            name: rauthy-bootstrap

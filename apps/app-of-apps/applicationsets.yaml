@@ -101,6 +101,14 @@ spec:
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                   ignoreProfile: pvc
                   respectIgnoreDifferences: "true"
+                - appName: rauthy
+                  overlayRoot: apps/rauthy/overlays
+                  namespace: guardrail
+                  syncWave: "40"
+                  serverSideApply: "true"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                  ignoreProfile: pvc
+                  respectIgnoreDifferences: "true"
                 - appName: valkey
                   overlayRoot: apps/valkey/overlays
                   namespace: guardrail
@@ -139,6 +147,11 @@ spec:
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-pocket-id
                   overlayRoot: apps/guardrail-setup-pocket-id/overlays
+                  namespace: guardrail
+                  syncWave: "60"
+                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                - appName: guardrail-setup-rauthy
+                  overlayRoot: apps/guardrail-setup-rauthy/overlays
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true

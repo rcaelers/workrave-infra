@@ -5,6 +5,7 @@ namespace: guardrail
 
 resources:
   - ../../base
+  - rauthy-secrets.yaml
 
 patches:
   - path: ingress-host-patch.json
@@ -12,10 +13,11 @@ patches:
       group: gateway.networking.k8s.io
       version: v1
       kind: HTTPRoute
-      name: guardrail-web
-  - path: rauthy-oidc-secret-patch.yaml
-    target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: guardrail-web
+      name: rauthy
+
+configMapGenerator:
+  - name: rauthy-config
+    options:
+      disableNameSuffixHash: true
+    envs:
+      - config.env
