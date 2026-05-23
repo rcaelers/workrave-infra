@@ -101,14 +101,17 @@ spec:
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                   ignoreProfile: pvc
                   respectIgnoreDifferences: "true"
-                - appName: rauthy
-                  overlayRoot: apps/rauthy/overlays
-                  namespace: guardrail
-                  syncWave: "40"
-                  serverSideApply: "true"
-                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
-                  ignoreProfile: pvc
-                  respectIgnoreDifferences: "true"
+                # rauthy is disabled: no admin API for magic-link generation, so guardrail
+                # cannot issue setup URLs for the invitation flow. Re-enable if upstream adds
+                # POST /auth/v1/users/{id}/magic_link or equivalent.
+                # - appName: rauthy
+                #   overlayRoot: apps/rauthy/overlays
+                #   namespace: guardrail
+                #   syncWave: "40"
+                #   serverSideApply: "true"
+                #   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                #   ignoreProfile: pvc
+                #   respectIgnoreDifferences: "true"
                 - appName: valkey
                   overlayRoot: apps/valkey/overlays
                   namespace: guardrail
@@ -150,11 +153,12 @@ spec:
                   namespace: guardrail
                   syncWave: "60"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
-                - appName: guardrail-setup-rauthy
-                  overlayRoot: apps/guardrail-setup-rauthy/overlays
-                  namespace: guardrail
-                  syncWave: "60"
-                  compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
+                # guardrail-setup-rauthy disabled along with rauthy (see above)
+                # - appName: guardrail-setup-rauthy
+                #   overlayRoot: apps/guardrail-setup-rauthy/overlays
+                #   namespace: guardrail
+                #   syncWave: "60"
+                #   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-web
                   overlayRoot: apps/guardrail-web/overlays
                   namespace: guardrail

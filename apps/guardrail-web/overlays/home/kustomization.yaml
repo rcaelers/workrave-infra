@@ -13,9 +13,10 @@ patches:
       version: v1
       kind: HTTPRoute
       name: guardrail-web
-  - path: rauthy-oidc-secret-patch.yaml
-    target:
-      group: apps
-      version: v1
-      kind: Deployment
-      name: guardrail-web
+  # rauthy-oidc-secret-patch.yaml disabled: rauthy not running, secret would not exist
+  # - path: rauthy-oidc-secret-patch.yaml
+  #   target:
+  #     group: apps
+  #     version: v1
+  #     kind: Deployment
+  #     name: guardrail-web

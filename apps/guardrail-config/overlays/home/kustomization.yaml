@@ -5,7 +5,7 @@ namespace: guardrail
 
 resources:
   - ../../base
-  - 05-provisioner-rauthy-secrets.yaml
+  # 05-provisioner-rauthy-secrets.yaml disabled: rauthy provisioner removed from guardrail
 
 configMapGenerator:
   - name: guardrail-config
