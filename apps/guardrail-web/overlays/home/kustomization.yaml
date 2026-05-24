@@ -13,6 +13,12 @@ patches:
       version: v1
       kind: HTTPRoute
       name: guardrail-web
+  - path: ingress-pocketid-proxy-patch.json
+    target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
+      name: guardrail-pocketid-proxy
   # rauthy-oidc-secret-patch.yaml disabled: rauthy not running, secret would not exist
   # - path: rauthy-oidc-secret-patch.yaml
   #   target:
