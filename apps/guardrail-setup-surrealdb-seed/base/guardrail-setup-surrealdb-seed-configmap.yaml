@@ -103,18 +103,6 @@ data:
       log "Workrave product already exists (id: ${EXISTING_ID})"
     fi
   
-    # Ensure the anonymous user record exists so anonymous JWT authentication succeeds.
-    printf "UPSERT type::record('users', 'anonymous') CONTENT {
-      username: 'anonymous',
-      email: 'anonymous@workrave.org',
-      name: 'Anonymous',
-      avatar: 'A',
-      is_admin: false,
-      created_at: time::now(),
-      updated_at: time::now()
-    };" | surql
-    log "Anonymous user record ensured"
-
     # ── Workrave Demo product ────────────────────────────────────────────
     # INSERT IGNORE creates the record only if it doesn't exist.
     # The subsequent UPDATE SET enforces public:true even on existing records.
@@ -136,113 +124,136 @@ data:
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
     log "Workrave Demo product ready (id: ${WORKRAVE_DEMO_PRODUCT_ID})"
 
-    # Clean up any old seed data that may have been created with auto-generated IDs
-    # so we can re-insert with stable IDs (required for crash->group references).
-    printf "DELETE crash_groups WHERE product_id = type::record('products', '%s')
-      AND string::starts_with(fingerprint, 'seed-');"\
+    # Replace all existing Workrave Demo crash data with a compact Workrave-inspired
+    # data set. This seed intentionally creates only crash_groups and crashes.
+    printf "DELETE annotations WHERE product_id = type::record('products', '%s');" \
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
-    printf "DELETE crashes WHERE product_id = type::record('products', '%s')
-      AND string::starts_with(fingerprint, 'seed-');"\
+    printf "DELETE crashes WHERE product_id = type::record('products', '%s');" \
+      "$WORKRAVE_DEMO_PRODUCT_ID" | surql
+    printf "DELETE crash_groups WHERE product_id = type::record('products', '%s');" \
       "$WORKRAVE_DEMO_PRODUCT_ID" | surql
 
-    # Insert a crash group with a stable record ID (idempotent via INSERT IGNORE).
+    demo_fingerprint() {
+      printf "workrave.exe!%s|workrave.exe!Menus::init::<lambda9>::operator()() const|workrave.exe!std::__1::__function::__func<Menus::init::<lambda9>, std::__1::allocator<Menus::init::<lambda9>>, void ()>::operator()()|workrave.exe!menus::Node::activate()|workrave.exe!detail::ToolkitActionMenuEntry::activate()|libgiomm-2.4-1.dll!Gio::ActionGroup::activate_action_vfunc_callback|libgobject-2.0-0.dll!g_closure_invoke|libgobject-2.0-0.dll!signal_emit_unlocked_R|ucrtbase.dll!invoke_main" "$1"
+    }
+
     seed_demo_group() {
-      group_key="$1" signal="$2" count="$3" first_seen="$4" last_seen="$5" status="$6"
-      printf "INSERT IGNORE INTO crash_groups {
-        id: type::record('crash_groups', 'seed-%s'),
+      group_id="$1" top_frame="$2" source_file="$3" source_line="$4" count="$5" first_seen="$6" last_seen="$7" status="$8"
+      fingerprint=$(demo_fingerprint "$top_frame")
+      printf "INSERT INTO crash_groups {
+        id: type::record('crash_groups', '%s'),
         product_id: type::record('products', '%s'),
-        fingerprint: 'seed-%s',
-        signal: '%s',
+        fingerprint: '%s',
+        signal: 'EXCEPTION_ACCESS_VIOLATION_WRITE',
         count: %s,
         first_seen: d'%s',
         last_seen: d'%s',
         status: '%s',
-        created_at: time::now(),
-        updated_at: time::now()
+        assignee: NONE,
+        created_at: d'%s',
+        updated_at: d'%s'
       };" \
-        "$group_key" "$WORKRAVE_DEMO_PRODUCT_ID" "$group_key" \
-        "$signal" "$count" "$first_seen" "$last_seen" "$status" | surql
+        "$group_id" "$WORKRAVE_DEMO_PRODUCT_ID" "$fingerprint" \
+        "$count" "$first_seen" "$last_seen" "$status" "$first_seen" "$last_seen" | surql
     }
 
-    # Insert a crash record linked to a crash group (idempotent via INSERT IGNORE).
     seed_demo_crash() {
-      crash_id="$1" group_key="$2" version="$3" platform="$4" os="$5" created_at="$6"
-      printf "INSERT IGNORE INTO crashes {
-        id: type::record('crashes', 'seed-%s'),
+      crash_id="$1" group_id="$2" top_frame="$3" source_file="$4" source_line="$5" version="$6" os_version="$7" created_at="$8" machine="$9"
+      shift 9
+      crash_index="$1"
+      fingerprint=$(demo_fingerprint "$top_frame")
+      module_code_id="67EA$(printf '%04X' "$crash_index")710000"
+      thread_id=$((3000 + crash_index))
+      printf "INSERT INTO crashes {
+        id: type::record('crashes', '%s'),
         product_id: type::record('products', '%s'),
-        group_id: type::record('crash_groups', 'seed-%s'),
-        fingerprint: 'seed-%s',
+        group_id: type::record('crash_groups', '%s'),
+        fingerprint: '%s',
         report: {
-          annotations: { product: 'workrave-demo', version: '%s', platform: '%s' },
-          system_info: { os: '%s' }
+          product: 'Workrave Demo',
+          version: '%s',
+          timestamp: d'%s',
+          machine: '%s',
+          exceptionType: 'EXCEPTION_ACCESS_VIOLATION_WRITE',
+          exceptionTypeShort: 'ACCESS_VIOLATION',
+          signal: 'EXCEPTION_ACCESS_VIOLATION_WRITE',
+          title: '%s',
+          topFrame: '%s',
+          platform: 'windows',
+          build: 'windows-clang64',
+          crash_info: {
+            type: 'EXCEPTION_ACCESS_VIOLATION_WRITE',
+            address: '0x0000000000000030',
+            crashing_thread: 0
+          },
+          system_info: {
+            os: 'Windows NT',
+            os_ver: '%s',
+            cpu_arch: 'amd64',
+            cpu_count: 12
+          },
+          modules: [
+            { filename: 'workrave.exe', version: '1.11.0.0', code_id: '%s', debug_file: 'workrave.pdb' },
+            { filename: 'libgiomm-2.4-1.dll', version: '2.78.1.0', code_id: '652C8A9F2d0000', debug_file: 'libgiomm-2.4-1.pdb' },
+            { filename: 'libgobject-2.0-0.dll', version: '2.78.1.0', code_id: '652C88B12b0000', debug_file: 'libgobject-2.0-0.pdb' },
+            { filename: 'ucrtbase.dll', version: '10.0.26100.4202', code_id: '7C2C44FAf4000', debug_file: 'ucrtbase.pdb' }
+          ],
+          crashing_thread: {
+            thread_id: %s,
+            thread_name: 'main thread',
+            frames: [
+              { module: 'workrave.exe', function: '%s', source: '%s', line: %s },
+              { module: 'workrave.exe', function: 'Menus::init::<lambda9>::operator()() const', source: 'C:/build/workrave/src/ui/app/Menus.cc', line: 135 },
+              { module: 'workrave.exe', function: 'menus::Node::activate()', source: 'C:/build/workrave/src/ui/common/menus/Node.cc', line: 74 },
+              { module: 'workrave.exe', function: 'detail::ToolkitActionMenuEntry::activate()', source: 'C:/build/workrave/src/libs/toolkit/gtkmm/ToolkitMenu.cc', line: 211 },
+              { module: 'libgobject-2.0-0.dll', function: 'g_closure_invoke' },
+              { module: 'ucrtbase.dll', function: 'invoke_main' }
+            ]
+          },
+          threads: [
+            { thread_id: %s, thread_name: 'main thread' },
+            { thread_id: %s, thread_name: 'gtk event loop' }
+          ],
+          unloaded_modules: []
         },
         created_at: d'%s',
         updated_at: d'%s'
       };" \
-        "$crash_id" "$WORKRAVE_DEMO_PRODUCT_ID" "$group_key" "$group_key" \
-        "$version" "$platform" "$os" "$created_at" "$created_at" | surql
+        "$crash_id" "$WORKRAVE_DEMO_PRODUCT_ID" "$group_id" "$fingerprint" \
+        "$version" "$created_at" "$machine" "$fingerprint" "$top_frame" \
+        "$os_version" "$module_code_id" "$thread_id" "$top_frame" "$source_file" "$source_line" \
+        "$thread_id" "$((thread_id + 1))" "$created_at" "$created_at" | surql
     }
 
-    seed_demo_group "GR-0004" "bad_access_kern_protection_failure" 242 "2026-04-17T12:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0004-001" "GR-0004" "2.13.4" "macos" "Mac OS X 14.6.1" "2026-04-22T09:00:00Z"
-    seed_demo_crash "GR-0004-002" "GR-0004" "2.13.4" "macos" "Mac OS X 14.5.0" "2026-04-21T14:00:00Z"
+    seed_demo_series() {
+      group_id="$1" top_frame="$2" source_file="$3" source_line="$4" count="$5" first_seen="$6" last_seen="$7" status="$8" version="$9"
+      shift 9
+      os_version="$1"
+      seed_demo_group "$group_id" "$top_frame" "$source_file" "$source_line" "$count" "$first_seen" "$last_seen" "$status"
+      i=1
+      while [ "$i" -le "$count" ]; do
+        day=$(( (i * 3) % 24 + 1 ))
+        hour=$(( (8 + i) % 18 ))
+        minute=$(( (11 * i) % 60 ))
+        created_at=$(printf '2026-05-%02dT%02d:%02d:00Z' "$day" "$hour" "$minute")
+        seed_demo_crash "$(printf '%s-%03d' "$group_id" "$i")" "$group_id" "$top_frame" "$source_file" "$source_line" "$version" "$os_version" "$created_at" "demo-windows-$(( (i % 5) + 1 ))" "$i"
+        i=$((i + 1))
+      done
+    }
 
-    seed_demo_group "GR-0016" "bad_access_kern_protection_failure"  72 "2026-04-12T12:44:56Z" "2026-04-20T12:44:56Z" "new"
-    seed_demo_crash "GR-0016-001" "GR-0016" "2.13.2" "macos" "Mac OS X 14.4.1" "2026-04-20T10:00:00Z"
-    seed_demo_crash "GR-0016-002" "GR-0016" "2.13.2" "macos" "Mac OS X 14.3.0" "2026-04-18T16:00:00Z"
+    seed_demo_series "WRD-ABOUT-001" "Menus::on_menu_about()" "C:/build/workrave/src/ui/app/Menus.cc" 218 14 "2026-05-03T09:11:00Z" "2026-05-24T19:34:00Z" "new" "1.11.0-rc.4" "10.0.26200.8457"
+    seed_demo_series "WRD-ABOUT-002" "Menus::init::<lambda9>::operator()() const" "C:/build/workrave/src/ui/app/Menus.cc" 135 11 "2026-05-04T10:22:00Z" "2026-05-23T18:12:00Z" "triaged" "1.11.0-rc.4" "10.0.26100.4061"
+    seed_demo_series "WRD-MENU-003" "menus::Node::activate()" "C:/build/workrave/src/ui/common/menus/Node.cc" 74 9 "2026-05-06T08:43:00Z" "2026-05-22T17:05:00Z" "new" "1.11.0-rc.3" "10.0.22631.3593"
+    seed_demo_series "WRD-TOOLKIT-004" "detail::ToolkitActionMenuEntry::activate()" "C:/build/workrave/src/libs/toolkit/gtkmm/ToolkitMenu.cc" 211 8 "2026-05-07T12:14:00Z" "2026-05-21T16:45:00Z" "triaged" "1.11.0-rc.3" "10.0.26200.8457"
+    seed_demo_series "WRD-APPLET-005" "WorkraveApplet::on_menu_about()" "C:/build/workrave/src/ui/app/WorkraveApplet.cc" 302 7 "2026-05-08T11:02:00Z" "2026-05-20T15:17:00Z" "resolved" "1.10.52" "10.0.22631.3593"
+    seed_demo_series "WRD-WINDOW-006" "MainWindow::show_about_dialog()" "C:/build/workrave/src/ui/app/MainWindow.cc" 487 7 "2026-05-09T09:39:00Z" "2026-05-24T14:02:00Z" "new" "1.11.0-dev" "10.0.26100.4061"
+    seed_demo_series "WRD-GTK-007" 'GtkMenuBuilder::connect_actions()::$_3::operator()() const' "C:/build/workrave/src/ui/app/GtkMenuBuilder.cc" 156 6 "2026-05-10T13:01:00Z" "2026-05-23T13:47:00Z" "triaged" "1.11.0-dev" "10.0.26200.8457"
+    seed_demo_series "WRD-SESSION-008" "Application::open_about_dialog()" "C:/build/workrave/src/ui/app/Application.cc" 622 6 "2026-05-11T14:27:00Z" "2026-05-22T12:22:00Z" "resolved" "1.10.52" "10.0.26100.4061"
+    seed_demo_series "WRD-PREFS-009" "PreferencesDialog::on_help_about()" "C:/build/workrave/src/ui/pref/PreferencesDialog.cc" 344 5 "2026-05-12T15:41:00Z" "2026-05-21T11:04:00Z" "new" "1.11.0-rc.4" "10.0.22631.3593"
+    seed_demo_series "WRD-TRAY-010" "TrayIcon::activate_about_action()" "C:/build/workrave/src/ui/app/TrayIcon.cc" 189 5 "2026-05-13T08:18:00Z" "2026-05-20T10:39:00Z" "triaged" "1.11.0-rc.3" "10.0.26200.8457"
+    seed_demo_series "WRD-DBUS-011" "DBusMenuExporter::activate_action()" "C:/build/workrave/src/ui/app/DBusMenuExporter.cc" 91 4 "2026-05-14T16:08:00Z" "2026-05-19T09:25:00Z" "resolved" "1.11.0-dev" "10.0.22631.3593"
+    seed_demo_series "WRD-CREDITS-012" "AboutDialog::populate_credits()" "C:/build/workrave/src/ui/app/AboutDialog.cc" 64 4 "2026-05-15T10:09:00Z" "2026-05-18T08:51:00Z" "new" "1.10.52" "10.0.26100.4061"
 
-    seed_demo_group "GR-0008" "breakpoint"                          40 "2026-03-29T12:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_crash "GR-0008-001" "GR-0008" "2.14.0" "windows" "Windows 11 22H2" "2026-04-21T11:00:00Z"
-    seed_demo_crash "GR-0008-002" "GR-0008" "2.14.0" "windows" "Windows 10 21H2" "2026-04-19T08:00:00Z"
-
-    seed_demo_group "GR-0021" "bad_access_kern_invalid_address"     28 "2026-03-04T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0021-001" "GR-0021" "2.12.9" "macos" "Mac OS X 14.2.1" "2026-04-23T07:00:00Z"
-    seed_demo_crash "GR-0021-002" "GR-0021" "2.12.9" "macos" "Mac OS X 14.1.0" "2026-04-20T12:00:00Z"
-
-    seed_demo_group "GR-0057" "bad_access_kern_invalid_address"     26 "2026-03-10T13:44:56Z" "2026-04-23T12:44:56Z" "new"
-    seed_demo_crash "GR-0057-001" "GR-0057" "2.13.2" "macos" "Mac OS X 14.3.0" "2026-04-23T06:00:00Z"
-    seed_demo_crash "GR-0057-002" "GR-0057" "2.13.2" "macos" "Mac OS X 14.2.0" "2026-04-22T13:00:00Z"
-
-    seed_demo_group "GR-0042" "bus_bus_adrerr"                      24 "2026-03-31T12:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_crash "GR-0042-001" "GR-0042" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-21T10:00:00Z"
-    seed_demo_crash "GR-0042-002" "GR-0042" "2.12.7" "linux" "Debian 12"       "2026-04-19T09:00:00Z"
-
-    seed_demo_group "GR-0051" "bad_access_kern_invalid_address"     19 "2026-03-29T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0051-001" "GR-0051" "2.12.9" "macos" "Mac OS X 14.0.0" "2026-04-21T08:00:00Z"
-    seed_demo_crash "GR-0051-002" "GR-0051" "2.12.9" "macos" "Mac OS X 13.6.1" "2026-04-18T11:00:00Z"
-
-    seed_demo_group "GR-0027" "bad_access_kern_invalid_address"     17 "2026-04-08T12:44:56Z" "2026-04-22T12:44:56Z" "new"
-    seed_demo_crash "GR-0027-001" "GR-0027" "2.13.2" "macos" "Mac OS X 14.4.0" "2026-04-22T05:00:00Z"
-    seed_demo_crash "GR-0027-002" "GR-0027" "2.13.2" "macos" "Mac OS X 14.3.1" "2026-04-20T15:00:00Z"
-
-    seed_demo_group "GR-0010" "bad_access_kern_protection_failure"  15 "2026-03-22T13:44:56Z" "2026-04-21T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0010-001" "GR-0010" "2.12.7" "macos" "Mac OS X 14.1.0" "2026-04-21T07:00:00Z"
-    seed_demo_crash "GR-0010-002" "GR-0010" "2.12.7" "macos" "Mac OS X 13.7.0" "2026-04-19T16:00:00Z"
-
-    seed_demo_group "GR-0036" "bus_bus_adrerr"                      14 "2026-04-03T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0036-001" "GR-0036" "2.13.2" "linux" "Fedora 39"       "2026-04-22T04:00:00Z"
-    seed_demo_crash "GR-0036-002" "GR-0036" "2.13.2" "linux" "Ubuntu 24.04"    "2026-04-20T11:00:00Z"
-
-    seed_demo_group "GR-0030" "bus_bus_adrerr"                      12 "2026-04-16T12:44:56Z" "2026-04-22T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0030-001" "GR-0030" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-22T03:00:00Z"
-    seed_demo_crash "GR-0030-002" "GR-0030" "2.12.7" "linux" "Debian 11"       "2026-04-21T18:00:00Z"
-
-    seed_demo_group "GR-0046" "bad_access_kern_protection_failure"   9 "2026-03-11T13:44:56Z" "2026-04-22T12:44:56Z" "new"
-    seed_demo_crash "GR-0046-001" "GR-0046" "2.12.9" "macos" "Mac OS X 14.1.1" "2026-04-22T02:00:00Z"
-    seed_demo_crash "GR-0046-002" "GR-0046" "2.12.9" "macos" "Mac OS X 13.5.0" "2026-04-18T14:00:00Z"
-
-    seed_demo_group "GR-0038" "breakpoint"                           6 "2026-02-23T13:44:56Z" "2026-04-21T12:44:56Z" "new"
-    seed_demo_crash "GR-0038-001" "GR-0038" "2.13.3" "windows" "Windows 11 23H2" "2026-04-21T06:00:00Z"
-    seed_demo_crash "GR-0038-002" "GR-0038" "2.13.3" "windows" "Windows 10 22H2" "2026-04-17T09:00:00Z"
-
-    seed_demo_group "GR-0043" "access_violation_write"               5 "2026-04-12T12:44:56Z" "2026-04-23T12:44:56Z" "resolved"
-    seed_demo_crash "GR-0043-001" "GR-0043" "2.13.2" "windows" "Windows 11 22H2" "2026-04-23T05:00:00Z"
-    seed_demo_crash "GR-0043-002" "GR-0043" "2.13.2" "windows" "Windows 10 21H2" "2026-04-19T13:00:00Z"
-
-    seed_demo_group "GR-0024" "bus_bus_adrerr"                       2 "2026-03-24T13:44:56Z" "2026-04-23T12:44:56Z" "triaged"
-    seed_demo_crash "GR-0024-001" "GR-0024" "2.12.7" "linux" "Ubuntu 22.04"    "2026-04-23T04:00:00Z"
-    seed_demo_crash "GR-0024-002" "GR-0024" "2.12.7" "linux" "Arch Linux"      "2026-04-22T20:00:00Z"
-
-    log "Workrave Demo seeded: 15 crash groups, 30 crashes"
+    log "Workrave Demo seeded: 12 crash groups, 86 crashes"
 
     log "Guardrail setup complete"
