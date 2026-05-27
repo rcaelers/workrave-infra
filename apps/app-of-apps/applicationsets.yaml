@@ -162,7 +162,7 @@ spec:
                 - appName: guardrail-web
                   overlayRoot: apps/guardrail-web/overlays
                   namespace: guardrail
-                  syncWave: "60"
+                  syncWave: "65"
                   compareOptions: ServerSideDiff=true,IncludeMutationWebhook=true
                 - appName: guardrail-setup-surrealdb-seed
                   overlayRoot: apps/guardrail-setup-surrealdb-seed/overlays
