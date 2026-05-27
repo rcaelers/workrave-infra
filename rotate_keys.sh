@@ -9,26 +9,6 @@ gen_alnum() {
   ( set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$n" )
 }
 
-# ── Snapshot current SurrealDB password before rotation ──────────────────────
-
-OLD_SURREALDB_ROOT_PASSWORD=""
-if [ -f "${REPO_ROOT}/apps/surrealdb/base/surrealdb-secrets.yaml" ]; then
-  OLD_SURREALDB_ROOT_PASSWORD=$(
-    sops --decrypt "${REPO_ROOT}/apps/surrealdb/base/surrealdb-secrets.yaml" 2>/dev/null \
-      | awk '/rootPassword:/{print $2}'
-  )
-fi
-
-# ── Snapshot current pocket-id encryption key before rotation ────────────────
-
-OLD_POCKETID_ENCRYPTION_KEY=""
-if [ -f "${REPO_ROOT}/apps/pocket-id/base/pocket-id-secrets.yaml" ]; then
-  OLD_POCKETID_ENCRYPTION_KEY=$(
-    sops --decrypt "${REPO_ROOT}/apps/pocket-id/base/pocket-id-secrets.yaml" 2>/dev/null \
-      | awk '/^ +ENCRYPTION_KEY:/{print $2}'
-  )
-fi
-
 # ── Snapshot current Rauthy ENC_KEYS before rotation ─────────────────────────
 
 OLD_RAUTHY_ENC_KEYS=""
@@ -51,8 +31,10 @@ GARAGE_ADMIN_TOKEN="$(openssl rand -base64 32)"
 
 POCKETID_STATIC_API_KEY="$(gen_alnum 32)"
 POCKETID_ENCRYPTION_KEY="$(openssl rand -base64 32)"
+POCKETID_SECRET_ROTATION_ID="$(openssl rand -hex 16)"
 
 SURREALDB_ROOT_PASSWORD="$(gen_alnum 32)"
+SURREALDB_SECRET_ROTATION_ID="$(openssl rand -hex 16)"
 
 RAUTHY_ENC_KEY_ID="$(openssl rand -hex 4)"
 RAUTHY_ENC_KEY="$(openssl rand -base64 32 | tr -d '\n')"
@@ -99,7 +81,9 @@ render_and_encrypt() {
     -e "s|%GARAGE_METRICS_TOKEN%|${GARAGE_METRICS_TOKEN}|g" \
     -e "s|%POCKETID_STATIC_API_KEY%|${POCKETID_STATIC_API_KEY}|g" \
     -e "s|%POCKETID_ENCRYPTION_KEY%|${POCKETID_ENCRYPTION_KEY}|g" \
+    -e "s|%POCKETID_SECRET_ROTATION_ID%|${POCKETID_SECRET_ROTATION_ID}|g" \
     -e "s|%SURREALDB_ROOT_PASSWORD%|${SURREALDB_ROOT_PASSWORD}|g" \
+    -e "s|%SURREALDB_SECRET_ROTATION_ID%|${SURREALDB_SECRET_ROTATION_ID}|g" \
     -e "s|%RESEND_API_KEY%|${RESEND_API_KEY}|g" \
     -e "s|%JWK_PRIVATE_KEY_B64%|${JWK_PRIVATE_KEY_B64}|g" \
     -e "s|%RAUTHY_ENC_KEYS%|${RAUTHY_ENC_KEYS}|g" \
@@ -181,43 +165,5 @@ render_and_encrypt \
 render_config \
   apps/guardrail-config/base/01-database-template.yaml \
   apps/guardrail-config/base/01-database.yaml
-
-# ── Push old SurrealDB password to cluster for the rotation Job ───────────────
-
-if [ -n "$OLD_SURREALDB_ROOT_PASSWORD" ]; then
-  if command -v kubectl >/dev/null 2>&1; then
-    kubectl create secret generic surrealdb-password-rotation \
-      --namespace surrealdb \
-      --from-literal=oldPassword="${OLD_SURREALDB_ROOT_PASSWORD}" \
-      --from-literal=newPassword="${SURREALDB_ROOT_PASSWORD}" \
-      --dry-run=client -o yaml | kubectl apply -f -
-    echo "  ✓ surrealdb-password-rotation (cluster secret)"
-  else
-    echo "  ⚠ kubectl not found — skipping surrealdb-password-rotation"
-    echo "    Run manually: kubectl create secret generic surrealdb-password-rotation \\"
-    echo "      --namespace surrealdb --from-literal=oldPassword='<old-password>'"
-  fi
-else
-  echo "  ⚠ no existing surrealdb-secrets found — skipping rotation secret"
-fi
-
-# ── Push pocket-id encryption key rotation secret to cluster ─────────────────
-
-if [ -n "$OLD_POCKETID_ENCRYPTION_KEY" ]; then
-  if command -v kubectl >/dev/null 2>&1; then
-    kubectl create secret generic pocket-id-key-rotation \
-      --namespace guardrail \
-      --from-literal=oldKey="${OLD_POCKETID_ENCRYPTION_KEY}" \
-      --from-literal=newKey="${POCKETID_ENCRYPTION_KEY}" \
-      --dry-run=client -o yaml | kubectl apply -f -
-    echo "  ✓ pocket-id-key-rotation (cluster secret)"
-  else
-    echo "  ⚠ kubectl not found — skipping pocket-id-key-rotation"
-    echo "    Run manually: kubectl create secret generic pocket-id-key-rotation \\"
-    echo "      --namespace guardrail --from-literal=oldKey='<old-key>' --from-literal=newKey='<new-key>'"
-  fi
-else
-  echo "  ⚠ no existing pocket-id-secrets found — skipping rotation secret"
-fi
 
 echo "Done."

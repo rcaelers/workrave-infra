@@ -2,11 +2,19 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: pocket-id-key-rotation
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-20"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: pocket-id-key-rotation
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-20"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -23,16 +31,27 @@ rules:
 - apiGroups: [""]
   resources: ["secrets"]
   resourceNames: ["pocket-id-key-rotation"]
-  verbs: ["delete"]
+  verbs: ["get", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create"]
 - apiGroups: [""]
   resources: ["secrets"]
   resourceNames: ["pocket-id-secrets"]
+  verbs: ["get"]
+- apiGroups: ["isindir.github.com"]
+  resources: ["sopssecrets"]
+  resourceNames: ["pocket-id-sop-secrets"]
   verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: pocket-id-key-rotation
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-20"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 subjects:
 - kind: ServiceAccount
   name: pocket-id-key-rotation
@@ -40,6 +59,55 @@ roleRef:
   kind: Role
   name: pocket-id-key-rotation
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pocket-id-key-snapshot
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-10"
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: pocket-id-key-rotation
+    spec:
+      serviceAccountName: pocket-id-key-rotation
+      restartPolicy: OnFailure
+      containers:
+        - name: snapshot
+          image: alpine/k8s:1.32.4
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+
+              if kubectl get secret pocket-id-key-rotation -n guardrail >/dev/null 2>&1; then
+                echo "Existing Pocket ID key rotation snapshot found; keeping it for retry"
+                exit 0
+              fi
+
+              old_secret=$(
+                kubectl get secret pocket-id-secrets -n guardrail \
+                  -o jsonpath='{.metadata.resourceVersion}{" "}{.data.ENCRYPTION_KEY}' 2>/dev/null || true
+              )
+              old_resource_version=${old_secret%% *}
+              old_key_b64=${old_secret#* }
+              if [ -z "$old_key_b64" ]; then
+                echo "No existing Pocket ID encryption key found; first install does not need rotation"
+                exit 0
+              fi
+
+              old_key=$(printf '%s' "$old_key_b64" | base64 -d)
+              kubectl create secret generic pocket-id-key-rotation \
+                --namespace guardrail \
+                --from-literal=oldKey="${old_key}" \
+                --from-literal=oldResourceVersion="${old_resource_version}" \
+                --dry-run=client -o yaml | kubectl apply -f -
+              echo "Pocket ID encryption key snapshot created"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -68,17 +136,88 @@ spec:
                   name: pocket-id-key-rotation
                   key: oldKey
                   optional: true
-            - name: NEW_KEY
+            - name: OLD_RESOURCE_VERSION
               valueFrom:
                 secretKeyRef:
                   name: pocket-id-key-rotation
-                  key: newKey
+                  key: oldResourceVersion
                   optional: true
           command: ["/bin/sh", "-c"]
           args:
             - |
+              set -eu
+
+              read_new_key() {
+                local current_resource_version current_rotation_id desired_rotation_id key_b64
+                desired_rotation_id=$(
+                  kubectl get sopssecret pocket-id-sop-secrets -n guardrail \
+                    -o jsonpath='{.spec.secretTemplates[0].annotations.rotationid}' 2>/dev/null || true
+                )
+
+                i=0
+                while true; do
+                  if [ -n "$desired_rotation_id" ]; then
+                    current_rotation_id=$(
+                      kubectl get secret pocket-id-secrets -n guardrail \
+                        -o jsonpath='{.metadata.annotations.rotationid}' 2>/dev/null || true
+                    )
+                    if [ "$current_rotation_id" = "$desired_rotation_id" ]; then
+                      break
+                    fi
+                  else
+                    current_resource_version=$(
+                      kubectl get secret pocket-id-secrets -n guardrail \
+                        -o jsonpath='{.metadata.resourceVersion}'
+                    )
+                    if [ -z "${OLD_RESOURCE_VERSION:-}" ] || [ "$current_resource_version" != "$OLD_RESOURCE_VERSION" ]; then
+                      break
+                    fi
+                  fi
+
+                  i=$((i + 1))
+                  if [ "$i" -ge 60 ]; then
+                    if [ -n "$desired_rotation_id" ]; then
+                      echo "Pocket ID secret did not reach desired rotation id ${desired_rotation_id}" >&2
+                      exit 1
+                    else
+                      echo "Pocket ID secret resourceVersion did not change; using current secret value" >&2
+                      break
+                    fi
+                  fi
+                  sleep 2
+                done
+
+                key_b64=$(
+                  kubectl get secret pocket-id-secrets -n guardrail \
+                    -o jsonpath='{.data.ENCRYPTION_KEY}'
+                )
+                NEW_KEY=$(printf '%s' "$key_b64" | base64 -d)
+              }
+
+              refresh_snapshot() {
+                local current_resource_version
+                current_resource_version=$(
+                  kubectl get secret pocket-id-secrets -n guardrail \
+                    -o jsonpath='{.metadata.resourceVersion}' 2>/dev/null || true
+                )
+                kubectl create secret generic pocket-id-key-rotation \
+                  --namespace guardrail \
+                  --from-literal=oldKey="${NEW_KEY}" \
+                  --from-literal=oldResourceVersion="${current_resource_version}" \
+                  --dry-run=client -o yaml | kubectl apply -f -
+              }
+
+              read_new_key
+
               if [ -z "${OLD_KEY:-}" ] || [ "${OLD_KEY}" = "${NEW_KEY:-}" ]; then
                 echo "No key rotation needed"
+                if refresh_snapshot; then
+                  echo "Rotation snapshot updated to current key before cleanup"
+                else
+                  echo "Could not refresh rotation snapshot before cleanup" >&2
+                fi
+                kubectl delete secret pocket-id-key-rotation -n guardrail \
+                  --ignore-not-found=true
               else
                 POD=$(kubectl get pods -n guardrail \
                   -l app=pocket-id \
@@ -102,9 +241,15 @@ spec:
                   sleep 2
                 done
 
+                if refresh_snapshot; then
+                  echo "Rotation snapshot updated to current key before cleanup"
+                else
+                  echo "Could not refresh rotation snapshot before cleanup" >&2
+                fi
+
                 kubectl delete secret pocket-id-key-rotation -n guardrail \
-                  && echo "Rotation secret deleted" \
-                  || echo "Rotation secret already gone"
+                  --ignore-not-found=true
+                echo "Rotation snapshot deleted"
               fi
 
               echo "Restarting pocket-id to pick up updated secrets..."
