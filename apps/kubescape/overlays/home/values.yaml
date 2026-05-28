@@ -1,0 +1,23 @@
+clusterName: home
+
+capabilities:
+  operator: enable
+  configurationScan: enable
+  continuousScan: disable
+  nodeScan: enable
+  nodeSbomGeneration: disable
+  scanEmbeddedSBOMs: disable
+  vulnerabilityScan: disable
+  relevancy: disable
+  vexGeneration: disable
+  runtimeObservability: enable
+  networkPolicyService: disable
+  networkEventsStreaming: disable
+  runtimeDetection: disable
+  malwareDetection: disable
+  nodeProfileService: disable
+  admissionController: disable
+  httpDetection: disable
+  seccompProfileService: disable
+  autoUpgrading: disable
+  prometheusExporter: disable
