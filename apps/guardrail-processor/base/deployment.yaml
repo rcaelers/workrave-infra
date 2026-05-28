@@ -19,7 +19,7 @@ spec:
         app: guardrail-processor
       annotations:
         configmap.reloader.stakater.com/reload: "guardrail-config"
-        secret.reloader.stakater.com/reload: "guardrail-valkey-secrets,guardrail-object-storage-secrets"
+        secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets"
     spec:
       serviceAccountName: guardrail-processor-sa
       securityContext:
@@ -77,6 +77,9 @@ spec:
               value: "guardrail=debug,apalis=debug,apalis_redis=debug"
           volumeMounts:
             - name: config-volume
+              mountPath: /config/01-database.yaml
+              subPath: 01-database.yaml
+            - name: config-volume
               mountPath: /config/01-object-storage.yaml
               subPath: 01-object-storage.yaml
             - name: valkey-secret-volume
@@ -84,6 +87,9 @@ spec:
               subPath: secrets
             - name: object-storage-secret-volume
               mountPath: /config/03-object-storage-secret.yaml
+              subPath: secrets
+            - name: database-secret-volume
+              mountPath: /config/06-database-secret.yaml
               subPath: secrets
             - name: tmp-volume
               mountPath: /tmp
@@ -97,5 +103,8 @@ spec:
         - name: object-storage-secret-volume
           secret:
             secretName: guardrail-object-storage-secrets
+        - name: database-secret-volume
+          secret:
+            secretName: guardrail-database-secrets
         - name: tmp-volume
           emptyDir: {}
