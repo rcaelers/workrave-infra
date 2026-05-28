@@ -199,6 +199,11 @@ spec:
                   createNamespace: "false"
                   serverSideApply: "true"
                   skipDryRunOption: "true"
+                - appName: kubescape
+                  path: apps/kubescape/base
+                  namespace: kubescape
+                  syncWave: "35"
+                  serverSideApply: "true"
                 - appName: tailnet-admin
                   path: apps/tailnet-admin/base
                   namespace: argocd

@@ -1,0 +1,33 @@
+name: Kubescape
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  nsa-framework:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Kubescape NSA scan
+        uses: kubescape/github-action@v3.0.21
+        with:
+          files: apps
+          frameworks: nsa
+          severityThreshold: high
+          format: sarif
+          outputFile: kubescape-results
+          version: v4.0.8
+
+      - name: Upload Kubescape SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: kubescape-results.sarif
