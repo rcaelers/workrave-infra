@@ -5,6 +5,7 @@ resources:
   - ../../base
   - httproute.yaml
   - argocd-cmd-params-cm-patch.yaml
+  - argocd-ssh-known-hosts-cm.yaml
 
 patches:
   - path: argocd-cm-patch.yaml
