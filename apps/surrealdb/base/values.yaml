@@ -7,27 +7,17 @@ surrealdb:
   port: 8000
   log: trace
 
-command:
-  - /bin/sh
-  - -ec
-args:
-  - |
-    exec surreal start \
-      --bind "$SURREAL_BIND" \
-      --log "$SURREAL_LOG" \
-      --user "$(cat /run/secrets/surrealdb/rootUser)" \
-      --pass "$(cat /run/secrets/surrealdb/rootPassword)" \
-      "$SURREAL_PATH"
-
-volumes:
-  - name: surrealdb-credentials
-    secret:
-      secretName: surrealdb-secrets
-
-volumeMounts:
-  - name: surrealdb-credentials
-    mountPath: /run/secrets/surrealdb
-    readOnly: true
+podExtraEnv:
+  - name: SURREAL_USER
+    valueFrom:
+      secretKeyRef:
+        name: surrealdb-secrets
+        key: rootUser
+  - name: SURREAL_PASS
+    valueFrom:
+      secretKeyRef:
+        name: surrealdb-secrets
+        key: rootPassword
     
 podSecurityContext:
   fsGroup: 65532
