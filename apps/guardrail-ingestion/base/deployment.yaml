@@ -16,7 +16,7 @@ spec:
         configmap.reloader.stakater.com/reload: "guardrail-config"
         secret.reloader.stakater.com/reload: "guardrail-valkey-secrets,guardrail-object-storage-secrets"
     spec:
-      serviceAccountName: guardrail-ingestion-sa
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

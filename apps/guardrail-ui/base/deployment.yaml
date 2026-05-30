@@ -13,6 +13,7 @@ spec:
       labels:
         app: guardrail-ui
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: guardrail-ui
           image: ghcr.io/rcaelers/guardrail-ui:placeholder

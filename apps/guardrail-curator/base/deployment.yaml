@@ -21,7 +21,7 @@ spec:
         configmap.reloader.stakater.com/reload: "guardrail-config"
         secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets"
     spec:
-      serviceAccountName: guardrail-curator-sa
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

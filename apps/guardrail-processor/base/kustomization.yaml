@@ -3,10 +3,6 @@ kind: Kustomization
 resources: 
   - deployment.yaml
   - network-policy.yaml
-  - service-account.yaml
-  - role.yaml
-patches:
-  - path: rolebinding-patch.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
     newTag: "e594ebf"

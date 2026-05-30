@@ -16,6 +16,7 @@ spec:
         configmap.reloader.stakater.com/reload: "guardrail-config"
         secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-oidc-secret,guardrail-jwk-secrets,guardrail-email-secrets,guardrail-provisioner-secrets"
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: guardrail-web
           image: ghcr.io/rcaelers/guardrail-server:placeholder
