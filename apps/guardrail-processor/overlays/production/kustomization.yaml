@@ -3,3 +3,5 @@ kind: Kustomization
 resources:
   - ../../base
 namespace: guardrail
+patches:
+  - path: log-level-patch.yaml

@@ -17,11 +17,22 @@ spec:
         secret.reloader.stakater.com/reload: "guardrail-database-secrets,guardrail-valkey-secrets,guardrail-object-storage-secrets,guardrail-jwk-secrets,guardrail-provisioner-secrets,guardrail-oidc-secrets"
     spec:
       automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: guardrail-api
           image: ghcr.io/rcaelers/guardrail-server:placeholder
           command: ["/app/guardrail"]
           args: ["api", "-C", "/config"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
           ports:
             - name: http
               containerPort: 80
@@ -54,6 +65,8 @@ spec:
             - name: database-secret-volume
               mountPath: /config/06-database-secret.yaml
               subPath: secrets
+            - name: tmp-volume
+              mountPath: /tmp
           startupProbe:
             httpGet:
               path: /api/live
@@ -99,3 +112,5 @@ spec:
         - name: database-secret-volume
           secret:
             secretName: guardrail-database-secrets
+        - name: tmp-volume
+          emptyDir: {}

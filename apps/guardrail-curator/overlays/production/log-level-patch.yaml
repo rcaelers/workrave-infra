@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guardrail-curator
+spec:
+  template:
+    spec:
+      containers:
+        - name: guardrail-curator
+          env:
+            - name: RUST_LOG
+              value: "guardrail=info,apalis=info,apalis_redis=info"
