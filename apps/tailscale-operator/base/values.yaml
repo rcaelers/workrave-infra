@@ -13,7 +13,7 @@ proxyConfig:
   defaultTags: tag:k8s
   image:
     repository: tailscale/tailscale
-    tag: v1.98.3
+    tag: v1.98.4
 
 apiServerProxyConfig:
   mode: "false"
