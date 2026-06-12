@@ -17,6 +17,9 @@ patches:
       name: garage
     patch: |-
       - op: add
+        path: /spec/template/metadata/annotations/secret.reloader.stakater.com~1reload
+        value: garage-secrets
+      - op: add
         path: /spec/template/spec/initContainers/0
         value:
           name: prepare-local-storage
