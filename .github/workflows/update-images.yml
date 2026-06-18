@@ -40,7 +40,7 @@ jobs:
       SERVICES: ${{ github.event_name == 'workflow_dispatch' && inputs.services || github.event.client_payload.services }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TARGET_BRANCH }}
 
