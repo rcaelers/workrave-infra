@@ -17,6 +17,8 @@ spec:
     - name: pocket-id
     - name: valkey
     - name: valkey-helm
+    - name: surrealdb
+    - name: surrealdb-helm
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
