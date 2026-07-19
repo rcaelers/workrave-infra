@@ -199,11 +199,11 @@ spec:
                   createNamespace: "false"
                   serverSideApply: "true"
                   skipDryRunOption: "true"
-                - appName: kubescape
-                  overlayRoot: apps/kubescape/overlays
-                  namespace: kubescape
-                  syncWave: "35"
-                  serverSideApply: "true"
+                # - appName: kubescape
+                #   overlayRoot: apps/kubescape/overlays
+                #   namespace: kubescape
+                #   syncWave: "35"
+                #   serverSideApply: "true"
                 - appName: tailnet-admin
                   path: apps/tailnet-admin/base
                   namespace: argocd
@@ -218,11 +218,11 @@ spec:
                   workrave.org/environment: home
           - list:
               elements:
-                - appName: kubescape
-                  overlayRoot: apps/kubescape/overlays
-                  namespace: kubescape
-                  syncWave: "35"
-                  serverSideApply: "true"
+                # - appName: kubescape
+                #   overlayRoot: apps/kubescape/overlays
+                #   namespace: kubescape
+                #   syncWave: "35"
+                #   serverSideApply: "true"
                 - appName: cert-manager-linode-webhook
                   sourceType: gitHelm
                   repoURL: https://github.com/linode/cert-manager-webhook-linode.git
