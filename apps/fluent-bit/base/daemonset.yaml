@@ -30,17 +30,18 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: 5m
-              memory: 16Mi
+              cpu: 10m
+              memory: 64Mi
             limits:
-              cpu: 50m
-              memory: 32Mi
+              cpu: 200m
+              memory: 128Mi
           readinessProbe:
             httpGet:
               path: /api/v1/health
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
+            timeoutSeconds: 3
           volumeMounts:
             - name: config
               mountPath: /fluent-bit/etc
