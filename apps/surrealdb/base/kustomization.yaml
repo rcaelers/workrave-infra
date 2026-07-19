@@ -7,7 +7,7 @@ resources:
 helmCharts:
   - name: surrealdb
     repo: https://helm.surrealdb.com
-    version: 0.4.0
+    version: 0.4.6
     releaseName: surrealdb
     valuesFile: values.yaml
 patches:
