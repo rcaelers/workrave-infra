@@ -11,6 +11,12 @@
 # got stuck with a terminating `applications.argoproj.io` CRD; doing it here
 # up front avoids that failure mode entirely.
 #
+# IMPORTANT: argocd-application-controller re-adds
+# resources-finalizer.argocd.argoproj.io on its next reconcile if it's still
+# running when a finalizer is stripped (its sync policy declaratively wants
+# that finalizer present). The controller must be scaled to 0 *before*
+# stripping finalizers, or the strip is a no-op race.
+#
 # Usage: scripts/argocd-teardown.sh <kube-context>
 set -euo pipefail
 
@@ -24,12 +30,16 @@ if ! ${KUBECTL} get namespace argocd >/dev/null 2>&1; then
   exit 0
 fi
 
+echo "==> Scaling down argocd-application-controller so it can't re-add finalizers"
+${KUBECTL} -n argocd scale statefulset argocd-application-controller --replicas=0 2>/dev/null || true
+${KUBECTL} -n argocd wait --for=delete pod -l app.kubernetes.io/name=argocd-application-controller --timeout=2m 2>/dev/null || true
+
 echo "==> Stripping resources-finalizer.argocd.argoproj.io from all Applications"
 for ns in $(${KUBECTL} get applications.argoproj.io -A -o jsonpath='{.items[*].metadata.namespace}' 2>/dev/null | tr ' ' '\n' | sort -u); do
   for app in $(${KUBECTL} -n "${ns}" get applications.argoproj.io -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
     echo "    - ${ns}/${app}"
     ${KUBECTL} -n "${ns}" patch application.argoproj.io "${app}" \
-      --type=json -p='[{"op":"remove","path":"/metadata/finalizers"}]' 2>/dev/null || true
+      --type=merge -p '{"metadata":{"finalizers":null}}' 2>/dev/null || true
   done
 done
 

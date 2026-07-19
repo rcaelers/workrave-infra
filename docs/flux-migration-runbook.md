@@ -93,6 +93,16 @@ stuck.
    ```sh
    scripts/argocd-teardown.sh <kube-context>
    ```
+   The script scales `argocd-application-controller` to 0 first. On the
+   home migration, an earlier version of this script stripped Application
+   finalizers *before* doing that, and the still-running controller re-added
+   them within milliseconds — all 28 Applications ended up stuck
+   `Terminating` and blocked the `argocd` namespace from deleting, the exact
+   failure mode this whole migration exists to get away from. If you ever
+   see that again: confirm `argocd-application-controller` has zero pods,
+   then re-strip finalizers (`kubectl -n argocd patch application.argoproj.io
+   <name> --type=merge -p '{"metadata":{"finalizers":null}}'`) — with the
+   controller actually dead, the strip sticks.
 3. Bootstrap Flux and point it at this repo:
    ```sh
    scripts/flux-bootstrap.sh <home|production> <kube-context> [ssh-private-key-file]
