@@ -17,7 +17,7 @@ case "${ENVIRONMENT}" in
     GIT_BRANCH="staging"
     ;;
   production)
-    GIT_URL="https://github.com/rcaelers/workrave-infra.git"
+    GIT_URL="ssh://git@github.com/rcaelers/workrave-infra.git"
     GIT_BRANCH="main"
     ;;
   *)
@@ -48,7 +48,7 @@ BOOTSTRAP_ARGS=(
 
 if [ -n "${SSH_KEY_FILE}" ]; then
   BOOTSTRAP_ARGS+=(--private-key-file="${SSH_KEY_FILE}")
-elif [ "${ENVIRONMENT}" = "home" ] && ! ssh-add -l >/dev/null 2>&1; then
+elif ! ssh-add -l >/dev/null 2>&1; then
   echo "WARNING: no keys loaded in ssh-agent and no ssh-private-key-file given." >&2
   echo "         flux bootstrap will likely fail to authenticate to ${GIT_URL}." >&2
   echo "         Re-run with the key explicitly: $0 ${ENVIRONMENT} ${CONTEXT} ~/.ssh/<key>" >&2
