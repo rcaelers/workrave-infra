@@ -3,8 +3,7 @@ kind: Job
 metadata:
   name: guardrail-setup-rauthy
   annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    kustomize.toolkit.fluxcd.io/force: "true"
 spec:
   template:
     spec:

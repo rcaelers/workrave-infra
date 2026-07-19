@@ -3,11 +3,5 @@ kind: Kustomization
 
 resources:
   - letsencrypt-prod.yaml
-
-helmCharts:
-  - name: cert-manager
-    repo: https://charts.jetstack.io
-    version: v1.21.0
-    releaseName: cert-manager
-    namespace: cert-manager
-    valuesFile: values.yaml
+  - helmrepository.yaml
+  - helmrelease.yaml

@@ -1,0 +1,102 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gate-60
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./clusters/_empty
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: guardrail-config
+    - name: guardrail-setup-garage
+    - name: guardrail-setup-surrealdb-schema
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-api
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-api/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-60
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-curator
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-curator/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-60
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-ingestion
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-ingestion/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-60
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-processor
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-processor/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-60
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-setup-pocket-id
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-setup-pocket-id/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-60

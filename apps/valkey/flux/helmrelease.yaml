@@ -1,0 +1,49 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: valkey
+  namespace: flux-system
+spec:
+  interval: 1h
+  releaseName: valkey
+  targetNamespace: guardrail
+  install:
+    createNamespace: true
+  chart:
+    spec:
+      chart: valkey
+      version: 0.10.0
+      sourceRef:
+        kind: HelmRepository
+        name: valkey
+        namespace: flux-system
+  values:
+    fullnameOverride: valkey
+    auth:
+      enabled: true
+      usersExistingSecret: valkey-secrets
+      aclUsers:
+        default:
+          permissions: "~* &* +@all"
+          passwordKey: VALKEY_PASSWORD
+    dataStorage:
+      enabled: true
+      size: 5Gi
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: valkey
+            patch: |-
+              - op: add
+                path: /spec/template/metadata/annotations
+                value:
+                  secret.reloader.stakater.com/reload: "valkey-secrets"

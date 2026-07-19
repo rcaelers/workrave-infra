@@ -1,0 +1,34 @@
+# Home-only: uses Linode DNS01 for the local domain instead of the
+# gateway-HTTPRoute HTTP01 solver used in production.
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gate-32
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./clusters/_empty
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: cert-manager
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cert-manager-linode-webhook
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/cert-manager-linode-webhook
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-32

@@ -1,0 +1,72 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: surrealdb
+  namespace: flux-system
+spec:
+  interval: 1h
+  releaseName: surrealdb
+  targetNamespace: surrealdb
+  install:
+    createNamespace: true
+  chart:
+    spec:
+      chart: surrealdb
+      version: 0.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: surrealdb
+        namespace: flux-system
+  values:
+    image:
+      tag: v3.0.5
+    surrealdb:
+      path: rocksdb:///data
+      port: 8000
+      log: trace
+    podExtraEnv:
+      - name: SURREAL_USER
+        valueFrom:
+          secretKeyRef:
+            name: surrealdb-secrets
+            key: rootUser
+      - name: SURREAL_PASS
+        valueFrom:
+          secretKeyRef:
+            name: surrealdb-secrets
+            key: rootPassword
+    podSecurityContext:
+      fsGroup: 65532
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    persistence:
+      enabled: true
+      size: 5Gi
+      mountPath: /data
+      accessModes:
+        - ReadWriteOnce
+    strategy:
+      type: Recreate
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: PersistentVolumeClaim
+              name: surrealdb
+            patch: |-
+              - op: add
+                path: /spec/storageClassName
+                value: local-path
+          - target:
+              kind: Deployment
+              name: surrealdb
+            patch: |-
+              - op: add
+                path: /spec/template/metadata/annotations
+                value:
+                  secret.reloader.stakater.com/reload: "surrealdb-secrets"

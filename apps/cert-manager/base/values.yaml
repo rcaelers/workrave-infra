@@ -1,4 +1,0 @@
-installCRDs: true
-
-config:
-  enableGatewayAPI: true

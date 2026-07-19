@@ -1,0 +1,140 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: garage
+  namespace: flux-system
+spec:
+  interval: 1h
+  releaseName: garage
+  targetNamespace: garage
+  install:
+    createNamespace: true
+  chart:
+    spec:
+      chart: apps/garage/base/charts/garage
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+  values:
+    garage:
+      dbEngine: lmdb
+      replicationFactor: "1"
+      consistencyMode: consistent
+      metadataAutoSnapshotInterval: 6h
+      existingRpcSecret: garage-secrets
+      s3:
+        api:
+          bindAddr: "[::]:3900"
+          region: us-east-1
+          rootDomain: ""
+        web:
+          bindAddr: "[::]:3902"
+          rootDomain: ""
+          index: index.html
+      admin:
+        apiBindAddr: "[::]:3903"
+    deployment:
+      kind: StatefulSet
+      replicaCount: 1
+      podManagementPolicy: OrderedReady
+    image:
+      repository: dxflrs/amd64_garage
+      tag: v2.3.0
+      pullPolicy: IfNotPresent
+    persistence:
+      enabled: true
+      meta:
+        storageClass: local-path-retain
+        size: 1Gi
+      data:
+        storageClass: local-path-retain
+        size: 5Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 384Mi
+    livenessProbe:
+      tcpSocket:
+        port: admin
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: admin
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 12
+    environment:
+      - name: GARAGE_ADMIN_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: garage-secrets
+            key: adminToken
+      - name: GARAGE_METRICS_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: garage-secrets
+            key: metricsToken
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: StatefulSet
+              name: garage
+            patch: |-
+              - op: add
+                path: /spec/template/metadata/annotations/secret.reloader.stakater.com~1reload
+                value: garage-secrets
+              - op: add
+                path: /spec/template/spec/initContainers/0
+                value:
+                  name: prepare-local-storage
+                  image: busybox:stable
+                  imagePullPolicy: IfNotPresent
+                  command:
+                    - sh
+                    - -ec
+                    - |
+                      mkdir -p /mnt/meta /mnt/data
+                      chown -R 1000:1000 /mnt/meta /mnt/data
+                      chmod 700 /mnt/meta /mnt/data
+                  securityContext:
+                    runAsUser: 0
+                    runAsGroup: 0
+                    runAsNonRoot: false
+                    allowPrivilegeEscalation: false
+                    readOnlyRootFilesystem: true
+                    capabilities:
+                      drop:
+                        - ALL
+                      add:
+                        - CHOWN
+                        - DAC_OVERRIDE
+                        - FOWNER
+                  volumeMounts:
+                    - name: meta
+                      mountPath: /mnt/meta
+                    - name: data
+                      mountPath: /mnt/data
+          - target:
+              kind: Service
+              name: garage
+            patch: |-
+              - op: add
+                path: /spec/publishNotReadyAddresses
+                value: true
+              - op: add
+                path: /spec/ports/-
+                value:
+                  name: admin
+                  port: 3903
+                  targetPort: 3903
+                  protocol: TCP

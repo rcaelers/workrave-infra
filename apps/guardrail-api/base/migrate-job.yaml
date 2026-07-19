@@ -3,8 +3,7 @@ kind: Job
 metadata:
   name: guardrail-migrate
   annotations:
-    argocd.argoproj.io/hook: PreSync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+    kustomize.toolkit.fluxcd.io/force: "true"
 spec:
   template:
     spec:

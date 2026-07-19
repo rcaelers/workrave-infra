@@ -3,8 +3,7 @@ kind: Job
 metadata:
   name: guardrail-setup-surrealdb-seed
   annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookFailed
+    kustomize.toolkit.fluxcd.io/force: "true"
 spec:
   backoffLimit: 3
   template:

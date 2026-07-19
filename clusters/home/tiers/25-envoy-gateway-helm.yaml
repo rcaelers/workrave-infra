@@ -1,0 +1,35 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gate-25
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./clusters/_empty
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: fluent-bit
+    - name: reloader
+    - name: victorialogs
+    - name: guardrail-setup-kyverno
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: envoy-gateway-helm
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/envoy-gateway-helm
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-25

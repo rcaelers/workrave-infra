@@ -3,8 +3,7 @@ kind: Job
 metadata:
   name: pocket-id-setup
   annotations:
-    argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+    kustomize.toolkit.fluxcd.io/force: "true"
 spec:
   template:
     spec:

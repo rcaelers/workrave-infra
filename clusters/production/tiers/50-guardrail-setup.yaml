@@ -1,0 +1,70 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gate-50
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./clusters/_empty
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: garage
+    - name: garage-helm
+    - name: pocket-id
+    - name: valkey
+    - name: valkey-helm
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-config
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-config/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-50
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-setup-garage
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-setup-garage/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-50
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: guardrail-setup-surrealdb-schema
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./apps/guardrail-setup-surrealdb-schema/overlays/production
+  prune: true
+  wait: true
+  timeout: 5m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: gate-50

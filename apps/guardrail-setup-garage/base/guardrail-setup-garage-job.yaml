@@ -3,8 +3,7 @@ kind: Job
 metadata:
   name: guardrail-setup-garage
   annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookFailed
+    kustomize.toolkit.fluxcd.io/force: "true"
 spec:
   backoffLimit: 6
   template:
