@@ -5,7 +5,7 @@ metadata:
   name: gate-70
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -20,7 +20,7 @@ metadata:
   name: guardrail-setup-surrealdb-seed
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-setup-surrealdb-seed/overlays/production
   prune: true
   wait: true
@@ -37,7 +37,7 @@ metadata:
   name: guardrail-ui
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-ui/overlays/production
   prune: true
   wait: true
@@ -54,7 +54,7 @@ metadata:
   name: surrealdb
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/surrealdb/overlays/production
   prune: true
   wait: true
@@ -71,7 +71,7 @@ metadata:
   name: surrealdb-helm
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/surrealdb/flux
   prune: true
   wait: true

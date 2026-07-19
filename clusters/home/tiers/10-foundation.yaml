@@ -6,7 +6,7 @@ metadata:
   name: guardrail-resources
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-resources/base
   prune: true
   wait: true
@@ -21,7 +21,7 @@ metadata:
   name: sops-secrets-operator
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/sops-secrets-operator/base
   prune: true
   wait: true
@@ -36,7 +36,7 @@ metadata:
   name: kyverno
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/kyverno/base
   prune: true
   wait: true

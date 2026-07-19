@@ -5,7 +5,7 @@ metadata:
   name: gate-20
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -22,7 +22,7 @@ metadata:
   name: fluent-bit
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/fluent-bit/overlays/home
   prune: true
   wait: true
@@ -39,7 +39,7 @@ metadata:
   name: reloader
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/reloader/base
   prune: true
   wait: true
@@ -56,7 +56,7 @@ metadata:
   name: victorialogs
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/victorialogs/overlays/home
   prune: true
   wait: true
@@ -73,7 +73,7 @@ metadata:
   name: guardrail-setup-kyverno
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-setup-kyverno/base
   prune: true
   wait: true

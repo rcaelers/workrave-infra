@@ -5,7 +5,7 @@ metadata:
   name: gate-35
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -21,7 +21,7 @@ metadata:
   name: envoy-gateway
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/envoy-gateway/overlays/production
   prune: true
   wait: true

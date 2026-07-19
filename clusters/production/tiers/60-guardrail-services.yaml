@@ -5,7 +5,7 @@ metadata:
   name: gate-60
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -22,7 +22,7 @@ metadata:
   name: guardrail-api
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-api/overlays/production
   prune: true
   wait: true
@@ -39,7 +39,7 @@ metadata:
   name: guardrail-curator
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-curator/overlays/production
   prune: true
   wait: true
@@ -56,7 +56,7 @@ metadata:
   name: guardrail-ingestion
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-ingestion/overlays/production
   prune: true
   wait: true
@@ -73,7 +73,7 @@ metadata:
   name: guardrail-processor
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-processor/overlays/production
   prune: true
   wait: true
@@ -90,7 +90,7 @@ metadata:
   name: guardrail-setup-pocket-id
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/guardrail-setup-pocket-id/overlays/production
   prune: true
   wait: true

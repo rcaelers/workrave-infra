@@ -5,7 +5,7 @@ metadata:
   name: gate-30
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -20,7 +20,7 @@ metadata:
   name: cert-manager
   namespace: flux-system
 spec:
-  interval: 10m
+  interval: 1m
   path: ./apps/cert-manager/overlays/home
   prune: true
   wait: true
