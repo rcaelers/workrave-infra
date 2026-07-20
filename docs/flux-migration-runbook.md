@@ -54,7 +54,7 @@ stuck.
   `install.createNamespace: true` instead.
 - ArgoCD `PreSync`/`Sync`/`PostSync` hook Jobs (migrate, guardrail-setup-*,
   pocket-id setup/rotation, surrealdb rotation) are now annotated
-  `kustomize.toolkit.fluxcd.io/force: "true"`, which tells Flux to
+  `kustomize.toolkit.fluxcd.io/force: "Enabled"`, which tells Flux to
   delete+recreate the Job when its spec changes — the closest equivalent of
   ArgoCD's `BeforeHookCreation` hook-delete-policy.
   - **Known limitation**: a few of these jobs relied on ArgoCD's fine-grained

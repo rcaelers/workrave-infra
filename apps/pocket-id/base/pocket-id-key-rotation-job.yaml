@@ -53,7 +53,7 @@ kind: Job
 metadata:
   name: pocket-id-key-snapshot
   annotations:
-    kustomize.toolkit.fluxcd.io/force: "true"
+    kustomize.toolkit.fluxcd.io/force: "Enabled"
 spec:
   backoffLimit: 3
   template:
@@ -100,7 +100,7 @@ kind: Job
 metadata:
   name: pocket-id-key-rotation
   annotations:
-    kustomize.toolkit.fluxcd.io/force: "true"
+    kustomize.toolkit.fluxcd.io/force: "Enabled"
 spec:
   backoffLimit: 3
   template:

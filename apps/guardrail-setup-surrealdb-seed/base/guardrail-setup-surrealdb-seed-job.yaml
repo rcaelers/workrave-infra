@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: guardrail-setup-surrealdb-seed
   annotations:
-    kustomize.toolkit.fluxcd.io/force: "true"
+    kustomize.toolkit.fluxcd.io/force: "Enabled"
 spec:
   backoffLimit: 3
   template:
