@@ -8,4 +8,4 @@ resources:
   - rauthy-bootstrap-configmap.yaml
 images:
   - name: ghcr.io/sebadob/rauthy
-    newTag: 0.36.1
+    newTag: 0.36.2
