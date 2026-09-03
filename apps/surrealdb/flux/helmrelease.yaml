@@ -19,7 +19,7 @@ spec:
         namespace: flux-system
   values:
     image:
-      tag: v3.0.5
+      tag: v3.2.4
     surrealdb:
       path: rocksdb:///data
       port: 8000
