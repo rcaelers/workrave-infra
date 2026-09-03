@@ -56,6 +56,8 @@ RAUTHY_BOOTSTRAP_API_KEY="$(printf '%s' \
   ']}' \
   | base64 | tr -d '\n')"
 
+FLUX_WEBHOOK_TOKEN="$(openssl rand -hex 32)"
+
 RESEND_API_KEY="$(gen_alnum 32)"
 # Extract only the base64 body (single line) from the Ed25519 PKCS8 PEM
 JWK_PRIVATE_KEY_B64="$(openssl genpkey -algorithm Ed25519 2>/dev/null | grep -v '^-----' | tr -d '\n')"
@@ -85,6 +87,7 @@ render_and_encrypt() {
     -e "s|%SURREALDB_ROOT_PASSWORD%|${SURREALDB_ROOT_PASSWORD}|g" \
     -e "s|%SURREALDB_SECRET_ROTATION_ID%|${SURREALDB_SECRET_ROTATION_ID}|g" \
     -e "s|%RESEND_API_KEY%|${RESEND_API_KEY}|g" \
+    -e "s|%FLUX_WEBHOOK_TOKEN%|${FLUX_WEBHOOK_TOKEN}|g" \
     -e "s|%JWK_PRIVATE_KEY_B64%|${JWK_PRIVATE_KEY_B64}|g" \
     -e "s|%RAUTHY_ENC_KEYS%|${RAUTHY_ENC_KEYS}|g" \
     -e "s|%RAUTHY_ENC_KEY_ID%|${RAUTHY_ENC_KEY_ID}|g" \
@@ -162,8 +165,35 @@ render_and_encrypt \
   apps/guardrail-config/base/07-email-secrets-template.yaml \
   apps/guardrail-config/base/07-email-secrets.yaml
 
+render_and_encrypt \
+  apps/flux-webhook/base/flux-webhook-secrets-template.yaml \
+  apps/flux-webhook/base/flux-webhook-secrets.yaml
+
 render_config \
   apps/guardrail-config/base/01-database-template.yaml \
   apps/guardrail-config/base/01-database.yaml
 
 echo "Done."
+
+# ── Post-rotation: the Flux webhook needs GitHub updated ─────────────────────
+#
+# Flux derives the receiver URL from the token itself:
+#
+#     webhookPath = sha256(token + receiverName + namespace)
+#
+# so rotating FLUX_WEBHOOK_TOKEN changes the URL as well as the shared secret.
+# Until GitHub is updated it will POST a stale signature to a dead path, the
+# deliveries will fail, and sync silently falls back to the GitRepository
+# interval (1h). Nothing in the cluster reports this as unhealthy.
+#
+# Run ./update_flux_webhook.sh once Flux has applied the new secret.
+cat <<'NOTE'
+
+  ! The Flux webhook token was rotated.
+    Commit and push, wait for Flux to apply the new secret, then run:
+
+        ./update_flux_webhook.sh
+
+    Until then GitHub push events will fail and sync falls back to
+    hourly polling.
+NOTE
