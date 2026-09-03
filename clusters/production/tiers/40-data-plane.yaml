@@ -5,7 +5,8 @@ metadata:
   name: gate-40
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -20,7 +21,8 @@ metadata:
   name: garage
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/garage/overlays/production
   prune: true
   wait: true
@@ -37,7 +39,8 @@ metadata:
   name: garage-helm
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/garage/flux
   prune: true
   wait: true
@@ -54,7 +57,8 @@ metadata:
   name: pocket-id
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/pocket-id/overlays/production
   prune: true
   wait: true
@@ -71,7 +75,8 @@ metadata:
   name: valkey
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/valkey/overlays/production
   prune: true
   wait: true
@@ -88,7 +93,8 @@ metadata:
   name: valkey-helm
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/valkey/flux
   prune: true
   wait: true
@@ -105,7 +111,8 @@ metadata:
   name: surrealdb
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/surrealdb/overlays/production
   prune: true
   wait: true
@@ -122,7 +129,8 @@ metadata:
   name: surrealdb-helm
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/surrealdb/flux
   prune: true
   wait: true
@@ -139,7 +147,8 @@ metadata:
   name: flux-webhook
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/flux-webhook/overlays/production
   prune: true
   wait: true

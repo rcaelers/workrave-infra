@@ -13,3 +13,24 @@ patches:
     - op: add
       path: /spec/template/spec/containers/0/args/-
       value: --requeue-dependency=5s
+- target:
+    kind: GitRepository
+    name: flux-system
+  patch: |-
+    - op: replace
+      path: /spec/interval
+      value: 1h
+# Change propagation is webhook-driven (apps/flux-webhook); these intervals are
+# only drift correction and a fallback if the webhook fails. retryInterval is set
+# explicitly because it otherwise defaults to interval - a transient failure would
+# take an hour to self-heal.
+- target:
+    kind: Kustomization
+    name: flux-system
+  patch: |-
+    - op: replace
+      path: /spec/interval
+      value: 1h
+    - op: add
+      path: /spec/retryInterval
+      value: 5m

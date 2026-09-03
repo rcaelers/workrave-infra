@@ -5,7 +5,8 @@ metadata:
   name: gate-30
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -20,7 +21,8 @@ metadata:
   name: cert-manager
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/cert-manager/overlays/production
   prune: true
   wait: true
@@ -37,7 +39,8 @@ metadata:
   name: tailscale-proxygroup
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/tailscale-proxygroup/base
   prune: true
   wait: true

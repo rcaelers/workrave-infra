@@ -5,7 +5,8 @@ metadata:
   name: gate-50
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./clusters/_empty
   prune: false
   sourceRef:
@@ -26,7 +27,8 @@ metadata:
   name: guardrail-config
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/guardrail-config/overlays/production
   prune: true
   wait: true
@@ -43,7 +45,8 @@ metadata:
   name: guardrail-setup-garage
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/guardrail-setup-garage/overlays/production
   prune: true
   wait: true
@@ -60,7 +63,8 @@ metadata:
   name: guardrail-setup-surrealdb-schema
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/guardrail-setup-surrealdb-schema/overlays/production
   prune: true
   wait: true

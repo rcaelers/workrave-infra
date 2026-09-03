@@ -6,7 +6,8 @@ metadata:
   name: guardrail-resources
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/guardrail-resources/base
   prune: true
   wait: true
@@ -21,7 +22,8 @@ metadata:
   name: sops-secrets-operator
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/sops-secrets-operator/base
   prune: true
   wait: true
@@ -36,7 +38,8 @@ metadata:
   name: kyverno
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/kyverno/base
   prune: true
   wait: true
@@ -51,7 +54,8 @@ metadata:
   name: tailscale-operator
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/tailscale-operator/base
   prune: true
   wait: true
@@ -66,7 +70,8 @@ metadata:
   name: tailscale-operator-helm
   namespace: flux-system
 spec:
-  interval: 1m
+  interval: 1h
+  retryInterval: 5m
   path: ./apps/tailscale-operator/flux
   prune: true
   wait: true
