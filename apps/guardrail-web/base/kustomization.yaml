@@ -7,4 +7,4 @@ resources:
   - httproute-pocketid-proxy.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "62fb4be"
+    newTag: "3f81287"
