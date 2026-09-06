@@ -5,4 +5,4 @@ resources:
   - service.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-ui
-    newTag: "9922072"
+    newTag: "5bed7b4"
