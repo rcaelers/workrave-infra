@@ -11,6 +11,8 @@ spec:
         - path:
             type: PathPrefix
             value: /api
+      timeouts:
+        request: 120s
       backendRefs:
         - name: guardrail-api
           port: 80

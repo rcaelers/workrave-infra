@@ -11,6 +11,8 @@ spec:
         - path:
             type: PathPrefix
             value: /api/minidump
+      timeouts:
+        request: 120s
       backendRefs:
         - name: guardrail-ingestion
           port: 80
