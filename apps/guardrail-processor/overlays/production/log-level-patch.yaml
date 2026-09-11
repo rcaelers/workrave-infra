@@ -9,8 +9,6 @@ spec:
         - name: guardrail-processor
           env:
             - name: RUST_LOG
-              # processor=debug is temporary, to find out why symbols for the
-              # MinGW DLLs are never applied: the symbol supplier lives in the
-              # processor crate, so guardrail=info alone discards everything it
-              # logs, including which paths it looks a module up under.
-              value: "guardrail=info,processor=debug,apalis=info,apalis_redis=info"
+              # The crate is named processor; guardrail=info alone would drop
+              # everything it logs.
+              value: "guardrail=info,processor=info,apalis=info,apalis_redis=info"
