@@ -5,4 +5,4 @@ resources:
   - network-policy.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "c034417"
+    newTag: "6ce17a7"
