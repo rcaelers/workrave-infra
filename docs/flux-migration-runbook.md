@@ -1,5 +1,10 @@
 # ArgoCD → Flux CD migration runbook
 
+This is the historical migration record. The `home` cluster and its SSH Git
+server are retired. For a fresh production cluster, follow
+[Rebuild production](rebuild-production.md); the bootstrap script now accepts
+`production <kube-context> [sops-age-key-file]`.
+
 ## Why
 
 ArgoCD's controller stack (`argocd-application-controller`,

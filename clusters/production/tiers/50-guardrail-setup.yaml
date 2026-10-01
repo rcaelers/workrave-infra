@@ -15,6 +15,7 @@ spec:
   dependsOn:
     - name: garage
     - name: garage-helm
+    - name: guardrail-setup-garage
     - name: pocket-id
     - name: valkey
     - name: valkey-helm
@@ -55,7 +56,10 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: gate-50
+    # Garage is not healthy until this job applies its initial cluster layout.
+    # Run alongside its Helm install, which waits for that health check.
+    - name: gate-40
+    - name: garage
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

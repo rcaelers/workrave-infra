@@ -12,5 +12,11 @@
     "managerFilePatterns": [
       "/^apps/[^/]+/(base|overlays/[^/]+)/[^/]+\\.ya?ml$/"
     ]
-  }
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": ["docker.io/envoyproxy/gateway-helm"],
+      "groupName": "Envoy Gateway controller and CRDs"
+    }
+  ]
 }

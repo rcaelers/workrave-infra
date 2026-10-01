@@ -9,6 +9,9 @@ spec:
   targetNamespace: envoy-gateway-system
   install:
     createNamespace: true
+    crds: Skip
+  upgrade:
+    crds: Skip
   chart:
     spec:
       chart: gateway-helm
@@ -17,3 +20,6 @@ spec:
         kind: HelmRepository
         name: envoy-gateway-helm
         namespace: flux-system
+  values:
+    crds:
+      enabled: false
