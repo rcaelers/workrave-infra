@@ -108,6 +108,12 @@ flux --context="$CONTEXT" reconcile kustomization flux-system --with-source --ti
 # HelmReleases now exist because their parent application tiers are Ready.
 "${KUBECTL[@]}" wait helmreleases.helm.toolkit.fluxcd.io -n flux-system \
   --all --for=condition=Ready --timeout="$BOOTSTRAP_TIMEOUT"
+"${KUBECTL[@]}" wait gateway/main-gateway -n envoy-gateway-system \
+  --for=condition=Programmed --timeout="$BOOTSTRAP_TIMEOUT"
+"${KUBECTL[@]}" rollout status deployment/envoy-gateway -n envoy-gateway-system \
+  --timeout="$BOOTSTRAP_TIMEOUT"
+"${KUBECTL[@]}" rollout status deployment -n envoy-gateway-system \
+  --selector=app.kubernetes.io/managed-by=envoy-gateway --timeout="$BOOTSTRAP_TIMEOUT"
 
-echo "==> Bootstrap complete: all Flux application tiers and HelmReleases are Ready."
+echo "==> Bootstrap complete: all Flux application tiers, HelmReleases, and Envoy rollouts are Ready."
 show_status

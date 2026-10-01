@@ -115,6 +115,11 @@ with `WORKRAVE_BOOTSTRAP_TIMEOUT=45m` if needed. A failed tier causes a nonzero
 exit and a Flux status listing. Re-running is supported; omit the key-file
 argument once the correct key secret already exists.
 
+It also waits for Gateway `Programmed` and the Envoy controller/proxy rollouts.
+The single-node proxy uses zero surge and one unavailable pod during updates
+so a replacement can acquire host ports 80/443. Proxy updates therefore cause
+a brief gateway interruption.
+
 Flux installs Envoy-specific CRDs directly from the pinned chart artifact
 before installing the controller. k3s remains the owner of the standard
 Gateway API CRDs and safe-upgrade policies. The Envoy CRDs are retained if their

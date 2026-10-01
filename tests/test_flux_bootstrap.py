@@ -45,6 +45,8 @@ if tool == "kubectl":
         sys.exit(1)
     if args[:2] == ["wait", "helmreleases.helm.toolkit.fluxcd.io"] and os.environ.get("FAILED_HELM"):
         sys.exit(1)
+    if args[0] == "rollout" and os.environ.get("FAILED_PROXY"):
+        sys.exit(1)
 '''
 
 
@@ -113,7 +115,7 @@ class FluxBootstrapTest(unittest.TestCase):
         self.assertNotIn("decrypted-credential", result.stdout + result.stderr)
 
     def test_failed_application_or_helm_release_never_reports_completion(self):
-        for flag in ("FAILED_TIER", "FAILED_HELM"):
+        for flag in ("FAILED_TIER", "FAILED_HELM", "FAILED_PROXY"):
             with self.subTest(flag=flag):
                 result, calls = self.run_bootstrap({flag: "1"})
                 self.assertNotEqual(result.returncode, 0)
@@ -127,6 +129,7 @@ class FluxBootstrapTest(unittest.TestCase):
         self.assertIn("Bootstrap complete", result.stdout)
         self.assertFalse(any(c["tool"] == "kubectl" and "create" in c["args"] for c in calls))
         self.assertTrue(any(c["tool"] == "kubectl" and "helmreleases.helm.toolkit.fluxcd.io" in c["args"] for c in calls))
+        self.assertTrue(any(c["tool"] == "kubectl" and "rollout" in c["args"] for c in calls))
 
     def test_retired_home_is_rejected(self):
         result, calls = self.run_bootstrap(environment="home")
