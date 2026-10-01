@@ -14,7 +14,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: setup
-          image: curlimages/curl:8.13.0
+          image: curlimages/curl:8.22.0
           imagePullPolicy: IfNotPresent
           env:
             - name: GARAGE_ADMIN_TOKEN
