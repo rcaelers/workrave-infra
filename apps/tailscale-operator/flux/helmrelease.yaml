@@ -32,6 +32,6 @@ spec:
       defaultTags: tag:k8s
       image:
         repository: tailscale/tailscale
-        tag: v1.98.9
+        tag: v1.102.5
     apiServerProxyConfig:
       mode: "false"
