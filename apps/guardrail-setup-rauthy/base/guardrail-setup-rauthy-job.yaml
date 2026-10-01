@@ -11,7 +11,7 @@ spec:
       serviceAccountName: rauthy-setup
       containers:
         - name: setup
-          image: alpine:3.22
+          image: alpine:3.24
           command: ["/bin/sh", "-c"]
           args:
             - apk add --no-cache curl jq yq >/dev/null 2>&1 && /bin/sh /scripts/setup.sh
