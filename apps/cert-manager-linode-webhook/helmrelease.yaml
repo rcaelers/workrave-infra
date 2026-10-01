@@ -26,4 +26,5 @@ spec:
       secretName: linode-credentials
       secretKey: token
     image:
+      repository: linode/cert-manager-webhook-linode
       tag: v0.4.1

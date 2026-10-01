@@ -2,5 +2,15 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
-  ]
+  ],
+  "flux": {
+    "managerFilePatterns": [
+      "/^(apps|clusters)/.+\\.ya?ml$/"
+    ]
+  },
+  "kubernetes": {
+    "managerFilePatterns": [
+      "/^apps/[^/]+/(base|overlays/[^/]+)/[^/]+\\.ya?ml$/"
+    ]
+  }
 }
