@@ -10,7 +10,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: migrate
-          image: rust:1.95.0
+          image: rust:1.98.1
           command: ["sh", "-c"]
           args:
             - |
