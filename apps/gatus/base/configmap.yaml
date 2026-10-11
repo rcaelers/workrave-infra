@@ -58,6 +58,23 @@ data:
           - "[STATUS] == any(200, 204)"
           - "[CERTIFICATE_EXPIRATION] > 168h"
 
+      # --- Crash pipeline: catches failures where every service is still up ---
+      # Fails when uploads are rejected (unknown product, server errors) in the
+      # last 1-2 hours while none are accepted.
+      - <<: *defaults
+        name: uploads accepted
+        group: pipeline
+        url: http://guardrail-ingestion.guardrail.svc/api/upload-health
+        conditions:
+          - "[STATUS] == 200"
+      # Fails when no crash reached the database for 48 hours.
+      - <<: *defaults
+        name: crashes imported (48h)
+        group: pipeline
+        url: http://guardrail-curator-health.guardrail.svc:9090/pipeline
+        conditions:
+          - "[STATUS] == 200"
+
       # --- Guardrail services -------------------------------------------------
       # ingestion /ready fails while the product cache in Valkey is empty.
       - <<: *defaults
