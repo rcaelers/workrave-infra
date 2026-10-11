@@ -28,7 +28,13 @@ spec:
           passwordKey: VALKEY_PASSWORD
     dataStorage:
       enabled: true
-      size: 5Gi
+      # The chart only creates a PVC when requestedSize is set; without it
+      # /data silently falls back to an emptyDir and every restart wipes Valkey.
+      requestedSize: 5Gi
+      className: local-path-retain
+      keepPvc: true
+    # Never run two pods against the same data volume.
+    deploymentStrategy: Recreate
     resources:
       limits:
         cpu: "500m"
