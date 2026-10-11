@@ -33,8 +33,6 @@ spec:
       requestedSize: 5Gi
       className: local-path-retain
       keepPvc: true
-    # Never run two pods against the same data volume.
-    deploymentStrategy: Recreate
     resources:
       limits:
         cpu: "500m"
@@ -53,3 +51,12 @@ spec:
                 path: /spec/template/metadata/annotations
                 value:
                   secret.reloader.stakater.com/reload: "valkey-secrets"
+              # Never run two pods against the same data volume: stop the old
+              # pod before starting the new one. (Switching the type to
+              # Recreate fails under server-side apply, which keeps the live
+              # rollingUpdate fields.)
+              - op: add
+                path: /spec/strategy/rollingUpdate
+                value:
+                  maxSurge: 0
+                  maxUnavailable: 1
