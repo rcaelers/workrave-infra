@@ -41,3 +41,14 @@ spec:
       ports:
         - protocol: TCP
           port: 3903
+    # Gatus health checks.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: gatus
+      ports:
+        - protocol: TCP
+          port: 3903

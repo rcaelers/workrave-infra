@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gatus-tailnet
+  annotations:
+    tailscale.com/proxy-group: ingress-proxies
+    tailscale.com/tags: tag:shared-gatus
+spec:
+  defaultBackend:
+    service:
+      name: gatus
+      port:
+        name: http
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - status

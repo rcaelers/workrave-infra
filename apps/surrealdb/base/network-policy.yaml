@@ -36,6 +36,17 @@ spec:
     ports:
     - protocol: TCP
       port: 8000
+  # Gatus health checks.
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+      podSelector:
+        matchLabels:
+          app: gatus
+    ports:
+    - protocol: TCP
+      port: 8000
   egress:
   - to:
     - namespaceSelector:

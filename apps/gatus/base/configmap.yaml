@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gatus-config
+data:
+  config.yaml: |
+    storage:
+      type: sqlite
+      path: /data/data.db
+
+    web:
+      port: 8080
+
+    ui:
+      title: Workrave status
+      header: Workrave
+
+    # Gatus ignores this provider (and runs without alerting) until the
+    # gatus-secrets secret provides the token and chat id.
+    alerting:
+      telegram:
+        token: "${TELEGRAM_BOT_TOKEN}"
+        id: "${TELEGRAM_CHAT_ID}"
+        default-alert:
+          enabled: true
+          failure-threshold: 3
+          success-threshold: 2
+          send-on-resolved: true
+
+    endpoint-defaults: &defaults
+      interval: 1m
+      client:
+        timeout: 10s
+      alerts:
+        - type: telegram
+
+    endpoints:
+      # --- Public: what users and Crashpad clients see ---------------------
+      - <<: *defaults
+        name: crash upload (ingestion)
+        group: public
+        url: https://crashes.workrave.org/api/minidump/ready
+        conditions:
+          - "[STATUS] == 200"
+          - "[CERTIFICATE_EXPIRATION] > 168h"
+      - <<: *defaults
+        name: crash browser (web)
+        group: public
+        url: https://crashes.workrave.org/
+        conditions:
+          - "[STATUS] < 400"
+          - "[CERTIFICATE_EXPIRATION] > 168h"
+      - <<: *defaults
+        name: login (pocket-id)
+        group: public
+        url: https://auth.workrave.org/healthz
+        conditions:
+          - "[STATUS] == any(200, 204)"
+          - "[CERTIFICATE_EXPIRATION] > 168h"
+
+      # --- Guardrail services -------------------------------------------------
+      # ingestion /ready fails while the product cache in Valkey is empty.
+      - <<: *defaults
+        name: ingestion
+        group: guardrail
+        url: http://guardrail-ingestion.guardrail.svc/api/ready
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: api
+        group: guardrail
+        url: http://guardrail-api.guardrail.svc/api/ready
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: web
+        group: guardrail
+        url: http://guardrail-web.guardrail.svc/ready
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: ui
+        group: guardrail
+        url: http://guardrail-ui.guardrail.svc:3000/health
+        conditions:
+          - "[STATUS] == 200"
+      # curator /live fails when its SurrealDB connection is broken.
+      - <<: *defaults
+        name: curator (live)
+        group: guardrail
+        url: http://guardrail-curator-health.guardrail.svc:9090/live
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: curator (ready)
+        group: guardrail
+        url: http://guardrail-curator-health.guardrail.svc:9090/ready
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: processor
+        group: guardrail
+        url: http://guardrail-processor-health.guardrail.svc:9090/ready
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: pocket-id
+        group: guardrail
+        url: http://pocket-id.guardrail.svc/healthz
+        conditions:
+          - "[STATUS] == any(200, 204)"
+
+      # --- Backing services ---------------------------------------------------
+      - <<: *defaults
+        name: surrealdb
+        group: data
+        url: http://surrealdb.surrealdb.svc:8000/health
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: valkey
+        group: data
+        url: tcp://valkey.guardrail.svc:6379
+        conditions:
+          - "[CONNECTED] == true"
+      - <<: *defaults
+        name: garage
+        group: data
+        url: http://garage.garage.svc:3903/health
+        conditions:
+          - "[STATUS] == 200"
+      - <<: *defaults
+        name: victorialogs
+        group: data
+        url: http://victorialogs.monitoring.svc:9428/health
+        conditions:
+          - "[STATUS] == 200"

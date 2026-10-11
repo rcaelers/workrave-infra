@@ -10,6 +10,17 @@ spec:
   - Ingress
   - Egress
   ingress:
+  # Gatus health checks; kubelet probes do not need a rule.
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+      podSelector:
+        matchLabels:
+          app: gatus
+    ports:
+    - protocol: TCP
+      port: 9090
   egress:
   - to:
     - podSelector:

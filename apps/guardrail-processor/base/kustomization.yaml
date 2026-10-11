@@ -3,6 +3,7 @@ kind: Kustomization
 resources: 
   - deployment.yaml
   - network-policy.yaml
+  - health-service.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
     newTag: "613f1b7"
