@@ -7,6 +7,14 @@ data:
     storage:
       type: sqlite
       path: /data/data.db
+      # Gatus shows one bar per check result and keeps 100 by default, which at
+      # one check per minute is under two hours. Keep a week of results to page
+      # back through, and a longer incident history. Uptime percentages (up to
+      # 30d) and the response-time chart come from Gatus' hourly aggregates,
+      # which are kept for 30 days regardless.
+      maximum-number-of-results: 10080
+      maximum-number-of-events: 500
+      caching: true
 
     web:
       port: 8080
