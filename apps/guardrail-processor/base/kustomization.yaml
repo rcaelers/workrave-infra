@@ -6,4 +6,4 @@ resources:
   - health-service.yaml
 images:
   - name: ghcr.io/rcaelers/guardrail-server
-    newTag: "baa74d0"
+    newTag: "82e3360"
