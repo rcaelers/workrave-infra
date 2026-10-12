@@ -9,6 +9,7 @@ spec:
         - name: guardrail-curator
           env:
             - name: RUST_LOG
-              # The crate is named curator; guardrail=info alone would drop
-              # everything it logs.
-              value: "guardrail=info,curator=info,apalis=info,apalis_redis=info"
+              # Each crate logs under its own name: curator, and common for the shared
+              # code (queue preparation, worker failures); guardrail=info alone
+              # would drop what they log.
+              value: "guardrail=info,curator=info,common=info,apalis=info,apalis_redis=info"

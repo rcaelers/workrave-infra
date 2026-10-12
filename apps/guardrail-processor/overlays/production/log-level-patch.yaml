@@ -9,6 +9,7 @@ spec:
         - name: guardrail-processor
           env:
             - name: RUST_LOG
-              # The crate is named processor; guardrail=info alone would drop
-              # everything it logs.
-              value: "guardrail=info,processor=info,apalis=info,apalis_redis=info"
+              # Each crate logs under its own name: processor, and common for the shared
+              # code (queue preparation, worker failures); guardrail=info alone
+              # would drop what they log.
+              value: "guardrail=info,processor=info,common=info,apalis=info,apalis_redis=info"

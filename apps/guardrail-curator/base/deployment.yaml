@@ -74,7 +74,7 @@ spec:
               memory: "128Mi"
           env:
             - name: RUST_LOG
-              value: "guardrail=debug,apalis=debug,apalis_redis=debug"
+              value: "guardrail=debug,curator=debug,common=debug,apalis=debug,apalis_redis=debug"
           volumeMounts:
             - name: config-volume
               mountPath: /config/01-database.yaml
