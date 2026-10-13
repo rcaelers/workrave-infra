@@ -30,14 +30,16 @@ spec:
     ports:
     - protocol: TCP
       port: 6379
-  # Gatus health checks.
+  # Gatus and Kener health checks.
   - from:
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: monitoring
       podSelector:
-        matchLabels:
-          app: gatus
+        matchExpressions:
+          - key: app
+            operator: In
+            values: [gatus, kener]
     ports:
     - protocol: TCP
       port: 6379

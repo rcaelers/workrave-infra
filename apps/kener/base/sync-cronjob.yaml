@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kener-sync
+spec:
+  # Re-applies sync/monitors.json; run it right away after a change with
+  # kubectl -n monitoring create job --from=cronjob/kener-sync kener-sync-now
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: sync
+              # The Kener image has the node runtime the script needs.
+              image: rajnandan1/kener:4.1.7-alpine
+              command: ["node", "/sync/sync.mjs"]
+              env:
+                - name: KENER_URL
+                  value: http://kener:3000
+                - name: SYNC_CONFIG
+                  value: /sync/monitors.json
+                # Optional so the job is a no-op until an API key exists.
+                - name: KENER_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: kener-secrets
+                      key: KENER_API_KEY
+                      optional: true
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+              volumeMounts:
+                - name: sync
+                  mountPath: /sync
+                  readOnly: true
+          volumes:
+            - name: sync
+              configMap:
+                name: kener-sync

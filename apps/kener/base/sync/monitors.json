@@ -1,0 +1,36 @@
+{
+  "site": {
+    "title": "Workrave status",
+    "siteName": "Workrave",
+    "siteURL": "https://status.tailc4583f.ts.net",
+    "nav": [{ "name": "Crash reports", "url": "https://crashes.workrave.org/", "iconURL": "" }]
+  },
+  "home": {
+    "page_title": "Workrave status",
+    "page_header": "Workrave status",
+    "page_subheader": "Crash reporting pipeline and the services behind it",
+    "history_days": 30
+  },
+  "monitors": [
+    { "tag": "crash-upload", "name": "crash upload (ingestion)", "group": "public", "url": "https://crashes.workrave.org/api/minidump/ready", "expect": [200] },
+    { "tag": "crash-browser", "name": "crash browser (web)", "group": "public", "url": "https://crashes.workrave.org/", "expect": "<400" },
+    { "tag": "login", "name": "login (pocket-id)", "group": "public", "url": "https://auth.workrave.org/healthz", "expect": [200, 204] },
+
+    { "tag": "uploads-accepted", "name": "uploads accepted", "group": "pipeline", "url": "http://guardrail-ingestion.guardrail.svc/api/upload-health", "expect": [200] },
+    { "tag": "crashes-imported", "name": "crashes imported (48h)", "group": "pipeline", "url": "http://guardrail-curator-health.guardrail.svc:9090/pipeline", "expect": [200] },
+
+    { "tag": "ingestion", "name": "ingestion", "group": "guardrail", "url": "http://guardrail-ingestion.guardrail.svc/api/ready", "expect": [200] },
+    { "tag": "api", "name": "api", "group": "guardrail", "url": "http://guardrail-api.guardrail.svc/api/ready", "expect": [200] },
+    { "tag": "web", "name": "web", "group": "guardrail", "url": "http://guardrail-web.guardrail.svc/ready", "expect": [200] },
+    { "tag": "ui", "name": "ui", "group": "guardrail", "url": "http://guardrail-ui.guardrail.svc:3000/health", "expect": [200] },
+    { "tag": "curator-live", "name": "curator (live)", "group": "guardrail", "url": "http://guardrail-curator-health.guardrail.svc:9090/live", "expect": [200] },
+    { "tag": "curator-ready", "name": "curator (ready)", "group": "guardrail", "url": "http://guardrail-curator-health.guardrail.svc:9090/ready", "expect": [200] },
+    { "tag": "processor", "name": "processor", "group": "guardrail", "url": "http://guardrail-processor-health.guardrail.svc:9090/ready", "expect": [200] },
+    { "tag": "pocket-id", "name": "pocket-id", "group": "guardrail", "url": "http://pocket-id.guardrail.svc/healthz", "expect": [200, 204] },
+
+    { "tag": "surrealdb", "name": "surrealdb", "group": "data", "url": "http://surrealdb.surrealdb.svc:8000/health", "expect": [200] },
+    { "tag": "valkey", "name": "valkey", "group": "data", "tcp": { "host": "valkey.guardrail.svc", "port": 6379 } },
+    { "tag": "garage", "name": "garage", "group": "data", "url": "http://garage.garage.svc:3903/health", "expect": [200] },
+    { "tag": "victorialogs", "name": "victorialogs", "group": "data", "url": "http://victorialogs.monitoring.svc:9428/health", "expect": [200] }
+  ]
+}

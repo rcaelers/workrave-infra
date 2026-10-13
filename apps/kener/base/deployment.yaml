@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kener
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: kener
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kener
+      annotations:
+        secret.reloader.stakater.com/reload: "kener-secrets"
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        # Kener needs Redis for its job queues and cache, nothing it cannot
+        # rebuild on restart, so it gets a private, memory-only Valkey that is
+        # only reachable over the pod's loopback.
+        - name: valkey
+          image: valkey/valkey:9.1.2
+          restartPolicy: Always
+          args:
+            - valkey-server
+            - --bind
+            - 127.0.0.1
+            - --port
+            - "6379"
+            - --save
+            - ""
+            - --appendonly
+            - "no"
+            - --maxmemory
+            - 96mb
+            # BullMQ requires noeviction.
+            - --maxmemory-policy
+            - noeviction
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 999
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          startupProbe:
+            exec:
+              command: ["valkey-cli", "-h", "127.0.0.1", "ping"]
+            periodSeconds: 2
+            failureThreshold: 15
+          volumeMounts:
+            - name: valkey-data
+              mountPath: /data
+      containers:
+        - name: kener
+          image: rajnandan1/kener:4.1.7-alpine
+          env:
+            - name: ORIGIN
+              value: https://status.tailc4583f.ts.net
+            - name: REDIS_URL
+              value: redis://127.0.0.1:6379
+            - name: KENER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kener-secrets
+                  key: KENER_SECRET_KEY
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 192Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          startupProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /app/database
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: kener-data
+        - name: valkey-data
+          emptyDir:
+            medium: Memory
+            sizeLimit: 128Mi
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi

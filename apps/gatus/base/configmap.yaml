@@ -160,3 +160,9 @@ data:
         url: http://victorialogs.monitoring.svc:9428/health
         conditions:
           - "[STATUS] == 200"
+      - <<: *defaults
+        name: kener (status page)
+        group: data
+        url: http://kener.monitoring.svc:3000/healthcheck
+        conditions:
+          - "[STATUS] == 200"
