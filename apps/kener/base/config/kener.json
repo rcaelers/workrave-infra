@@ -1,4 +1,13 @@
 {
+  "bootstrap": {
+    "owner": { "email": "owner@kener.invalid", "name": "Kener owner (no login)" },
+    "oidc": {
+      "provider_name": "Pocket ID",
+      "issuer_url": "https://auth.workrave.org",
+      "client_id": "kener",
+      "admin_group": "kener_admins"
+    }
+  },
   "site": {
     "title": "Workrave status",
     "siteName": "Workrave",

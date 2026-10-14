@@ -15,7 +15,8 @@ spec:
       labels:
         app: kener
       annotations:
-        secret.reloader.stakater.com/reload: "kener-secrets"
+        # kener-oidc is written by the Pocket ID setup job (guardrail-setup-pocket-id).
+        secret.reloader.stakater.com/reload: "kener-secrets,kener-oidc"
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -123,7 +124,62 @@ spec:
               mountPath: /app/database
             - name: tmp
               mountPath: /tmp
+        # Configures Kener from config/kener.json (see config.mjs). Its
+        # readiness gates the pod, so no traffic reaches Kener before the
+        # signup is closed and the configuration is in place.
+        - name: config
+          image: rajnandan1/kener:4.1.7-alpine
+          command: ["node", "/config/config.mjs"]
+          env:
+            - name: KENER_CONFIG
+              value: /config/kener.json
+            - name: KENER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kener-secrets
+                  key: KENER_SECRET_KEY
+            # Optional so Kener runs (without login) until the Pocket ID
+            # setup job has created the client.
+            - name: KENER_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kener-oidc
+                  key: client_secret
+                  optional: true
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 5m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            exec:
+              command: ["cat", "/tmp/ready"]
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: data
+              mountPath: /app/database
+            - name: config-tmp
+              mountPath: /tmp
       volumes:
+        - name: config
+          configMap:
+            name: kener-config
+        - name: config-tmp
+          emptyDir:
+            sizeLimit: 1Mi
         - name: data
           persistentVolumeClaim:
             claimName: kener-data

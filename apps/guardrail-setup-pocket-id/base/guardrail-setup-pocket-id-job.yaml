@@ -6,6 +6,11 @@ metadata:
     kustomize.toolkit.fluxcd.io/force: "Enabled"
 spec:
   template:
+    metadata:
+      annotations:
+        # Flux only recreates this Job when its spec changes, not when the
+        # script or config ConfigMaps do: bump this to rerun the setup.
+        workrave.org/setup-revision: "2"
     spec:
       restartPolicy: Never
       serviceAccountName: pocket-id-setup

@@ -308,6 +308,127 @@ data:
     fi
     rm -f "$guardrail_secret_json"
 
+    # --- Kener (status page) -------------------------------------------------
+    # Only members of the Kener admin group may use the client; Kener maps that
+    # group to its admin role. The Pocket ID admin is always a member.
+    KENER_CLIENT_ID=$(setup_value '.kener.client_id')
+    KENER_URL=$(setup_value '.kener.url')
+    KENER_ADMIN_GROUP=$(setup_value '.kener.admin_group')
+    KENER_NAMESPACE=$(setup_value '.kener.namespace')
+    : "${KENER_CLIENT_ID:?kener.client_id is required}"
+    : "${KENER_URL:?kener.url is required}"
+    : "${KENER_ADMIN_GROUP:?kener.admin_group is required}"
+    : "${KENER_NAMESPACE:?kener.namespace is required}"
+
+    log "Ensuring Kener admin group '$KENER_ADMIN_GROUP' exists..."
+    kener_group_id=$(request_json GET "$POCKET_ID_URL/api/user-groups?search=$KENER_ADMIN_GROUP&pagination%5Blimit%5D=100" \
+      | jq -r --arg name "$KENER_ADMIN_GROUP" '.data[] | select(.name == $name) | .id' | head -n 1)
+    if [ -z "$kener_group_id" ]; then
+      kener_group_payload=$(jq -nc --arg name "$KENER_ADMIN_GROUP" '{name: $name, friendlyName: "Kener admins"}')
+      kener_group_id=$(request_json POST "$POCKET_ID_URL/api/user-groups" "$kener_group_payload" | jq -r '.id')
+      log "Created Kener admin group ($kener_group_id)"
+    fi
+
+    # PUT replaces the member list, so keep the members added by hand.
+    kener_group_members=$(request_json GET "$POCKET_ID_URL/api/user-groups/$kener_group_id" \
+      | jq -c --arg admin "$admin_id" '[(.users // [])[].id, $admin] | unique')
+    request_json PUT "$POCKET_ID_URL/api/user-groups/$kener_group_id/users" \
+      "$(jq -nc --argjson ids "$kener_group_members" '{userIds: $ids}')" >/dev/null
+    log "Kener admin group members: $kener_group_members"
+
+    log "Ensuring Kener OIDC client exists..."
+    kener_client_created=false
+    kener_client_tmp=$(mktemp)
+    kener_client_status=$(request_status GET "$POCKET_ID_URL/api/oidc/clients/$KENER_CLIENT_ID" "$kener_client_tmp")
+    kener_client_payload=$(jq -nc \
+      --arg id "$KENER_CLIENT_ID" \
+      --arg url "$KENER_URL" \
+      '{
+        id: $id,
+        name: "Workrave status",
+        callbackURLs: [($url + "/account/oidc/callback")],
+        logoutCallbackURLs: [$url],
+        isPublic: false,
+        pkceEnabled: true,
+        requiresReauthentication: false,
+        credentials: {
+          federatedIdentities: []
+        },
+        launchURL: $url,
+        isGroupRestricted: true
+      }')
+
+    case "$kener_client_status" in
+      200)
+        request_json PUT "$POCKET_ID_URL/api/oidc/clients/$KENER_CLIENT_ID" "$kener_client_payload" >/dev/null
+        log "Updated Kener OIDC client"
+        ;;
+      404)
+        request_json POST "$POCKET_ID_URL/api/oidc/clients" "$kener_client_payload" >/dev/null
+        log "Created Kener OIDC client"
+        kener_client_created=true
+        ;;
+      *)
+        log "Unexpected response while checking Kener OIDC client: HTTP $kener_client_status"
+        cat "$kener_client_tmp"
+        rm -f "$kener_client_tmp"
+        exit 1
+        ;;
+    esac
+    rm -f "$kener_client_tmp"
+
+    request_json PUT "$POCKET_ID_URL/api/oidc/clients/$KENER_CLIENT_ID/allowed-user-groups" \
+      "$(jq -nc --arg id "$kener_group_id" '{userGroupIds: [$id]}')" >/dev/null
+    log "Kener OIDC client restricted to '$KENER_ADMIN_GROUP'"
+
+    log "Ensuring Kener OIDC client secret is stored in $KENER_NAMESPACE/kener-oidc..."
+    kener_secret_json=$(mktemp)
+    kener_secret_status=$(curl -s -o "$kener_secret_json" -w '%{http_code}' --cacert "$K8S_CA" \
+      -H "Authorization: Bearer $K8S_TOKEN" \
+      "$K8S_URL/api/v1/namespaces/$KENER_NAMESPACE/secrets/kener-oidc")
+    existing_kener_secret=$(jq -r '.data.client_secret // empty' "$kener_secret_json" 2>/dev/null || true)
+    rm -f "$kener_secret_json"
+
+    if [ "$kener_secret_status" != "200" ] && [ "$kener_secret_status" != "404" ]; then
+      log "Unexpected response while reading $KENER_NAMESPACE/kener-oidc: HTTP $kener_secret_status"
+      exit 1
+    fi
+
+    if [ -z "$existing_kener_secret" ] || [ "$kener_client_created" = "true" ]; then
+      kener_client_secret=$(request_json POST "$POCKET_ID_URL/api/oidc/clients/$KENER_CLIENT_ID/secrets" '{}' | jq -r '.secret // empty')
+      if [ -z "$kener_client_secret" ]; then
+        log "ERROR: Pocket ID returned no secret for the Kener OIDC client"
+        exit 1
+      fi
+      kener_secret_b64=$(printf '%s' "$kener_client_secret" | base64 | tr -d '\n')
+      if [ "$kener_secret_status" = "404" ]; then
+        kener_secret_payload=$(jq -nc \
+          --arg ns "$KENER_NAMESPACE" \
+          --arg data "$kener_secret_b64" \
+          '{"apiVersion":"v1","kind":"Secret","metadata":{"name":"kener-oidc","namespace":$ns},"data":{"client_secret":$data}}')
+        kener_write_status=$(curl -s -o /dev/null -w '%{http_code}' -X POST --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/json" \
+          "$K8S_URL/api/v1/namespaces/$KENER_NAMESPACE/secrets" \
+          -d "$kener_secret_payload")
+      else
+        kener_write_status=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH --cacert "$K8S_CA" \
+          -H "Authorization: Bearer $K8S_TOKEN" \
+          -H "Content-Type: application/merge-patch+json" \
+          "$K8S_URL/api/v1/namespaces/$KENER_NAMESPACE/secrets/kener-oidc" \
+          -d "{\"data\":{\"client_secret\":\"$kener_secret_b64\"}}")
+      fi
+      case "$kener_write_status" in
+        2*) log "Kener OIDC client secret stored in $KENER_NAMESPACE/kener-oidc" ;;
+        *)
+          log "ERROR: storing $KENER_NAMESPACE/kener-oidc failed: HTTP $kener_write_status"
+          exit 1
+          ;;
+      esac
+    else
+      log "Kener OIDC client secret already exists in $KENER_NAMESPACE/kener-oidc, skipping"
+    fi
+
     log "Ensuring ArgoCD OIDC client exists..."
     argocd_client_tmp=$(mktemp)
     argocd_client_status=$(request_status GET "$POCKET_ID_URL/api/oidc/clients/argocd" "$argocd_client_tmp")

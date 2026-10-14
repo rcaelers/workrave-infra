@@ -5,9 +5,10 @@ resources:
   - deployment.yaml
   - service.yaml
   - pvc.yaml
-  - sync-cronjob.yaml
+  - pocket-id-setup-rbac.yaml
+# The name hash rolls the pod on every change, which reruns config.mjs.
 configMapGenerator:
-  - name: kener-sync
+  - name: kener-config
     files:
-      - sync/sync.mjs
-      - sync/monitors.json
+      - config/config.mjs
+      - config/kener.json

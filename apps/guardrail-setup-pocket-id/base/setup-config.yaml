@@ -3,3 +3,10 @@ pocket_id_admin:
   email: admin@workrave.org
   first_name: Workrave
   last_name: Admin
+# Kener status page login; the namespace needs the pocket-id-setup-kener Role
+# from apps/kener so this job can store the client secret there.
+kener:
+  client_id: kener
+  url: https://status.tailc4583f.ts.net
+  admin_group: kener_admins
+  namespace: monitoring
