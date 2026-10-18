@@ -26,7 +26,7 @@
     { "tag": "login", "name": "login (pocket-id)", "group": "public", "url": "https://auth.workrave.org/healthz", "expect": [200, 204] },
 
     { "tag": "uploads-accepted", "name": "uploads accepted", "group": "pipeline", "url": "http://guardrail-ingestion.guardrail.svc/api/upload-health", "expect": [200] },
-    { "tag": "crashes-imported", "name": "crashes imported (48h)", "group": "pipeline", "url": "http://guardrail-curator-health.guardrail.svc:9090/pipeline", "expect": [200] },
+    { "tag": "crashes-imported", "name": "crashes imported (96h)", "group": "pipeline", "url": "http://guardrail-curator-health.guardrail.svc:9090/pipeline", "expect": [200] },
 
     { "tag": "ingestion", "name": "ingestion", "group": "guardrail", "url": "http://guardrail-ingestion.guardrail.svc/api/ready", "expect": [200] },
     { "tag": "api", "name": "api", "group": "guardrail", "url": "http://guardrail-api.guardrail.svc/api/ready", "expect": [200] },

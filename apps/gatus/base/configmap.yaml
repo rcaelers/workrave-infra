@@ -77,7 +77,7 @@ data:
           - "[STATUS] == 200"
       # Fails when no crash reached the database for 48 hours.
       - <<: *defaults
-        name: crashes imported (48h)
+        name: crashes imported (96h)
         group: pipeline
         url: http://guardrail-curator-health.guardrail.svc:9090/pipeline
         conditions:
