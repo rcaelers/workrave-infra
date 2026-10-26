@@ -71,7 +71,7 @@ spec:
               mountPath: /data
       containers:
         - name: kener
-          image: rajnandan1/kener:v4.1.8-alpine
+          image: rajnandan1/kener:4.1.10-alpine
           env:
             - name: ORIGIN
               value: https://status.tailc4583f.ts.net
@@ -128,7 +128,7 @@ spec:
         # readiness gates the pod, so no traffic reaches Kener before the
         # signup is closed and the configuration is in place.
         - name: config
-          image: rajnandan1/kener:v4.1.8-alpine
+          image: rajnandan1/kener:4.1.10-alpine
           command: ["node", "/config/config.mjs"]
           env:
             - name: KENER_CONFIG
