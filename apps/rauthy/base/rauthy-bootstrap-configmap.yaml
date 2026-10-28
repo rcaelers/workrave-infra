@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: rauthy-bootstrap
-data:
-  clients.json: "[]"

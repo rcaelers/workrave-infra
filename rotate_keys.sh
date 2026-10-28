@@ -9,16 +9,6 @@ gen_alnum() {
   ( set +o pipefail; LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$n" )
 }
 
-# ── Snapshot current Rauthy ENC_KEYS before rotation ─────────────────────────
-
-OLD_RAUTHY_ENC_KEYS=""
-if [ -f "${REPO_ROOT}/apps/rauthy/overlays/home/rauthy-secrets.yaml" ]; then
-  OLD_RAUTHY_ENC_KEYS=$(
-    sops --decrypt "${REPO_ROOT}/apps/rauthy/overlays/home/rauthy-secrets.yaml" 2>/dev/null \
-      | awk '/^ +ENC_KEYS:/{print $2}'
-  )
-fi
-
 # ── Generate new secrets ──────────────────────────────────────────────────────
 
 VALKEY_PASSWORD="$(gen_alnum 32)"
@@ -35,26 +25,6 @@ POCKETID_SECRET_ROTATION_ID="$(openssl rand -hex 16)"
 
 SURREALDB_ROOT_PASSWORD="$(gen_alnum 32)"
 SURREALDB_SECRET_ROTATION_ID="$(openssl rand -hex 16)"
-
-RAUTHY_ENC_KEY_ID="$(openssl rand -hex 4)"
-RAUTHY_ENC_KEY="$(openssl rand -base64 32 | tr -d '\n')"
-# Prepend old keys so existing data remains decryptable after rotation
-if [ -n "$OLD_RAUTHY_ENC_KEYS" ]; then
-  RAUTHY_ENC_KEYS="${RAUTHY_ENC_KEY_ID}/${RAUTHY_ENC_KEY} ${OLD_RAUTHY_ENC_KEYS}"
-else
-  RAUTHY_ENC_KEYS="${RAUTHY_ENC_KEY_ID}/${RAUTHY_ENC_KEY}"
-fi
-RAUTHY_HQL_SECRET_RAFT="$(gen_alnum 32)"
-RAUTHY_HQL_SECRET_API="$(gen_alnum 32)"
-RAUTHY_BOOTSTRAP_API_KEY_SECRET="$(gen_alnum 64)"
-RAUTHY_ADMIN_PASSWORD="$(gen_alnum 32)"
-RAUTHY_BOOTSTRAP_API_KEY="$(printf '%s' \
-  '{"name":"guardrail","exp":9999999999,"access":[' \
-  '{"group":"Clients","access_rights":["read","create","update","delete"]},' \
-  '{"group":"Users","access_rights":["read","create","update","delete"]},' \
-  '{"group":"Secrets","access_rights":["read"]}' \
-  ']}' \
-  | base64 | tr -d '\n')"
 
 FLUX_WEBHOOK_TOKEN="$(openssl rand -hex 32)"
 
@@ -89,13 +59,6 @@ render_and_encrypt() {
     -e "s|%RESEND_API_KEY%|${RESEND_API_KEY}|g" \
     -e "s|%FLUX_WEBHOOK_TOKEN%|${FLUX_WEBHOOK_TOKEN}|g" \
     -e "s|%JWK_PRIVATE_KEY_B64%|${JWK_PRIVATE_KEY_B64}|g" \
-    -e "s|%RAUTHY_ENC_KEYS%|${RAUTHY_ENC_KEYS}|g" \
-    -e "s|%RAUTHY_ENC_KEY_ID%|${RAUTHY_ENC_KEY_ID}|g" \
-    -e "s|%RAUTHY_HQL_SECRET_RAFT%|${RAUTHY_HQL_SECRET_RAFT}|g" \
-    -e "s|%RAUTHY_HQL_SECRET_API%|${RAUTHY_HQL_SECRET_API}|g" \
-    -e "s|%RAUTHY_BOOTSTRAP_API_KEY%|${RAUTHY_BOOTSTRAP_API_KEY}|g" \
-    -e "s|%RAUTHY_BOOTSTRAP_API_KEY_SECRET%|${RAUTHY_BOOTSTRAP_API_KEY_SECRET}|g" \
-    -e "s|%RAUTHY_ADMIN_PASSWORD%|${RAUTHY_ADMIN_PASSWORD}|g" \
         "$template" > "$output"
 
   sops --encrypt --in-place "$output"
@@ -132,14 +95,6 @@ render_and_encrypt \
 render_and_encrypt \
   apps/pocket-id/base/pocket-id-secrets-template.yaml \
   apps/pocket-id/base/pocket-id-secrets.yaml
-
-render_and_encrypt \
-  apps/rauthy/overlays/home/rauthy-secrets-template.yaml \
-  apps/rauthy/overlays/home/rauthy-secrets.yaml
-
-render_and_encrypt \
-  apps/guardrail-config/overlays/home/05-provisioner-rauthy-secrets-template.yaml \
-  apps/guardrail-config/overlays/home/05-provisioner-rauthy-secrets.yaml
 
 render_and_encrypt \
   apps/guardrail-config/base/02-valkey-secrets-template.yaml \
