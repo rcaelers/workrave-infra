@@ -29,7 +29,7 @@ spec:
         # rebuild on restart, so it gets a private, memory-only Valkey that is
         # only reachable over the pod's loopback.
         - name: valkey
-          image: valkey/valkey:9.1.2
+          image: valkey/valkey:9.1.3
           restartPolicy: Always
           args:
             - valkey-server
