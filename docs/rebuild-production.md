@@ -5,8 +5,8 @@ and setup jobs. It does not contain the SOPS private key, host configuration,
 external accounts, or persistent application data. Keep those backups outside
 the cluster before wiping it.
 
-The `home` cluster and its SSH Git server are retired. Use `production`, the
-GitHub repository, and the `main` branch.
+The only supported environment is `production`, using the GitHub repository
+and the `main` branch.
 
 ## Save before wiping
 

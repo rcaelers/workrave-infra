@@ -1,7 +1,7 @@
 # ArgoCD → Flux CD migration runbook
 
-This is the historical migration record. The `home` cluster and its SSH Git
-server are retired. For a fresh production cluster, follow
+This is the historical migration record for the production stack.
+For a fresh production cluster, follow
 [Rebuild production](rebuild-production.md); the bootstrap script now accepts
 `production <kube-context> [sops-age-key-file]`.
 
@@ -9,7 +9,7 @@ server are retired. For a fresh production cluster, follow
 
 ArgoCD's controller stack (`argocd-application-controller`,
 `repo-server`, `server`, `applicationset-controller`, `notifications`,
-`dex`, `redis`) was using well over 1.4GB RAM on the single-node `home` k3s
+`dex`, `redis`) was using well over 1.4GB RAM on a single-node k3s
 cluster (8GB total), and its `Application` finalizer has repeatedly gotten
 stuck on reinstall, requiring manual finalizer surgery (see git history of
 the old `apps/app-of-apps/README.md`, now removed).
@@ -23,11 +23,11 @@ stuck.
 
 - `apps/argocd-config/`, `apps/app-of-apps/`, `apps/app-of-apps.yaml`, and
   `apps/tailnet-admin/` (the ArgoCD-UI Tailscale ingress) are removed.
-- `clusters/home/` and `clusters/production/` now hold one Flux
+- `clusters/production/` holds one Flux
   `Kustomization` object per app (mirroring the old one-Application-per-app
   ArgoCD model), grouped into numbered tiers under `tiers/` that replicate
-  the old ArgoCD sync-wave order (10, 20, 25, 30, 32*, 35, 40, 50, 60, 65,
-  70 — `*` home only). Each tier starts with a `gate-<N>` Kustomization that
+  the old ArgoCD sync-wave order (10, 20, 25, 30, 35, 40, 50, 60, 65,
+  70). Each tier starts with a `gate-<N>` Kustomization that
   `dependsOn` every app in the previous tier; apps in that tier `dependsOn`
   the gate. `clusters/_empty/` is a shared no-op path used only by gates.
 - Apps that used kustomize's `helmCharts:` inflator (cert-manager, garage,
@@ -37,9 +37,8 @@ stuck.
   support the `helmCharts:` inflator (it requires kustomize's
   `--enable-helm` exec plugin, which Flux disables by design). Chart
   versions were kept identical to what ArgoCD was running.
-  - `envoy-gateway-helm` (OCI chart) and `cert-manager-linode-webhook`
-    (chart from a separate GitHub repo, home only) are new `apps/` entries
-    since they previously existed only as inline ApplicationSet templating.
+  - `envoy-gateway-helm` (OCI chart) has its own `apps/` entry;
+    it previously existed only as inline ApplicationSet templating.
   - All `HelmRepository`/`OCIRepository`/`GitRepository`/`HelmRelease`
     objects live in the `flux-system` namespace with `targetNamespace: <ns>`
     + `install.createNamespace: true`, to avoid a chicken-and-egg problem
@@ -79,27 +78,24 @@ stuck.
 
 ## Prerequisites
 
-- Flux CLI 2.9.x: `brew install fluxcd/tap/flux` (done automatically by
-  `scripts/flux-bootstrap.sh` if missing).
-- For the `home` cluster: an SSH key already authorized to push to
-  `ssh://robc@k3s.home.krandor.org/srv/git/workrave-infra.git`, loaded in
-  your `ssh-agent` (`ssh-add -l`), or passed explicitly as the script's third
-  argument.
-- `kubectl` contexts for the target cluster (`home` and `hetzner` in this
-  repo's setup).
+- Install Flux CLI, `kubectl`, GitHub CLI, and SOPS as described in
+  [Rebuild production](rebuild-production.md), then authenticate with
+  `gh auth login`.
+- A `kubectl` context for production (`hetzner` in this repo's setup).
+- The original SOPS age key, either installed in the cluster or supplied as
+  the bootstrap script's third argument.
 
-## Migrating a cluster (already done for `home`, repeat for `production`/`hetzner`)
+## Migration procedure (completed for production)
 
-1. Make sure the branch with this Flux content is present on the branch the
-   target cluster's Flux will track (`staging` for home, `main` for
-   production) — push it there before bootstrapping, since
-   `flux bootstrap git` reconciles from that branch immediately.
+1. Make sure this Flux content is present on `main` in
+   `https://github.com/rcaelers/workrave-infra.git` before bootstrapping,
+   since `flux bootstrap git` reconciles from that branch immediately.
 2. Tear down ArgoCD, without pruning live workloads:
    ```sh
    scripts/argocd-teardown.sh <kube-context>
    ```
-   The script scales `argocd-application-controller` to 0 first. On the
-   home migration, an earlier version of this script stripped Application
+   The script scales `argocd-application-controller` to 0 first. During an
+   earlier migration, an older version of this script stripped Application
    finalizers *before* doing that, and the still-running controller re-added
    them within milliseconds — all 28 Applications ended up stuck
    `Terminating` and blocked the `argocd` namespace from deleting, the exact
@@ -110,7 +106,7 @@ stuck.
    controller actually dead, the strip sticks.
 3. Bootstrap Flux and point it at this repo:
    ```sh
-   scripts/flux-bootstrap.sh <home|production> <kube-context> [ssh-private-key-file]
+   scripts/flux-bootstrap.sh production <kube-context> [sops-age-key-file]
    ```
 4. Watch reconciliation:
    ```sh
@@ -123,25 +119,6 @@ stuck.
    kubectl --context=<kube-context> get pods -A
    kubectl --context=<kube-context> top pods -n flux-system
    ```
-
-## Repeating for `production` (hetzner)
-
-Production uses the public `https://github.com/rcaelers/workrave-infra.git`
-repo on the `main` branch instead of the home SSH server, and includes the
-Tailscale apps (`tailscale-operator`, `tailscale-proxygroup`) instead of
-`cert-manager-linode-webhook`. `clusters/production/` is already built out
-in this branch with the same tier structure — once this branch (or its
-merge into `main`) is what production's Flux should track, run:
-
-```sh
-scripts/argocd-teardown.sh hetzner
-scripts/flux-bootstrap.sh production hetzner
-```
-
-If `https://github.com/rcaelers/workrave-infra.git` requires authentication
-(private repo), pass `-u`/`-p` (username/password or PAT) to `flux bootstrap
-git` manually instead of using the script, or extend
-`scripts/flux-bootstrap.sh` with `--username`/`--password` flags.
 
 ## Rolling back
 

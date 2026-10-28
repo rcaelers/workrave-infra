@@ -1,3 +1,0 @@
-ingress:
-  port: 80
-  base_url: https://crashes-dev.workrave.org

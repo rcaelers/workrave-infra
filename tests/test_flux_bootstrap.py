@@ -131,8 +131,8 @@ class FluxBootstrapTest(unittest.TestCase):
         self.assertTrue(any(c["tool"] == "kubectl" and "helmreleases.helm.toolkit.fluxcd.io" in c["args"] for c in calls))
         self.assertTrue(any(c["tool"] == "kubectl" and "rollout" in c["args"] for c in calls))
 
-    def test_retired_home_is_rejected(self):
-        result, calls = self.run_bootstrap(environment="home")
+    def test_unsupported_environment_is_rejected(self):
+        result, calls = self.run_bootstrap(environment="unsupported")
         self.assert_no_bootstrap(result, calls)
         self.assertEqual(calls, [])
 

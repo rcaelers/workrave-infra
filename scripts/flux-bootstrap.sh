@@ -16,7 +16,7 @@ BOOTSTRAP_TIMEOUT="${WORKRAVE_BOOTSTRAP_TIMEOUT:-30m}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [[ "$ENVIRONMENT" != production ]]; then
-  echo "Only production is supported; the home cluster and its Git server are retired." >&2
+  echo "Only production is supported." >&2
   exit 1
 fi
 
