@@ -65,7 +65,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: snapshot
-          image: alpine/k8s:1.37.1
+          image: alpine/k8s:1.37.2
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -112,7 +112,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: rotate
-          image: alpine/k8s:1.37.1
+          image: alpine/k8s:1.37.2
           env:
             - name: OLD_KEY
               valueFrom:
