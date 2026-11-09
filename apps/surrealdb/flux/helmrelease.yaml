@@ -20,7 +20,7 @@ spec:
   values:
     image:
       repository: surrealdb/surrealdb
-      tag: v3.3.5
+      tag: v4.0.1
     surrealdb:
       path: rocksdb:///data
       port: 8000
