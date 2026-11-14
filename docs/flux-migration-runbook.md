@@ -129,3 +129,34 @@ its own namespace/CRDs, leaving managed workloads running). To roll back:
 1. `flux uninstall --context=<kube-context>` (removes Flux controllers and
    CRDs, leaves workloads running).
 2. Re-apply the old ArgoCD manifests from a prior commit if needed.
+
+## Kyverno 1.19 to 1.20
+
+Kyverno 1.20 no longer enforces legacy `ClusterPolicy` resources. The chart
+blocks an upgrade while they exist. Do not bypass that check: migrate
+`verify-guardrail-images` to `ImageValidatingPolicy` first.
+
+For an existing 1.19 installation, apply the replacement policy alongside the
+legacy policy, initially listing only `pods` in `matchConstraints.resourceRules`.
+Version 1.19 does not autogenerate controller rules when that list also includes
+`pods/ephemeralcontainers`; the committed policy enables both on 1.20.
+Confirm `.status.conditionStatus.ready` and the generated controller rules before
+removing the legacy policy. Suspend the `guardrail-setup-kyverno` Flux
+Kustomization during the handover so it cannot recreate the legacy object.
+
+Once the replacement accepts signed Guardrail images and rejects unverifiable
+ones, remove the legacy policy, upgrade Kyverno, and resume the Kustomization
+against the migrated Git revision. It then applies the full policy, including
+ephemeral containers. A fresh installation needs no manual handover.
+
+Run the admission smoke tests after the upgrade:
+
+```sh
+python3 scripts/check-kyverno-image-policy.py <kube-context>
+```
+
+The tests use server-side dry runs and never start pods. Temporary policies are
+restricted to randomly labelled test requests and are deleted afterwards. They
+check digest pinning, signed regular/init images, controller and ephemeral
+container admission, unsigned images, wrong signer identities, and namespace
+and image scope. Finish by checking Flux, Helm, and workload readiness.

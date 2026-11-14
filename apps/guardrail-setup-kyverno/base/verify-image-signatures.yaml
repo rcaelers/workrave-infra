@@ -1,5 +1,5 @@
-apiVersion: kyverno.io/v1
-kind: ClusterPolicy
+apiVersion: policies.kyverno.io/v1
+kind: ImageValidatingPolicy
 metadata:
   name: verify-guardrail-images
   annotations:
@@ -9,33 +9,41 @@ metadata:
       keyless signatures via GitHub Actions before they are admitted to the
       cluster.
 spec:
-  validationFailureAction: Enforce
-  webhookTimeoutSeconds: 30
-  admission: true
-  background: false
-  emitWarning: false
-  rules:
-    - name: verify-cosign-signature
-      skipBackgroundRequests: true
-      match:
-        any:
-          - resources:
-              kinds:
-                - Pod
-              namespaces:
-                - guardrail
-      verifyImages:
-        - imageReferences:
-            - "ghcr.io/rcaelers/guardrail-*"
-          mutateDigest: true
-          required: true
-          useCache: true
-          verifyDigest: false
-          attestors:
-            - entries:
-                - keyless:
-                    issuer: "https://token.actions.githubusercontent.com"
-                    subjectRegExp: "https://github.com/rcaelers/guardrail/\\.github/workflows/containers\\.yml@refs/.*"
-                    rekor:
-                      url: "https://rekor.sigstore.dev"
-                  signatureAlgorithm: sha256
+  validationActions: [Deny]
+  failurePolicy: Fail
+  webhookConfiguration:
+    timeoutSeconds: 30
+  evaluation:
+    admission:
+      enabled: true
+    background:
+      enabled: false
+  matchConstraints:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: guardrail
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: [v1]
+        operations: [CREATE, UPDATE]
+        resources: [pods, pods/ephemeralcontainers]
+  matchImageReferences:
+    - glob: "ghcr.io/rcaelers/guardrail-*"
+  validationConfigurations:
+    mutateDigest: true
+    required: true
+    verifyDigest: false
+  attestors:
+    - name: guardrail
+      cosign:
+        keyless:
+          identities:
+            - issuer: "https://token.actions.githubusercontent.com"
+              subjectRegExp: '^https://github\.com/rcaelers/guardrail/\.github/workflows/containers\.yml@refs/.*$'
+        ctlog:
+          url: "https://rekor.sigstore.dev"
+  validations:
+    - expression: >-
+        (images.containers + images.initContainers + images.ephemeralContainers).map(image,
+          verifyImageSignatures(image, [attestors.guardrail])).all(verified, verified > 0)
+      message: "Guardrail images must be signed by the Guardrail GitHub Actions container workflow."
