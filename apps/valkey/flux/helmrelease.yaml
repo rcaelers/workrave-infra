@@ -12,7 +12,7 @@ spec:
   chart:
     spec:
       chart: valkey
-      version: 0.12.1
+      version: 1.0.0
       sourceRef:
         kind: HelmRepository
         name: valkey
@@ -26,13 +26,15 @@ spec:
         default:
           permissions: "~* &* +@all"
           passwordKey: VALKEY_PASSWORD
-    dataStorage:
+    # Keep RollingUpdate explicit: the post-renderer below prevents concurrent
+    # writers, and retaining the type avoids stale SSA rollingUpdate fields.
+    deploymentStrategy: RollingUpdate
+    persistence:
       enabled: true
-      # The chart only creates a PVC when requestedSize is set; without it
-      # /data silently falls back to an emptyDir and every restart wipes Valkey.
-      requestedSize: 5Gi
-      className: local-path-retain
-      keepPvc: true
+      # Chart 1.x replaces dataStorage; keep the same PVC name and storage.
+      size: 5Gi
+      storageClass: local-path-retain
+      keepOnUninstall: true
     resources:
       limits:
         cpu: "500m"
